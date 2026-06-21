@@ -226,7 +226,6 @@ export function FilterBar({
             <Popover.Trigger asChild>
               <FilterPill
                 icon={<Calendar size={16} strokeWidth={2} />}
-                name="Date range"
                 value={formattedRange}
                 tint="var(--color-brand-blue)"
                 active

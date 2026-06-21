@@ -56,9 +56,21 @@ export function StatusDistributionChart({
         style={{ boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)" }}
       >
         <Header isAdmin={isAdmin} />
-        <p className="mt-3 text-body-lg text-ink-subtle">
-          No data for the current filter.
-        </p>
+        <div className="mt-4 flex flex-col items-center justify-center py-10 text-center">
+          <span
+            aria-hidden
+            className="inline-flex size-12 items-center justify-center rounded-full"
+            style={{ background: "rgba(15, 23, 42, 0.05)", color: "var(--color-ink-muted)" }}
+          >
+            <PieChart size={24} strokeWidth={2} />
+          </span>
+          <p className="mt-3 font-bold" style={{ fontSize: 16, color: "var(--color-ink-strong)" }}>
+            No tasks in this range
+          </p>
+          <p className="mt-1" style={{ fontSize: 14, color: "var(--color-ink-muted)" }}>
+            Widen the date range or clear filters to see the status breakdown.
+          </p>
+        </div>
       </section>
     );
   }

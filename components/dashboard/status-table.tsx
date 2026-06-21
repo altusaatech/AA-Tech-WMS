@@ -220,10 +220,20 @@ export function StatusTable({
           className="bg-surface-card rounded-section border border-hairline p-10 text-center"
           style={{ boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)" }}
         >
-          <p className="text-body-lg text-ink-subtle">
+          <span
+            aria-hidden
+            className="mx-auto inline-flex size-12 items-center justify-center rounded-full"
+            style={{ background: "rgba(15, 23, 42, 0.05)", color: "var(--color-ink-muted)" }}
+          >
+            <Users size={24} strokeWidth={2} />
+          </span>
+          <p className="mt-3 font-bold" style={{ fontSize: 16, color: "var(--color-ink-strong)" }}>
+            {rows.length === 0 ? "No tasks in this range" : "No employees match your search"}
+          </p>
+          <p className="mt-1" style={{ fontSize: 14, color: "var(--color-ink-muted)" }}>
             {rows.length === 0
-              ? "No data for the current filter."
-              : "No employees match your search."}
+              ? "Try widening the date range or clearing filters."
+              : "Try a different name or department."}
           </p>
           {hasActiveFilter && rows.length > 0 && (
             <button

@@ -329,7 +329,7 @@ export function EditEmployeeDialog({
                 <span>
                   Admin
                   <span className="block text-[13px] text-[#64748B]">
-                    Only Hetesh or Manan can change admin access.
+                    Only a super-admin can change admin access.
                   </span>
                 </span>
               </div>

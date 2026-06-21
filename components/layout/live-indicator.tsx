@@ -65,8 +65,8 @@ export function LiveIndicator() {
         className="size-2.5 rounded-full"
         style={{
           backgroundColor: dotColor,
-          boxShadow: connected ? `0 0 12px ${dotColor}` : "none",
-          animation: connected ? "livePulse 1.8s ease-in-out infinite" : "none",
+          boxShadow: connected ? `0 0 8px ${dotColor}` : "none",
+          animation: connected ? "livePulse 3s ease-in-out infinite" : "none",
         }}
         aria-hidden
       />

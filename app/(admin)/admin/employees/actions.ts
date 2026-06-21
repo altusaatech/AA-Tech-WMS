@@ -152,7 +152,7 @@ export async function inviteEmployee(input: InviteEmployeeInput): Promise<{
   // Only super-admins may create an admin. Reject BEFORE the Firebase user is
   // created / the row is inserted so no orphan account is left behind.
   if (parsed.isAdmin === true && !isSuperAdmin(me.email)) {
-    return { ok: false, error: "Only Hetesh or Manan can create an admin." };
+    return { ok: false, error: "Only a super-admin can create an admin." };
   }
 
   // Case-insensitive dup check — historical imports may have mixed-case
@@ -340,7 +340,7 @@ export async function editEmployee(
   ) {
     return {
       ok: false,
-      error: "Only Hetesh or Manan can change an employee's admin access.",
+      error: "Only a super-admin can change an employee's admin access.",
     };
   }
 

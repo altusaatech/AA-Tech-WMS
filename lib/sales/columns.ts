@@ -1,0 +1,75 @@
+// Column definitions for the Sales spreadsheet grids. `key` matches the Drizzle
+// camelCase field name on salesQuotes / salesBom.
+
+export type SalesColType = "text" | "number" | "date" | "url" | "bool";
+
+export interface SalesColDef {
+  key: string;
+  label: string;
+  type: SalesColType;
+  readOnly?: boolean;
+  width?: number;
+}
+
+export const QUOTE_COLUMNS: SalesColDef[] = [
+  { key: "enquiryNo", label: "Enquiry No", type: "text", width: 120 },
+  { key: "scope", label: "Scope", type: "text", width: 130 },
+  { key: "enquirySource", label: "Enquiry Source", type: "text", width: 140 },
+  { key: "introducerName", label: "Introducer Name", type: "text", width: 150 },
+  { key: "companyName", label: "Company Name", type: "text", width: 170 },
+  { key: "personName", label: "Person Name", type: "text", width: 150 },
+  { key: "cellNo", label: "Cell No", type: "text", width: 130 },
+  { key: "email", label: "Email", type: "text", width: 190 },
+  { key: "product", label: "Product", type: "text", width: 150 },
+  { key: "description", label: "Description", type: "text", width: 220 },
+  { key: "item", label: "Item", type: "text", width: 140 },
+  { key: "qty", label: "Qty", type: "number", width: 80 },
+  { key: "unitOfMeasurement", label: "Unit of Measurement", type: "text", width: 150 },
+  { key: "rate", label: "Rate", type: "number", width: 100 },
+  { key: "basicAmount", label: "Basic Amount", type: "number", width: 120 },
+  { key: "quoteStatus", label: "Quote Status", type: "text", width: 130 },
+  { key: "quoteLink", label: "Quote Link", type: "url", width: 160 },
+  { key: "quotationNotes", label: "Quotation Notes", type: "text", width: 220 },
+  { key: "poNo", label: "PO No", type: "text", width: 120 },
+  { key: "poLink", label: "PO Link", type: "url", width: 160 },
+  { key: "poAmount", label: "PO Amount", type: "number", width: 120 },
+  { key: "poDate", label: "PO Date", type: "date", width: 150 },
+  { key: "productSpecificationLink", label: "Product Specification Link", type: "url", width: 180 },
+];
+
+export const BOM_COLUMNS: SalesColDef[] = [
+  { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
+  { key: "enquiryNo", label: "Enquiry No", type: "text", width: 120 },
+  { key: "poNo", label: "PO No", type: "text", width: 120 },
+  { key: "poDate", label: "PO Date", type: "date", width: 150 },
+  { key: "companyName", label: "Company Name", type: "text", width: 170 },
+  { key: "poLink", label: "PO Link", type: "url", width: 160 },
+  { key: "personName", label: "Person Name", type: "text", width: 150 },
+  { key: "cellNo", label: "Cell No", type: "text", width: 130 },
+  { key: "email", label: "Email", type: "text", width: 190 },
+  { key: "description", label: "Description", type: "text", width: 220 },
+  { key: "itemNameCode", label: "Item Name/Code", type: "text", width: 160 },
+  { key: "unitOfMeasure", label: "Unit of Measure", type: "text", width: 140 },
+  { key: "qty", label: "Qty", type: "number", width: 80 },
+  { key: "rate", label: "Rate", type: "number", width: 100 },
+  { key: "amountWoGst", label: "Amount w/o GST", type: "number", width: 130 },
+  { key: "scope", label: "Scope", type: "text", width: 130 },
+  { key: "ourSoNo", label: "Our SO No", type: "text", width: 120 },
+  { key: "soDate", label: "SO Date", type: "date", width: 150 },
+  { key: "soChecklistLink", label: "SO Checklist Link", type: "url", width: 170 },
+  { key: "productSpecificationLink", label: "Product Specification Link", type: "url", width: 180 },
+  { key: "soDrawingNo", label: "SO Drawing No", type: "text", width: 140 },
+  { key: "soAmendmentNeeded", label: "SO Amendment Needed", type: "bool", width: 110 },
+  { key: "soAmendmentReasons", label: "SO Amendment Reasons", type: "text", width: 220 },
+  { key: "amendmentDate", label: "Amendment Date", type: "date", width: 150 },
+  { key: "amendmentRelatedNotes", label: "Amendment Related Notes", type: "text", width: 220 },
+  { key: "targetDispatchDate", label: "Target Dispatch Date", type: "date", width: 160 },
+  { key: "actualDispatchDate", label: "Actual Dispatch Date", type: "date", width: 160 },
+  { key: "daysToProduce", label: "Days to Produce", type: "number", width: 120 },
+  { key: "actualNoOfDays", label: "Actual No of Days", type: "number", width: 130 },
+  { key: "noOfDaysDelay", label: "No of Days Delay", type: "number", width: 130 },
+  { key: "gaApprovalNeeded", label: "GA Approval Needed", type: "bool", width: 110 },
+];
+
+export const QUOTE_KEYS = QUOTE_COLUMNS.map((c) => c.key);
+export const BOM_KEYS = BOM_COLUMNS.map((c) => c.key);

@@ -72,7 +72,6 @@ export function MainNavPill({ href, label, Icon, active, count, badge, grow, var
             letterSpacing: 0,
             boxShadow:
               "0 0 0 2px rgba(15, 23, 42, 0.82), 0 4px 10px rgba(1, 128, 207, 0.45)",
-            animation: "navPillBadgePulse 2.4s ease-in-out infinite",
           }}
         >
           {badgeLabel}

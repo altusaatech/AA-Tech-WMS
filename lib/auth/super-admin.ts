@@ -6,7 +6,7 @@
  * the UI hides the admin toggle for non-super-admins.
  */
 export const SUPER_ADMIN_EMAILS = [
-  "heteshvichare.aatech@gmail.com",
+  "support@unleashed.in",
   "manan@unleashed.in",
 ] as const;
 

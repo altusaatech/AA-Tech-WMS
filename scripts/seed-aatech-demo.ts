@@ -26,12 +26,23 @@ function recentCreatedAt(): Date {
 }
 
 const DEMO_EMPLOYEES = [
-  { name: "Aarav Sharma",  email: "aarav.demo@aatech.in",  role: "both" as const,      department: "Sales" },
-  { name: "Priya Nair",    email: "priya.demo@aatech.in",  role: "doer" as const,      department: "Marketing" },
-  { name: "Rohan Mehta",   email: "rohan.demo@aatech.in",  role: "doer" as const,      department: "Accounts" },
-  { name: "Sneha Iyer",    email: "sneha.demo@aatech.in",  role: "both" as const,      department: "Handholding" },
-  { name: "Vikram Singh",  email: "vikram.demo@aatech.in", role: "initiator" as const, department: "Apps" },
-  { name: "Neha Gupta",    email: "neha.demo@aatech.in",   role: "doer" as const,      department: "Consulting" },
+  { name: "Chetan Sheth",      email: "chetan.sheth@aatech.in",      role: "both" as const, department: "Founder Office" },
+  { name: "Rajiv Sheth",       email: "rajiv.sheth@aatech.in",       role: "both" as const, department: "Founder Office" },
+  { name: "Falguni Sheth",     email: "falguni.sheth@aatech.in",     role: "both" as const, department: "Admin" },
+  { name: "Pankaj Choudhari",  email: "pankaj.choudhari@aatech.in",  role: "both" as const, department: "Sales" },
+  { name: "Mahendra Naik",     email: "mahendra.naik@aatech.in",     role: "doer" as const, department: "Sales" },
+  { name: "Rakesh Arjal",      email: "rakesh.arjal@aatech.in",      role: "doer" as const, department: "Handholding" },
+  { name: "Sonam Nadar",       email: "sonam.nadar@aatech.in",       role: "both" as const, department: "Marketing" },
+  { name: "Sheela Yadav",      email: "sheela.yadav@aatech.in",      role: "doer" as const, department: "Accounts" },
+  { name: "Prathamesh Jadhav", email: "prathamesh.jadhav@aatech.in", role: "both" as const, department: "Apps" },
+  { name: "Nitin Parab",       email: "nitin.parab@aatech.in",       role: "doer" as const, department: "Apps" },
+  { name: "Rajkumar Yadav",    email: "rajkumar.yadav@aatech.in",    role: "doer" as const, department: "CRM" },
+  { name: "Prachi Kadam",      email: "prachi.kadam@aatech.in",      role: "both" as const, department: "HR" },
+  { name: "Mahesh Jangam",     email: "mahesh.jangam@aatech.in",     role: "doer" as const, department: "Consulting" },
+  { name: "Akshay Kadam",      email: "akshay.kadam@aatech.in",      role: "both" as const, department: "Social Media" },
+  { name: "Anjan Jena",        email: "anjan.jena@aatech.in",        role: "doer" as const, department: "Handholding" },
+  { name: "Chandresh Yadav",   email: "chandresh.yadav@aatech.in",   role: "doer" as const, department: "Accounts" },
+  { name: "Shobhnath Yadav",   email: "shobhnath.yadav@aatech.in",   role: "doer" as const, department: "Admin" },
 ];
 
 const SUBJECTS = ["Marketing", "Sales", "Accounts", "MIS", "Documentation", "Customer Visit", "Collection", "Follow Up Basic Docs", "Recruitment", "Admin"];
@@ -60,16 +71,18 @@ async function main() {
       .onConflictDoNothing({ target: employees.email });
   }
 
-  // 2) Gather the assignment pool (demo employees + your real admin/employees)
+  // 2) Wipe previous demo tasks first (frees FK refs), then remove the old
+  //    placeholder employees (aarav.demo@…, priya.demo@…, etc.).
+  await db.delete(tasks).where(like(tasks.legacyImportKey, `${DEMO_KEY}-%`));
+  await db.delete(employees).where(like(employees.email, "%.demo@aatech.in"));
+
+  // 3) Gather the assignment pool (the real-named employees + your admin)
   const all = await db.select({ id: employees.id, name: employees.name, role: employees.role }).from(employees);
   const doers = all.filter((e) => e.role === "doer" || e.role === "both");
   const initiators = all.filter((e) => e.role === "initiator" || e.role === "both");
   if (doers.length === 0 || initiators.length === 0) {
     throw new Error("Need at least one doer and one initiator employee.");
   }
-
-  // 3) Wipe any previous demo tasks so re-runs don't duplicate
-  await db.delete(tasks).where(like(tasks.legacyImportKey, `${DEMO_KEY}-%`));
 
   // 4) Build the task rows
   const rows: (typeof tasks.$inferInsert)[] = [];

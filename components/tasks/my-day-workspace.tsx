@@ -68,38 +68,35 @@ export function MyDayWorkspace({
 
   return (
     <main className="mx-auto max-w-[1600px] px-8 max-md:px-4 pt-8 pb-16">
-      {/* Welcome banner + view toggle */}
-      <div className="mb-7 flex items-end justify-between gap-4 flex-wrap">
+      {/* Compact header + view toggle (the big welcome greeting lives on the
+          post-sign-in /welcome screen, so the work page isn't eaten by it). */}
+      <div className="mb-5 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1
             className="text-ink-strong"
             style={{
               fontFamily: "var(--font-display), system-ui, sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(42px, 4.6vw, 60px)",
-              letterSpacing: "-0.025em",
-              lineHeight: 1,
+              fontWeight: 800,
+              fontSize: 26,
+              letterSpacing: "-0.02em",
+              lineHeight: 1.1,
             }}
           >
-            Welcome, {firstName}
+            My Day
           </h1>
-          <p className="text-ink-subtle mt-3" style={{ fontSize: 19, lineHeight: 1.5 }}>
-            You have{" "}
+          <p className="text-ink-subtle mt-1" style={{ fontSize: 14, lineHeight: 1.4 }}>
             <span className="font-bold text-ink-strong tabular-nums">{dueToday}</span>{" "}
             {dueToday === 1 ? "task" : "tasks"} due today
             {overdue > 0 && (
               <>
-                {" "}and{" "}
+                {" · "}
                 <span className="font-bold tabular-nums" style={{ color: "var(--color-red-deep)" }}>
                   {overdue}
                 </span>{" "}
                 overdue
               </>
             )}
-            .
-            {isAdmin && view === "agenda" && (
-              <span className="text-ink-subtle"> Drag a card to another day to reschedule it.</span>
-            )}
+            {isAdmin && view === "agenda" && <span> · drag a card to reschedule</span>}
           </p>
         </div>
 

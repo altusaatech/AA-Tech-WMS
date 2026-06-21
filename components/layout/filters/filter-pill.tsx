@@ -11,8 +11,9 @@ export const FilterPill = React.forwardRef<
   HTMLButtonElement,
   {
     icon: React.ReactNode;
-    /** The filter's name — small sublabel under the value (e.g. "Status"). */
-    name: string;
+    /** The filter's name — small sublabel under the value (e.g. "Status").
+     *  Omit it to show a single compact line (just the icon + value). */
+    name?: string;
     /** The current value summary (e.g. "High & Medium", "All Clients"). */
     value: string;
     /** Accent for the badge + value when a selection is active. Defaults to A A Tech red. */
@@ -52,9 +53,11 @@ export const FilterPill = React.forwardRef<
         >
           {value}
         </span>
-        <span className="text-[11.5px] font-medium" style={{ color: "var(--color-ink-subtle)" }}>
-          {name}
-        </span>
+        {name && (
+          <span className="text-[11.5px] font-medium" style={{ color: "var(--color-ink-subtle)" }}>
+            {name}
+          </span>
+        )}
       </span>
       <ChevronDown size={15} className="text-ink-subtle shrink-0" />
     </button>

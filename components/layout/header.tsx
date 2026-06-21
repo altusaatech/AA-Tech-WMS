@@ -43,13 +43,13 @@ export async function DashboardHeader({
           <NavHistoryButtons />
           <MobileMenuServer isAdmin={isAdmin} />
 
-          {/* LEFT: A A Tech logo. The image is the brand mark — no
-              accompanying text wordmark, the logo already includes the name. */}
+          {/* LEFT: A A Tech compact mark — the square triangle logo, so it
+              stays short and doesn't eat horizontal space in the header. */}
           <a href="/" className="flex items-center shrink-0" aria-label="A A Tech home">
             <img
-              src="/logo.png"
+              src="/logo-mark.png"
               alt="A A Tech"
-              className="h-16 w-auto max-md:h-14"
+              className="h-11 w-auto max-md:h-10"
               style={{ display: "block" }}
             />
           </a>

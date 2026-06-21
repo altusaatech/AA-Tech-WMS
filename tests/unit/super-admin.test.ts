@@ -3,17 +3,17 @@ import { isSuperAdmin, SUPER_ADMIN_EMAILS } from "@/lib/auth/super-admin";
 
 describe("isSuperAdmin", () => {
   it("returns true for the two exact super-admin emails", () => {
-    expect(isSuperAdmin("heteshvichare.aatech@gmail.com")).toBe(true);
+    expect(isSuperAdmin("support@unleashed.in")).toBe(true);
     expect(isSuperAdmin("manan@unleashed.in")).toBe(true);
   });
 
   it("returns true regardless of case", () => {
-    expect(isSuperAdmin("HETESHVICHARE.AATECH@GMAIL.COM")).toBe(true);
+    expect(isSuperAdmin("SUPPORT@UNLEASHED.IN")).toBe(true);
     expect(isSuperAdmin("Manan@Unleashed.In")).toBe(true);
   });
 
   it("returns true with surrounding whitespace", () => {
-    expect(isSuperAdmin("  heteshvichare.aatech@gmail.com  ")).toBe(true);
+    expect(isSuperAdmin("  support@unleashed.in  ")).toBe(true);
     expect(isSuperAdmin("\tmanan@unleashed.in\n")).toBe(true);
   });
 
@@ -32,7 +32,7 @@ describe("isSuperAdmin", () => {
   it("exposes exactly the two configured emails", () => {
     expect(SUPER_ADMIN_EMAILS).toHaveLength(2);
     expect([...SUPER_ADMIN_EMAILS]).toEqual([
-      "heteshvichare.aatech@gmail.com",
+      "support@unleashed.in",
       "manan@unleashed.in",
     ]);
   });
