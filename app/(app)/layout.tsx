@@ -21,12 +21,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // gate this request rather than throw the layout for every page. The gate
   // re-applies on the next render once the DB is healthy — it's a workflow
   // nudge, not a security boundary.
-  let mustFill = false;
-  try {
-    mustFill = await hasUnfilledWeekGoals(me.id);
-  } catch {
-    mustFill = false;
-  }
+  // Weekly-goals section removed — the mandatory fill gate is disabled.
+  const mustFill = false;
   // Render the fill screen INLINE (not a redirect to a separate route): Vercel's
   // build for this project doesn't register newly added routes, so a redirect
   // target like /fill-weekly-goals 404'd in prod. Rendering it here — inside the
@@ -45,6 +41,15 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <>
       <IdleTimerClient timeoutMinutes={settings.idleTimeoutMinutes} />
       <KeyboardShortcuts />
+      {/* Faint Altus Corp watermark, fixed behind all app content */}
+      <img
+        src="/altus-corp-logo.png"
+        alt=""
+        aria-hidden
+        draggable={false}
+        className="pointer-events-none fixed bottom-10 right-10 z-0 select-none max-md:hidden"
+        style={{ height: 320, width: "auto", opacity: 0.05 }}
+      />
       {children}
     </>
   );

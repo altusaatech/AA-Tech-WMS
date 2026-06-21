@@ -71,16 +71,10 @@ export function GlobalSearch() {
         <button
           type="button"
           aria-label="Search"
-          className="inline-flex items-center gap-2 rounded-pill border border-hairline bg-surface-soft px-3 h-10 text-ink-subtle transition-colors hover:bg-surface-card hover:border-hairline-strong max-md:h-9 max-md:px-2.5"
+          title="Search  (⌘K)"
+          className="inline-flex size-10 items-center justify-center rounded-pill border border-hairline bg-surface-soft text-ink-subtle transition-colors hover:bg-surface-card hover:border-hairline-strong max-md:size-9"
         >
-          <Search size={16} strokeWidth={2.2} className="shrink-0" />
-          <span className="text-[14px] font-medium max-2xl:hidden">Search everything…</span>
-          <kbd
-            className="ml-2 hidden 2xl:inline-flex items-center gap-0.5 rounded border border-hairline bg-surface-card px-1.5 py-0.5 text-[11px] font-bold text-ink-subtle"
-            aria-hidden
-          >
-            ⌘K
-          </kbd>
+          <Search size={18} strokeWidth={2.2} className="shrink-0" />
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>

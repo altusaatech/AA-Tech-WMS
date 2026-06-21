@@ -81,6 +81,24 @@ export async function DashboardHeader({
               </span>
             )}
             <UserMenuServer />
+            {/* Altus Corp — "Powered by" partner mark at the top-right corner */}
+            <span
+              className="flex items-center gap-2.5 pl-0.5 max-lg:hidden"
+              aria-label="Powered by Altus Corp"
+            >
+              <span className="h-10 w-px bg-hairline-strong" aria-hidden />
+              <span className="flex flex-col items-center leading-none">
+                <span className="mb-1 text-[8.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+                  Powered by
+                </span>
+                <img
+                  src="/altus-corp-logo.png"
+                  alt="Altus Corp"
+                  className="h-10 w-auto"
+                  style={{ display: "block" }}
+                />
+              </span>
+            </span>
           </div>
         </div>
       </div>

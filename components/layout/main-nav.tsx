@@ -72,14 +72,6 @@ export function MainNav({ activeTasks, isAdmin, variant }: Props) {
         Icon={FileSpreadsheet}
         active={isActive("/sales")}
         variant={variant}      />
-      {/* Weekly Goals (coming soon) · Attendance · Incentive · Outstanding.
-          Documents / Archived / Inbox moved into the user menu. */}
-      <MainNavPill
-        href={"/weekly-goals" as Route}
-        label="Weekly Goals"
-        Icon={Target}
-        active={isActive("/weekly-goals")}
-        variant={variant}      />
       <MainNavPill
         href={"/attendance" as Route}
         label="Attendance"
@@ -88,12 +80,6 @@ export function MainNav({ activeTasks, isAdmin, variant }: Props) {
           isActive("/attendance") &&
           !pathname.startsWith("/attendance/dashboard")
         }
-        variant={variant}      />
-      <MainNavPill
-        href={"/record-reference" as Route}
-        label="References"
-        Icon={BookMarked}
-        active={isActive("/record-reference")}
         variant={variant}      />
     </nav>
   );
