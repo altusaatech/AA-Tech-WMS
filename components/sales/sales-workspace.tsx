@@ -14,8 +14,10 @@ import {
   TrendingUp,
   ArrowRight,
   ChevronRight,
+  Layers,
   type LucideIcon,
 } from "lucide-react";
+import { PageHero } from "@/components/layout/page-hero";
 import { SalesDataGrid } from "./sales-grid";
 import { SalesEntryModal } from "./sales-entry-modal";
 import {
@@ -129,6 +131,7 @@ export function SalesWorkspace({
   const current = FORMS.find((f) => f.key === active)!;
   const rows = rowsByKind[active];
   const countOf = (k: SaleKind) => rowsByKind[k].length;
+  const totalEntries = Object.values(rowsByKind).reduce((n, list) => n + list.length, 0);
 
   function openForm(k: SaleKind) {
     setActive(k);
@@ -174,47 +177,26 @@ export function SalesWorkspace({
         }}
       />
 
-      {/* ── page header ── */}
-      <div className="flex items-center gap-3.5">
-        <span
-          className="inline-flex size-11 items-center justify-center rounded-2xl text-white shadow-lg"
-          style={{ background: "linear-gradient(135deg, #0180cf, #0069b3)", boxShadow: "0 10px 22px -8px #0180cf88" }}
-        >
-          <TrendingUp size={22} strokeWidth={2.4} />
-        </span>
-        <div>
-          <h1
-            style={{
-              fontFamily: "var(--font-display), system-ui, sans-serif",
-              fontWeight: 900,
-              fontSize: 26,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.05,
-              width: "fit-content",
-              background: "linear-gradient(120deg, #0069b3 0%, #0180cf 45%, #63b81e 120%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            AA-Tech Production System
-          </h1>
-          <p className="mt-0.5 text-[13px] text-slate-500">
-            {view === "hub"
-              ? "Pick a module — open its Form to add an entry, or its Register to view stored data."
-              : `${current.label} register`}
-          </p>
-        </div>
-      </div>
-      <div className="mt-3.5 h-[3px] w-full rounded-full" style={{ background: "linear-gradient(90deg, #63b81e, #0180cf 45%, #0069b3)", opacity: 0.85 }} />
-
       {view === "hub" ? (
-        <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {FORMS.map((f) => (
-            <WindowCard key={f.key} form={f} count={countOf(f.key)} onForm={() => openForm(f.key)} onRegister={() => openRegister(f.key)} />
-          ))}
-        </div>
+        <>
+          <PageHero
+            eyebrow="Production System"
+            title="AA-Tech Production System"
+            subtitle="Pick a module — open its Form to add an entry, or its Register to view stored data."
+            Icon={TrendingUp}
+            stats={[
+              { label: "Total entries", value: totalEntries, icon: Layers, from: "#0180cf", to: "#0069b3" },
+              { label: "Quote Status", value: rowsByKind.quote.length, icon: FileText, from: "#0180cf", to: "#63b81e" },
+              { label: "BOM Status", value: rowsByKind.bom.length, icon: ClipboardList, from: "#63b81e", to: "#0069b3" },
+              { label: "Work Orders", value: rowsByKind.wo.length, icon: Factory, from: "#0d9488", to: "#63b81e" },
+            ]}
+          />
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {FORMS.map((f) => (
+              <WindowCard key={f.key} form={f} count={countOf(f.key)} onForm={() => openForm(f.key)} onRegister={() => openRegister(f.key)} />
+            ))}
+          </div>
+        </>
       ) : (
         <div className="mt-5">
           <button
