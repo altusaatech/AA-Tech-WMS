@@ -66,19 +66,51 @@ export function DashboardHero({
   return (
     <section className="mx-auto max-w-[1600px] px-12 max-md:px-4 mt-6">
       <div
-        className="relative overflow-hidden rounded-[28px] px-9 py-8 max-md:px-5 max-md:py-6"
+        className="relative overflow-hidden rounded-[30px] px-11 py-10 max-md:px-5 max-md:py-7"
         style={{
-          background: "linear-gradient(120deg, #06243f 0%, #0a1c33 46%, #07372c 100%)",
-          boxShadow: "0 30px 70px -34px rgba(3,30,55,0.75), 0 1px 0 rgba(255,255,255,0.06) inset",
+          background: "linear-gradient(125deg, #04203a 0%, #061a30 44%, #06352b 100%)",
+          boxShadow:
+            "0 40px 90px -38px rgba(3,30,55,0.85), 0 0 0 1px rgba(255,255,255,0.05) inset, 0 1px 0 rgba(255,255,255,0.08) inset",
         }}
       >
-        {/* ambient glows */}
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-24 -top-28 h-[360px] w-[360px] rounded-full" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.42), transparent 68%)", filter: "blur(20px)" }} />
-          <div className="absolute -right-20 top-1/4 h-[380px] w-[380px] rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.30), transparent 68%)", filter: "blur(26px)" }} />
+        {/* ambient + motion layers */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          {/* rotating aurora wash */}
+          <div
+            className="hero-anim absolute left-1/2 top-1/2 h-[180%] w-[180%] -translate-x-1/2 -translate-y-1/2 opacity-[0.55]"
+            style={{
+              background:
+                "conic-gradient(from 0deg at 50% 50%, rgba(1,128,207,0.30), rgba(99,184,30,0.22), rgba(0,105,179,0.30), rgba(20,184,166,0.20), rgba(1,128,207,0.30))",
+              filter: "blur(60px)",
+              mixBlendMode: "screen",
+              animation: "heroAurora 42s linear infinite",
+            }}
+          />
+          {/* drifting glow blobs */}
+          <div
+            className="hero-anim absolute -left-28 -top-32 h-[420px] w-[420px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(1,128,207,0.55), transparent 66%)", filter: "blur(26px)", animation: "heroFloat1 16s ease-in-out infinite" }}
+          />
+          <div
+            className="hero-anim absolute right-[-7rem] top-[18%] h-[440px] w-[440px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(99,184,30,0.42), transparent 66%)", filter: "blur(32px)", animation: "heroFloat2 20s ease-in-out infinite" }}
+          />
+          {/* dotted grid */}
           <div
             className="absolute inset-0 opacity-[0.5]"
-            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0)", backgroundSize: "30px 30px" }}
+            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 0)", backgroundSize: "30px 30px" }}
+          />
+          {/* periodic shimmer sweep */}
+          <div
+            className="hero-anim absolute inset-y-0 left-0 w-1/3"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent)", animation: "heroShimmer 9s ease-in-out infinite" }}
+          />
+          {/* giant faint brand mark */}
+          <img
+            src="/logo-mark.png"
+            alt=""
+            className="absolute -right-6 -top-10 h-[260px] w-auto opacity-[0.06] max-md:hidden"
+            style={{ filter: "brightness(0) invert(1)" }}
           />
         </div>
 
@@ -91,7 +123,7 @@ export function DashboardHero({
             </div>
             <h1
               className="mt-2 text-white"
-              style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 34, lineHeight: 1.04, letterSpacing: "-0.03em" }}
+              style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(28px, 3.4vw, 42px)", lineHeight: 1.02, letterSpacing: "-0.035em" }}
             >
               {greeting}, {firstName}.
             </h1>
@@ -175,8 +207,8 @@ function HeroMetric({ metric }: { metric: Metric }) {
       </div>
       <Counter
         value={metric.value}
-        className="relative mt-2 block tabular-nums text-white"
-        style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 32, letterSpacing: "-0.02em", lineHeight: 1 }}
+        className="relative mt-2.5 block tabular-nums text-white"
+        style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(28px, 2.8vw, 38px)", letterSpacing: "-0.025em", lineHeight: 1 }}
       />
     </div>
   );

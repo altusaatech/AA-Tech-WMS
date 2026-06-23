@@ -129,6 +129,32 @@
 }
 
 /* ────────────────────────────────────────────────────────────────────
+   Hero motion — drifting glow blobs, a slowly-rotating aurora wash and a
+   periodic shimmer sweep that give the dark command banners a living,
+   high-end feel. All transform/opacity only (cheap), and fully paused under
+   prefers-reduced-motion.
+   ──────────────────────────────────────────────────────────────────── */
+@keyframes heroFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(46px, 34px) scale(1.14); }
+}
+@keyframes heroFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-54px, 26px) scale(1.18); }
+}
+@keyframes heroAurora {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes heroShimmer {
+  0%        { transform: translateX(-130%) skewX(-12deg); }
+  55%, 100% { transform: translateX(360%) skewX(-12deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-anim { animation: none !important; }
+}
+
+/* ────────────────────────────────────────────────────────────────────
    Profile v2 — density swap
    Light-only theme; the root layout writes data-density on <html>.
    Components that want to participate read --density-pad-y or
