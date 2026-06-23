@@ -1,7 +1,7 @@
 // Column definitions for the Sales spreadsheet grids. `key` matches the Drizzle
 // camelCase field name on salesQuotes / salesBom.
 
-export type SalesColType = "text" | "number" | "date" | "url" | "bool";
+export type SalesColType = "text" | "number" | "date" | "url" | "bool" | "select";
 
 export interface SalesColDef {
   key: string;
@@ -9,6 +9,10 @@ export interface SalesColDef {
   type: SalesColType;
   readOnly?: boolean;
   width?: number;
+  /** Options for `type: "select"` dropdowns. */
+  options?: string[];
+  /** Marks the field required in the entry form (client-side validation). */
+  required?: boolean;
 }
 
 export const QUOTE_COLUMNS: SalesColDef[] = [
@@ -71,5 +75,91 @@ export const BOM_COLUMNS: SalesColDef[] = [
   { key: "gaApprovalNeeded", label: "GA Approval Needed", type: "bool", width: 110 },
 ];
 
+// ── SO Status ──────────────────────────────────────────────────
+export const SO_COLUMNS: SalesColDef[] = [
+  { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
+  { key: "enquiryNo", label: "Enquiry No", type: "text", width: 120 },
+  { key: "poNo", label: "PO No", type: "text", width: 120 },
+  { key: "poDate", label: "PO Date", type: "date", width: 150 },
+  { key: "companyName", label: "Company Name", type: "text", width: 170 },
+  { key: "poLink", label: "PO Link", type: "url", width: 160 },
+  { key: "personName", label: "Person Name", type: "text", width: 150 },
+  { key: "cellNo", label: "Cell No", type: "text", width: 130 },
+  { key: "email", label: "Email", type: "text", width: 190 },
+  { key: "description", label: "Description", type: "text", width: 220 },
+  { key: "itemNameCode", label: "Item Name/Code", type: "text", width: 160 },
+  { key: "unitOfMeasure", label: "Unit of Measure", type: "text", width: 140 },
+  { key: "qty", label: "Qty", type: "number", width: 80 },
+  { key: "rate", label: "Rate", type: "number", width: 100 },
+  { key: "amountWoGst", label: "Amount w/o GST", type: "number", width: 130 },
+  { key: "scope", label: "Scope", type: "text", width: 130 },
+  { key: "ourSoNo", label: "Our SO No", type: "text", width: 120 },
+  { key: "soDate", label: "SO Date", type: "date", width: 150 },
+  { key: "soChecklistLink", label: "SO Checklist Link", type: "url", width: 170 },
+  { key: "productSpecificationLink", label: "Product Specification Link", type: "url", width: 180 },
+  { key: "soDrawingNo", label: "SO Drawing No", type: "text", width: 140 },
+  { key: "soAmendmentNeeded", label: "SO Amendment Needed", type: "bool", width: 110 },
+  { key: "soAmendmentReasons", label: "SO Amendment Reasons", type: "text", width: 220 },
+  { key: "amendmentDate", label: "Amendment Date", type: "date", width: 150 },
+  { key: "amendmentRelatedNotes", label: "Amendment Related Notes", type: "text", width: 220 },
+  { key: "targetDispatchDate", label: "Target Dispatch Date", type: "date", width: 160 },
+  { key: "actualDispatchDate", label: "Actual Dispatch Date", type: "date", width: 160 },
+  { key: "daysToProduce", label: "Days to Produce", type: "number", width: 120 },
+  { key: "actualNoOfDays", label: "Actual No of Days", type: "number", width: 130 },
+  { key: "noOfDaysDelay", label: "No of Days Delay", type: "number", width: 130 },
+  { key: "gaApprovalNeeded", label: "GA Approval Needed", type: "bool", width: 110 },
+];
+
+// ── GA Approval Status ─────────────────────────────────────────
+export const GA_COLUMNS: SalesColDef[] = [
+  { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
+  { key: "ourSoNo", label: "Our SO No", type: "text", width: 120 },
+  { key: "soDate", label: "SO Date", type: "date", width: 150 },
+  { key: "poNo", label: "PO No", type: "text", width: 120 },
+  { key: "companyName", label: "Company Name", type: "text", width: 170 },
+  { key: "soChecklistLink", label: "SO Checklist Link", type: "url", width: 170 },
+  { key: "productSpecificationLink", label: "Product Specification Link", type: "url", width: 180 },
+  { key: "soDrawingNo", label: "SO Drawing No", type: "text", width: 140 },
+  { key: "description", label: "Description", type: "text", width: 220 },
+  { key: "itemNameCode", label: "Item Name/Code", type: "text", width: 160 },
+  { key: "gaDrawingsFolderLink", label: "GA Drawings Folder Link", type: "url", width: 180 },
+  { key: "gaStatus", label: "GA Status", type: "text", width: 130 },
+  { key: "gaStatusNotes", label: "GA Status Notes", type: "text", width: 220 },
+  { key: "submissionNoOfDays", label: "Submission No of Days", type: "number", width: 150 },
+  { key: "gaSubmissionTargetDate", label: "GA Submission Target Date", type: "date", width: 180 },
+  { key: "gaSubmissionDate", label: "GA Submission Date", type: "date", width: 160 },
+  { key: "targetGaApprovalDate", label: "Target GA Approval Date", type: "date", width: 180 },
+  { key: "actualGaApprovalDate", label: "Actual GA Approval Date", type: "date", width: 180 },
+  { key: "approvalNoOfDays", label: "Approval No of Days", type: "number", width: 150 },
+  { key: "noOfDaysDelay", label: "No of Days Delay", type: "number", width: 130 },
+  { key: "gaNo", label: "GA No", type: "text", width: 120 },
+];
+
+// ── Work Order Status ──────────────────────────────────────────
+export const WO_COLUMNS: SalesColDef[] = [
+  { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
+  { key: "ourSoNo", label: "Our SO No", type: "text", width: 120 },
+  { key: "bomNo", label: "BOM No", type: "text", width: 120 },
+  { key: "bomDate", label: "BOM Date", type: "date", width: 150 },
+  { key: "soChecklistLink", label: "SO Checklist Link", type: "url", width: 170 },
+  { key: "productSpecificationLink", label: "Product Specification Link", type: "url", width: 180 },
+  { key: "soDrawingNo", label: "SO Drawing No", type: "text", width: 140 },
+  { key: "gaDrawingsFolderLink", label: "GA Drawings Folder Link", type: "url", width: 180 },
+  { key: "bomFolderLink", label: "BOM Folder Link", type: "url", width: 160 },
+  { key: "preProductionChecklist", label: "Pre Production Checklist", type: "text", width: 180 },
+  { key: "workOrderFolderLink", label: "Work Order Folder Link", type: "url", width: 180 },
+  { key: "preProductionPlan", label: "Pre Production Plan", type: "text", width: 180 },
+  { key: "workOrderNo", label: "Work Order No", type: "text", width: 140 },
+  { key: "workOrderDate", label: "Work Order Date", type: "date", width: 150 },
+  { key: "noOfDays", label: "No of Days", type: "number", width: 110 },
+  { key: "targetDate", label: "Target Date", type: "date", width: 150 },
+  { key: "actualDate", label: "Actual Date", type: "date", width: 150 },
+  { key: "workOrderPendingWhere", label: "Work Order Pending Where?", type: "text", width: 200 },
+  { key: "boStatus", label: "BO Status", type: "text", width: 130 },
+];
+
 export const QUOTE_KEYS = QUOTE_COLUMNS.map((c) => c.key);
 export const BOM_KEYS = BOM_COLUMNS.map((c) => c.key);
+export const SO_KEYS = SO_COLUMNS.map((c) => c.key);
+export const GA_KEYS = GA_COLUMNS.map((c) => c.key);
+export const WO_KEYS = WO_COLUMNS.map((c) => c.key);

@@ -2,11 +2,21 @@
 
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { salesQuotes, salesBom } from "@/db/schema";
+import { salesQuotes, salesBom, salesSo, salesGa, salesWo } from "@/db/schema";
 import { requireUser } from "@/lib/auth/current";
-import { QUOTE_KEYS, BOM_KEYS } from "@/lib/sales/columns";
+import { QUOTE_KEYS, BOM_KEYS, SO_KEYS, GA_KEYS, WO_KEYS } from "@/lib/sales/columns";
 
-export type SaleKind = "quote" | "bom";
+export type SaleKind = "quote" | "bom" | "so" | "ga" | "wo";
+
+/** One registry entry per workflow module. Adding a module = one line here. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const REGISTRY: Record<SaleKind, { table: any; keys: string[] }> = {
+  quote: { table: salesQuotes, keys: QUOTE_KEYS },
+  bom: { table: salesBom, keys: BOM_KEYS },
+  so: { table: salesSo, keys: SO_KEYS },
+  ga: { table: salesGa, keys: GA_KEYS },
+  wo: { table: salesWo, keys: WO_KEYS },
+};
 
 export type SalesRow = Record<string, string | number | boolean | null> & { id: string };
 
@@ -22,12 +32,9 @@ function pick(row: Record<string, unknown>, keys: string[]): SalesRow {
 /** Append a blank row and return it (with its new id / sr_no). */
 export async function addSalesRow(kind: SaleKind): Promise<SalesRow> {
   await requireUser();
-  if (kind === "quote") {
-    const [row] = await db.insert(salesQuotes).values({ updatedAt: new Date() }).returning();
-    return pick(row as Record<string, unknown>, QUOTE_KEYS);
-  }
-  const [row] = await db.insert(salesBom).values({ updatedAt: new Date() }).returning();
-  return pick(row as Record<string, unknown>, BOM_KEYS);
+  const { table, keys } = REGISTRY[kind];
+  const [row] = await db.insert(table).values({ updatedAt: new Date() }).returning();
+  return pick(row as Record<string, unknown>, keys);
 }
 
 /** Update a single cell. `field` is validated against the column allow-list. */
@@ -38,27 +45,19 @@ export async function updateSalesCell(
   value: string | boolean | null,
 ): Promise<{ ok: boolean }> {
   await requireUser();
-  const allowed = kind === "quote" ? QUOTE_KEYS : BOM_KEYS;
-  if (!allowed.includes(field) || field === "srNo") return { ok: false };
+  const { table, keys } = REGISTRY[kind];
+  if (!keys.includes(field) || field === "srNo") return { ok: false };
 
   const clean = typeof value === "string" && value.trim() === "" ? null : value;
   const patch = { [field]: clean, updatedAt: new Date() } as Record<string, unknown>;
-
-  if (kind === "quote") {
-    await db.update(salesQuotes).set(patch).where(eq(salesQuotes.id, id));
-  } else {
-    await db.update(salesBom).set(patch).where(eq(salesBom.id, id));
-  }
+  await db.update(table).set(patch).where(eq(table.id, id));
   return { ok: true };
 }
 
 export async function deleteSalesRow(kind: SaleKind, id: string): Promise<{ ok: boolean }> {
   await requireUser();
-  if (kind === "quote") {
-    await db.delete(salesQuotes).where(eq(salesQuotes.id, id));
-  } else {
-    await db.delete(salesBom).where(eq(salesBom.id, id));
-  }
+  const { table } = REGISTRY[kind];
+  await db.delete(table).where(eq(table.id, id));
   return { ok: true };
 }
 
@@ -72,25 +71,17 @@ export async function saveSalesRow(
   values: Record<string, string | boolean | null>,
 ): Promise<SalesRow> {
   await requireUser();
-  const allowed = kind === "quote" ? QUOTE_KEYS : BOM_KEYS;
+  const { table, keys } = REGISTRY[kind];
   const patch: Record<string, unknown> = { updatedAt: new Date() };
   for (const [k, v] of Object.entries(values)) {
-    if (!allowed.includes(k) || k === "srNo") continue;
+    if (!keys.includes(k) || k === "srNo") continue;
     patch[k] = typeof v === "string" && v.trim() === "" ? null : v;
   }
 
-  if (kind === "quote") {
-    if (id) {
-      const [row] = await db.update(salesQuotes).set(patch).where(eq(salesQuotes.id, id)).returning();
-      return pick(row as Record<string, unknown>, QUOTE_KEYS);
-    }
-    const [row] = await db.insert(salesQuotes).values(patch as typeof salesQuotes.$inferInsert).returning();
-    return pick(row as Record<string, unknown>, QUOTE_KEYS);
-  }
   if (id) {
-    const [row] = await db.update(salesBom).set(patch).where(eq(salesBom.id, id)).returning();
-    return pick(row as Record<string, unknown>, BOM_KEYS);
+    const [row] = await db.update(table).set(patch).where(eq(table.id, id)).returning();
+    return pick(row as Record<string, unknown>, keys);
   }
-  const [row] = await db.insert(salesBom).values(patch as typeof salesBom.$inferInsert).returning();
-  return pick(row as Record<string, unknown>, BOM_KEYS);
+  const [row] = await db.insert(table).values(patch).returning();
+  return pick(row as Record<string, unknown>, keys);
 }

@@ -1,8 +1,8 @@
 import { asc } from "drizzle-orm";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { salesQuotes, salesBom } from "@/db/schema";
-import { QUOTE_KEYS, BOM_KEYS } from "@/lib/sales/columns";
+import { salesQuotes, salesBom, salesSo, salesGa, salesWo } from "@/db/schema";
+import { QUOTE_KEYS, BOM_KEYS, SO_KEYS, GA_KEYS, WO_KEYS } from "@/lib/sales/columns";
 import { SalesWorkspace } from "@/components/sales/sales-workspace";
 import type { SalesRow } from "./actions";
 
@@ -16,12 +16,21 @@ function pick(row: Record<string, unknown>, keys: string[]): SalesRow {
 
 export default async function SalesPage() {
   await requireUser();
-  const [quotes, boms] = await Promise.all([
+  const [quotes, boms, sos, gas, wos] = await Promise.all([
     db.select().from(salesQuotes).orderBy(asc(salesQuotes.createdAt)),
     db.select().from(salesBom).orderBy(asc(salesBom.createdAt)),
+    db.select().from(salesSo).orderBy(asc(salesSo.createdAt)),
+    db.select().from(salesGa).orderBy(asc(salesGa.createdAt)),
+    db.select().from(salesWo).orderBy(asc(salesWo.createdAt)),
   ]);
-  const quoteRows = quotes.map((r) => pick(r as Record<string, unknown>, QUOTE_KEYS));
-  const bomRows = boms.map((r) => pick(r as Record<string, unknown>, BOM_KEYS));
 
-  return <SalesWorkspace quoteRows={quoteRows} bomRows={bomRows} />;
+  return (
+    <SalesWorkspace
+      quoteRows={quotes.map((r) => pick(r as Record<string, unknown>, QUOTE_KEYS))}
+      bomRows={boms.map((r) => pick(r as Record<string, unknown>, BOM_KEYS))}
+      soRows={sos.map((r) => pick(r as Record<string, unknown>, SO_KEYS))}
+      gaRows={gas.map((r) => pick(r as Record<string, unknown>, GA_KEYS))}
+      woRows={wos.map((r) => pick(r as Record<string, unknown>, WO_KEYS))}
+    />
+  );
 }
