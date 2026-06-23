@@ -16,10 +16,9 @@ export function CollapsibleVelocity({ data }: { data: VelocityPoint[] }) {
   return (
     <section className="mx-auto max-w-[1600px] px-12 max-md:px-4 mt-12 max-md:mt-6">
       <div
-        className="bg-surface-card rounded-section overflow-hidden"
+        className="premium-card bg-surface-card rounded-section overflow-hidden"
         style={{
           border: "1px solid var(--color-hairline)",
-          boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
         }}
       >
         <button

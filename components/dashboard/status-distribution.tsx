@@ -77,9 +77,8 @@ export function StatusDistributionChart({
 
   return (
     <section
-      className="rounded-section bg-surface-card border border-hairline p-7 max-md:p-5"
+      className="premium-card rounded-section bg-surface-card border border-hairline p-7 max-md:p-5"
       style={{
-        boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
         opacity: 0,
         animation: "fadeUp 500ms ease-out 500ms forwards",
       }}

@@ -250,8 +250,7 @@ export function StatusTable({
         </div>
       ) : (
         <div
-          className="bg-surface-card rounded-section border border-hairline overflow-x-auto"
-          style={{ boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)" }}
+          className="premium-card bg-surface-card rounded-section border border-hairline overflow-x-auto"
         >
           <table className="w-full min-w-[720px]">
             <thead>
