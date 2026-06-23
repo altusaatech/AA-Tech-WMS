@@ -41,6 +41,36 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <>
       <IdleTimerClient timeoutMinutes={settings.idleTimeoutMinutes} />
       <KeyboardShortcuts />
+
+      {/* ── Premium ambient backdrop (fixed, behind all app content) ──
+          A soft brand-tinted wash + faint dotted grid + two blurred colour
+          blobs give every screen a modern SaaS depth without hurting the
+          readability of cards/tables (which sit on opaque white above it). */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(1,128,207,0.055) 0%, rgba(250,251,252,0) 42%, rgba(99,184,30,0.055) 100%)",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "radial-gradient(circle at 1px 1px, rgba(1,128,207,0.05) 1px, transparent 0)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div
+          className="absolute -left-32 -top-40 h-[520px] w-[520px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(1,128,207,0.12), transparent 70%)", filter: "blur(46px)" }}
+        />
+        <div
+          className="absolute right-[-10rem] top-1/3 h-[560px] w-[560px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(99,184,30,0.10), transparent 70%)", filter: "blur(54px)" }}
+        />
+      </div>
+
       {/* Faint Altus Corp watermark, fixed behind all app content */}
       <img
         src="/altus-corp-logo.png"

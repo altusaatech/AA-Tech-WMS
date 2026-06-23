@@ -55,7 +55,7 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
           return (
             <div role="listitem" key={item.key}>
               <div
-                className="group relative overflow-hidden rounded-2xl transition-all duration-200"
+                className="group relative overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1"
                 style={{
                   background: "var(--color-surface-card)",
                   border: `1px solid ${isOpen ? `rgb(${neonDeep})` : "var(--color-hairline-strong)"}`,
@@ -69,6 +69,11 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
                   aria-hidden
                   className="absolute inset-x-0 top-0 h-[3px]"
                   style={{ background: `linear-gradient(90deg, rgb(${neon}), rgb(${neonDeep}))` }}
+                />
+                {/* shine sweep on hover (sits behind the content) */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -translate-x-[200%] -skew-x-12 bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]"
                 />
                 <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3.5">
                   <Link
