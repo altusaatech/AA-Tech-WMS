@@ -6,6 +6,7 @@ import type { Route } from "next";
 import { Plus, Minus, ArrowUpRight } from "lucide-react";
 import type { NeonKey } from "./kpi-card";
 import { KpiDetailPanel } from "./kpi-detail-panel";
+import { Counter } from "./count-up";
 import type { KpiSet, WmsSummary } from "@/lib/types";
 
 interface Entry {
@@ -92,7 +93,8 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
                         className="opacity-0 -translate-x-0.5 transition-all group-hover/link:opacity-100 group-hover/link:translate-x-0"
                       />
                     </span>
-                    <span
+                    <Counter
+                      value={kpi.current}
                       className="block tabular-nums leading-none mt-2.5 text-ink-strong"
                       style={{
                         fontFamily: "var(--font-display), system-ui, sans-serif",
@@ -100,9 +102,7 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
                         fontSize: 38,
                         letterSpacing: "-0.02em",
                       }}
-                    >
-                      {kpi.current.toLocaleString()}
-                    </span>
+                    />
                     <span
                       className="mt-2 inline-flex items-center gap-1 tabular-nums font-extrabold"
                       style={{ fontSize: 12.5, color: deltaColor }}
