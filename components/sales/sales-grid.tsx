@@ -11,11 +11,14 @@ import {
   Table2,
   SlidersHorizontal,
   Download,
+  Upload,
   ChevronLeft,
   ChevronRight,
   X,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
-import { deleteSalesRow, type SaleKind, type SalesRow } from "@/app/(app)/sales/actions";
+import { deleteSalesRow, importSalesRows, type SaleKind, type SalesRow } from "@/app/(app)/sales/actions";
 import type { SalesColDef } from "@/lib/sales/columns";
 
 const PAGE_SIZES = [10, 25, 50, 100];
@@ -33,6 +36,7 @@ export function SalesDataGrid({
   rows,
   onEdit,
   onDeleted,
+  onImported,
   from = "#0069b3",
   to = "#0180cf",
 }: {
@@ -42,6 +46,7 @@ export function SalesDataGrid({
   rows: SalesRow[];
   onEdit: (row: SalesRow) => void;
   onDeleted: (id: string) => void;
+  onImported: (rows: SalesRow[]) => void;
   from?: string;
   to?: string;
 }) {
@@ -52,6 +57,9 @@ export function SalesDataGrid({
   const [colFilters, setColFilters] = React.useState<Record<string, string>>({});
   const [page, setPage] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(25);
+  const [importing, setImporting] = React.useState(false);
+  const [banner, setBanner] = React.useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const fileRef = React.useRef<HTMLInputElement>(null);
 
   const view = React.useMemo(() => {
     let r = rows;
@@ -126,6 +134,48 @@ export function SalesDataGrid({
     XLSX.writeFile(wb, `${(title ?? kind).replace(/\s+/g, "-")}-${stamp}.xlsx`);
   }
 
+  async function onImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (e.target) e.target.value = "";
+    if (!file) return;
+    setImporting(true);
+    setBanner(null);
+    try {
+      const XLSX = await import("xlsx");
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array", cellDates: true });
+      const sheetName = wb.SheetNames[0];
+      const ws = sheetName ? wb.Sheets[sheetName] : undefined;
+      if (!ws) throw new Error("empty workbook");
+      const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
+
+      const mapped = json.map((r) => {
+        const out: Record<string, string | boolean | null> = {};
+        for (const c of columns) {
+          if (c.readOnly) continue;
+          const raw = r[c.label];
+          if (raw === undefined || raw === null || raw === "") continue;
+          if (c.type === "bool") {
+            out[c.key] = ["yes", "true", "1", "y"].includes(String(raw).toLowerCase().trim());
+          } else if (c.type === "date" && raw instanceof Date) {
+            out[c.key] = raw.toISOString().slice(0, 10);
+          } else {
+            out[c.key] = String(raw).trim();
+          }
+        }
+        return out;
+      });
+
+      const inserted = await importSalesRows(kind, mapped);
+      if (inserted.length) onImported(inserted);
+      setBanner({ kind: "ok", text: `Imported ${inserted.length} row${inserted.length === 1 ? "" : "s"} successfully.` });
+    } catch {
+      setBanner({ kind: "err", text: "Import failed. Check that the file's column headers match this register's columns." });
+    } finally {
+      setImporting(false);
+    }
+  }
+
   const activeColFilters = Object.values(colFilters).filter((v) => v.trim()).length;
 
   return (
@@ -176,6 +226,16 @@ export function SalesDataGrid({
           >
             {view.length} of {rows.length}
           </span>
+          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={onImportFile} className="hidden" />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={importing}
+            className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/10 px-3.5 text-[13px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#0180cf]/15 disabled:opacity-50 disabled:hover:translate-y-0"
+            title="Import from Excel"
+          >
+            {importing ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />} Import
+          </button>
           <button
             type="button"
             onClick={exportExcel}
@@ -183,10 +243,27 @@ export function SalesDataGrid({
             className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[#63b81e]/40 bg-[#63b81e]/10 px-3.5 text-[13px] font-bold text-[#3f7a14] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#63b81e]/15 disabled:opacity-50 disabled:hover:translate-y-0"
             title="Export to Excel"
           >
-            <Download size={15} /> Excel
+            <Download size={15} /> Export
           </button>
         </div>
       </div>
+
+      {/* import status banner */}
+      {banner && (
+        <div
+          className={`mb-3 flex items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-[13px] font-semibold animate-in fade-in slide-in-from-top-1 ${
+            banner.kind === "ok" ? "border-[#63b81e]/30 bg-[#63b81e]/10 text-[#3f7a14]" : "border-red-200 bg-red-50 text-red-700"
+          }`}
+        >
+          <span className="inline-flex items-center gap-2">
+            {banner.kind === "ok" ? <CheckCircle2 size={16} /> : <X size={16} />}
+            {banner.text}
+          </span>
+          <button type="button" onClick={() => setBanner(null)} className="rounded-md p-1 hover:bg-black/5">
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* ── table ── */}
       <div

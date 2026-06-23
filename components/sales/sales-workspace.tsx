@@ -37,6 +37,8 @@ interface FormDef {
   to: string;
   steps: string[];
   columns: SalesColDef[];
+  /** Column checked for duplicate entries when saving via the form. */
+  primaryKey: string;
 }
 
 const FORMS: FormDef[] = [
@@ -45,10 +47,11 @@ const FORMS: FormDef[] = [
     label: "Quote Status",
     desc: "Enquiries to quotations to PO received",
     icon: FileText,
-    from: "#0180cf",
-    to: "#0069b3",
+    from: "#06b6d4",
+    to: "#0180cf",
     steps: ["Enquiry", "Quotation", "PO Received"],
     columns: QUOTE_COLUMNS,
+    primaryKey: "enquiryNo",
   },
   {
     key: "so",
@@ -59,6 +62,7 @@ const FORMS: FormDef[] = [
     to: "#63b81e",
     steps: ["PO", "Sales Order", "Amendment", "Dispatch"],
     columns: SO_COLUMNS,
+    primaryKey: "ourSoNo",
   },
   {
     key: "ga",
@@ -66,9 +70,10 @@ const FORMS: FormDef[] = [
     desc: "GA drawing submission to approval",
     icon: BadgeCheck,
     from: "#0069b3",
-    to: "#0180cf",
+    to: "#14b8a6",
     steps: ["SO", "GA Submission", "GA Approval"],
     columns: GA_COLUMNS,
+    primaryKey: "gaNo",
   },
   {
     key: "bom",
@@ -79,16 +84,18 @@ const FORMS: FormDef[] = [
     to: "#0069b3",
     steps: ["PO", "Sales Order", "Production", "Dispatch"],
     columns: BOM_COLUMNS,
+    primaryKey: "ourSoNo",
   },
   {
     key: "wo",
     label: "Work Order Status",
     desc: "BOM to pre-production to work order",
     icon: Factory,
-    from: "#0069b3",
-    to: "#16303f",
+    from: "#0d9488",
+    to: "#63b81e",
     steps: ["BOM", "Pre-Production", "Work Order"],
     columns: WO_COLUMNS,
+    primaryKey: "workOrderNo",
   },
 ];
 
@@ -136,17 +143,23 @@ export function SalesWorkspace({
     setModalRow(row);
     setModalOpen(true);
   }
-  function onSaved(saved: SalesRow) {
+  function onSaved(saved: SalesRow, opts: { close: boolean }) {
     setRowsByKind((prev) => {
       const list = prev[active];
       const i = list.findIndex((r) => r.id === saved.id);
       const next = i >= 0 ? list.map((r) => (r.id === saved.id ? saved : r)) : [...list, saved];
       return { ...prev, [active]: next };
     });
-    setView("register");
+    if (opts.close) {
+      setModalOpen(false);
+      setView("register");
+    }
   }
   function onDeleted(id: string) {
     setRowsByKind((prev) => ({ ...prev, [active]: prev[active].filter((r) => r.id !== id) }));
+  }
+  function onImported(imported: SalesRow[]) {
+    setRowsByKind((prev) => ({ ...prev, [active]: [...prev[active], ...imported] }));
   }
 
   return (
@@ -232,7 +245,7 @@ export function SalesWorkspace({
             </button>
           </div>
 
-          <SalesDataGrid kind={active} title={current.label} columns={current.columns} rows={rows} onEdit={openEdit} onDeleted={onDeleted} from={current.from} to={current.to} />
+          <SalesDataGrid kind={active} title={current.label} columns={current.columns} rows={rows} onEdit={openEdit} onDeleted={onDeleted} onImported={onImported} from={current.from} to={current.to} />
         </div>
       )}
 
@@ -243,6 +256,8 @@ export function SalesWorkspace({
         title={current.label}
         columns={current.columns}
         row={modalRow}
+        existingRows={rows}
+        primaryKey={current.primaryKey}
         onSaved={onSaved}
         from={current.from}
         to={current.to}

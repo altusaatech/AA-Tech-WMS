@@ -85,3 +85,32 @@ export async function saveSalesRow(
   const [row] = await db.insert(table).values(patch).returning();
   return pick(row as Record<string, unknown>, keys);
 }
+
+/**
+ * Bulk-insert rows from an imported Excel/CSV file. Each object is filtered
+ * through the same column allow-list; the generated `srNo` is never written.
+ * Returns the inserted rows (with their new ids / sr_no).
+ */
+export async function importSalesRows(
+  kind: SaleKind,
+  rowsValues: Record<string, string | boolean | null>[],
+): Promise<SalesRow[]> {
+  await requireUser();
+  const { table, keys } = REGISTRY[kind];
+
+  const cleaned = rowsValues
+    .map((values) => {
+      const patch: Record<string, unknown> = { updatedAt: new Date() };
+      for (const [k, v] of Object.entries(values)) {
+        if (!keys.includes(k) || k === "srNo") continue;
+        patch[k] = typeof v === "string" && v.trim() === "" ? null : v;
+      }
+      return patch;
+    })
+    .filter((p) => Object.keys(p).length > 1); // must carry at least one real field
+
+  if (cleaned.length === 0) return [];
+
+  const rows = await db.insert(table).values(cleaned).returning();
+  return rows.map((r) => pick(r as Record<string, unknown>, keys));
+}
