@@ -1,4 +1,3 @@
-import { LiveIndicator } from "./live-indicator";
 import { MainNavServer } from "./main-nav-server";
 import { MobileMenuServer } from "./mobile-menu-server";
 import { UserMenuServer } from "@/components/header/user-menu-server";
@@ -68,9 +67,6 @@ export async function DashboardHeader({
               room and nothing ever overlaps. */}
           <div className="flex items-center gap-2.5 2xl:gap-3 shrink-0 max-xl:ml-auto max-md:gap-1.5">
             <GlobalSearch />
-            <span className="max-2xl:hidden">
-              <LiveIndicator />
-            </span>
             <NewTaskTrigger />
             {isAdmin && (
               <span className="max-2xl:hidden">

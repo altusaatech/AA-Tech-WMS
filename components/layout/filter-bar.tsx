@@ -9,7 +9,6 @@ import {
   Calendar,
   User,
   Users,
-  ListFilter,
   Bookmark,
   X,
   Loader2,
@@ -371,13 +370,8 @@ export function FilterBar({
           </div>
         </div>
 
-        {/* Row 2 — active filters + result count */}
+        {/* Row 2 — active filter chips + result count */}
         <div className="flex items-center gap-2.5 flex-wrap min-h-[28px]">
-          <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold" style={{ color: "var(--color-ink-subtle)" }}>
-            <ListFilter size={15} strokeWidth={2.2} />
-            {activePills.length} active filter{activePills.length === 1 ? "" : "s"}
-          </span>
-
           {activePills.map((p) => (
             <span
               key={p.key}
