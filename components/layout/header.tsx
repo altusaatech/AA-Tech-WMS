@@ -1,6 +1,5 @@
 import { LiveIndicator } from "./live-indicator";
 import { MainNavServer } from "./main-nav-server";
-import { NavHistoryButtons } from "./nav-history-buttons";
 import { MobileMenuServer } from "./mobile-menu-server";
 import { UserMenuServer } from "@/components/header/user-menu-server";
 import { NewTaskTrigger } from "@/components/header/new-task-trigger";
@@ -38,9 +37,7 @@ export async function DashboardHeader({
         }}
       >
         <div className="relative w-full h-[96px] px-6 max-md:h-[72px] max-md:px-4 flex items-center gap-4 2xl:gap-6 max-md:gap-3">
-          {/* LEFT-MOST: Back / Forward history pills (md+ only).
-              On mobile, replaced by the hamburger menu (same slot). */}
-          <NavHistoryButtons />
+          {/* Mobile hamburger menu (phones only). */}
           <MobileMenuServer isAdmin={isAdmin} />
 
           {/* LEFT: A A Tech compact mark — the square triangle logo, so it
