@@ -30,43 +30,41 @@ export async function DashboardHeader({
 
   return (
     <header className="header-light">
-      {/* ─────────────── HERO COMMAND CARD ─────────────── */}
+      {/* ─────────────── HERO COMMAND CARD (light) ─────────────── */}
       <div className="px-4 pt-4 max-md:px-3 max-md:pt-3">
         <div className="relative mx-auto max-w-[1760px]">
           {/* soft outer glow */}
           <div
             aria-hidden
-            className="absolute -inset-1.5 rounded-[34px] opacity-50 blur-2xl"
+            className="absolute -inset-1 rounded-[34px] opacity-25 blur-2xl"
             style={{ background: "linear-gradient(105deg, #0180cf 0%, #0a7d8a 50%, #63b81e 100%)" }}
           />
 
           {/* the card */}
           <div
-            className="relative overflow-hidden rounded-[26px] ring-1 ring-white/10"
+            className="relative overflow-hidden rounded-[26px] border border-white/80"
             style={{
-              background: "linear-gradient(105deg, #08233f 0%, #0c3a47 46%, #1f6b3a 100%)",
-              boxShadow: "0 34px 80px -34px rgba(3,30,55,0.8), inset 0 1px 0 rgba(255,255,255,0.14)",
+              background: "linear-gradient(115deg, #e9f3fd 0%, #ffffff 46%, #edf7e3 100%)",
+              boxShadow: "0 26px 60px -34px rgba(15,60,100,0.28), inset 0 1px 0 rgba(255,255,255,0.9)",
             }}
           >
             {/* decorative backdrop */}
             <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute inset-0 opacity-[0.45]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 0)", backgroundSize: "26px 26px" }} />
-              <div className="hero-anim absolute -left-24 -top-28 h-72 w-72 rounded-full" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.5), transparent 68%)", filter: "blur(30px)", animation: "heroFloat1 18s ease-in-out infinite" }} />
-              <div className="hero-anim absolute right-[-4rem] -bottom-32 h-80 w-80 rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.42), transparent 68%)", filter: "blur(34px)", animation: "heroFloat2 22s ease-in-out infinite" }} />
-              <div className="hero-anim absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-transparent via-white/10 to-transparent" style={{ animation: "headerStreak 9s ease-in-out infinite" }} />
+              <div className="absolute inset-0 opacity-[0.6]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(1,128,207,0.06) 1px, transparent 0)", backgroundSize: "26px 26px" }} />
+              <div className="hero-anim absolute -left-24 -top-28 h-72 w-72 rounded-full" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.18), transparent 68%)", filter: "blur(30px)", animation: "heroFloat1 18s ease-in-out infinite" }} />
+              <div className="hero-anim absolute right-[-4rem] -bottom-32 h-80 w-80 rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.16), transparent 68%)", filter: "blur(34px)", animation: "heroFloat2 22s ease-in-out infinite" }} />
             </div>
 
             <div className="relative flex items-center justify-between gap-6 px-8 py-5 max-md:px-4 max-md:py-4 max-md:gap-3">
-              {/* LEFT — logo glass tile */}
+              {/* LEFT — logo tile */}
               <a
                 href="/"
                 aria-label="A A Tech home"
-                className="group relative flex shrink-0 flex-col items-center justify-center rounded-2xl bg-white/[0.07] ring-1 ring-white/15 backdrop-blur transition-transform hover:scale-[1.04]"
-                style={{ width: 86, height: 86, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18), 0 14px 32px -16px rgba(1,128,207,0.7)" }}
+                className="group relative flex shrink-0 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white transition-transform hover:scale-[1.04]"
+                style={{ width: 86, height: 86, boxShadow: "0 14px 30px -16px rgba(1,128,207,0.45)" }}
               >
-                <span aria-hidden className="absolute -inset-2 rounded-3xl opacity-60 blur-lg" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.35), transparent 70%)" }} />
-                <img src="/logo-mark.png" alt="A A Tech" className="relative h-9 w-auto" style={{ display: "block", filter: "drop-shadow(0 3px 10px rgba(0,0,0,0.4))" }} />
-                <span className="relative mt-1 text-[8px] font-black uppercase tracking-[0.22em] text-white/85">AA Tech</span>
+                <img src="/logo-mark.png" alt="A A Tech" className="relative h-9 w-auto" style={{ display: "block" }} />
+                <span className="relative mt-1 text-[8px] font-black uppercase tracking-[0.22em] text-slate-500">AA Tech</span>
               </a>
 
               {/* CENTER — wordmark + tagline + status pills */}
@@ -79,7 +77,7 @@ export async function DashboardHeader({
                     fontSize: "clamp(20px, 2.5vw, 33px)",
                     letterSpacing: "-0.02em",
                     lineHeight: 1.05,
-                    background: "linear-gradient(95deg, #bfe3ff 0%, #ffffff 40%, #c5f0a3 100%)",
+                    background: "linear-gradient(95deg, #0069b3 0%, #0180cf 42%, #4e9e2e 100%)",
                     backgroundSize: "200% auto",
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
@@ -92,7 +90,7 @@ export async function DashboardHeader({
                 </h1>
                 <div className="mt-1 flex items-center gap-3 max-md:hidden">
                   <span aria-hidden className="h-px w-10" style={{ background: "linear-gradient(90deg, transparent, #0180cf)" }} />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-white/55">Smart Warehouse Management System</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-slate-400">Smart Warehouse Management System</span>
                   <span aria-hidden className="h-px w-10" style={{ background: "linear-gradient(90deg, #63b81e, transparent)" }} />
                 </div>
                 <div className="mt-3.5 max-md:mt-2.5">
@@ -102,8 +100,8 @@ export async function DashboardHeader({
 
               {/* RIGHT — powered by Altus Corp */}
               <div className="flex shrink-0 flex-col items-center gap-1.5 max-lg:hidden" aria-label="Powered by Altus Corp">
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50">Powered by</span>
-                <span className="inline-flex items-center rounded-xl bg-white px-3 py-2 shadow-lg">
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Powered by</span>
+                <span className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                   <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-9 w-auto" style={{ display: "block" }} />
                 </span>
               </div>

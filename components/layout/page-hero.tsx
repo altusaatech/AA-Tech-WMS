@@ -13,11 +13,11 @@ export interface HeroStat {
 }
 
 /**
- * PageHero — the app's reusable bold "command banner". A deep animated dark
- * gradient with a rotating aurora, drifting glow blobs, a shimmer sweep and a
- * faint brand watermark; carries an eyebrow, gradient title, subtitle, an icon
- * chip, optional animated stat tiles and an actions slot. Used to anchor every
- * major screen with the same premium language as the dashboard hero.
+ * PageHero — the app's reusable "command banner" (light premium glass). A soft
+ * blue→green gradient on white with drifting glow blobs and a faint icon
+ * watermark; carries an eyebrow, gradient title, subtitle, an icon chip,
+ * optional animated stat tiles and an actions slot. Anchors major screens with
+ * the same language as the dashboard hero.
  */
 export function PageHero({
   eyebrow,
@@ -36,10 +36,10 @@ export function PageHero({
 }) {
   return (
     <div
-      className="relative overflow-hidden rounded-[28px] px-9 py-8 max-md:px-5 max-md:py-6"
+      className="relative overflow-hidden rounded-[28px] border border-white/80 px-9 py-8 max-md:px-5 max-md:py-6"
       style={{
-        background: "linear-gradient(125deg, #04203a 0%, #061a30 44%, #06352b 100%)",
-        boxShadow: "0 38px 86px -40px rgba(3,30,55,0.82), 0 0 0 1px rgba(255,255,255,0.05) inset, 0 1px 0 rgba(255,255,255,0.08) inset",
+        background: "linear-gradient(120deg, #e9f3fd 0%, #ffffff 46%, #edf7e3 100%)",
+        boxShadow: "0 28px 64px -38px rgba(15,60,100,0.30), inset 0 1px 0 rgba(255,255,255,0.9)",
       }}
     >
       <HeroBackdrop Icon={Icon} />
@@ -49,25 +49,37 @@ export function PageHero({
           {Icon && (
             <span
               className="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg max-md:size-12"
-              style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)", boxShadow: "0 14px 30px -12px rgba(1,128,207,0.7)" }}
+              style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)", boxShadow: "0 14px 30px -14px rgba(1,128,207,0.55)" }}
             >
               <Icon size={26} strokeWidth={2.3} />
             </span>
           )}
           <div className="min-w-0">
             {eyebrow && (
-              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
-                <span className="inline-block size-1.5 rounded-full bg-[#63b81e] shadow-[0_0_10px_#63b81e]" />
+              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <span className="inline-block size-1.5 rounded-full bg-[#63b81e] shadow-[0_0_8px_#63b81e88]" />
                 {eyebrow}
               </div>
             )}
             <h1
-              className="mt-1.5 text-white"
-              style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(26px, 3.1vw, 38px)", lineHeight: 1.03, letterSpacing: "-0.035em" }}
+              className="mt-1.5"
+              style={{
+                fontFamily: "var(--font-display), system-ui, sans-serif",
+                fontWeight: 900,
+                fontSize: "clamp(26px, 3.1vw, 38px)",
+                letterSpacing: "-0.035em",
+                lineHeight: 1.03,
+                width: "fit-content",
+                background: "linear-gradient(95deg, #0069b3 0%, #0180cf 42%, #4e9e2e 100%)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+                WebkitTextFillColor: "transparent",
+              }}
             >
               {title}
             </h1>
-            {subtitle && <p className="mt-2 text-[14px] text-white/65 max-w-2xl">{subtitle}</p>}
+            {subtitle && <p className="mt-2 text-[14px] text-slate-500 max-w-2xl">{subtitle}</p>}
           </div>
         </div>
         {actions && <div className="relative flex items-center gap-2.5 shrink-0">{actions}</div>}
@@ -90,39 +102,10 @@ export function PageHero({
 export function HeroBackdrop({ Icon }: { Icon?: LucideIcon }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div
-        className="hero-anim absolute left-1/2 top-1/2 h-[180%] w-[180%] -translate-x-1/2 -translate-y-1/2 opacity-[0.5]"
-        style={{
-          background:
-            "conic-gradient(from 0deg at 50% 50%, rgba(1,128,207,0.30), rgba(99,184,30,0.22), rgba(0,105,179,0.30), rgba(20,184,166,0.20), rgba(1,128,207,0.30))",
-          filter: "blur(60px)",
-          mixBlendMode: "screen",
-          animation: "heroAurora 42s linear infinite",
-        }}
-      />
-      <div
-        className="hero-anim absolute -left-28 -top-32 h-[420px] w-[420px] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(1,128,207,0.50), transparent 66%)", filter: "blur(28px)", animation: "heroFloat1 16s ease-in-out infinite" }}
-      />
-      <div
-        className="hero-anim absolute right-[-7rem] top-[18%] h-[440px] w-[440px] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(99,184,30,0.40), transparent 66%)", filter: "blur(34px)", animation: "heroFloat2 20s ease-in-out infinite" }}
-      />
-      <div
-        className="absolute inset-0 opacity-[0.5]"
-        style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 0)", backgroundSize: "30px 30px" }}
-      />
-      <div
-        className="hero-anim absolute inset-y-0 left-0 w-1/3"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.09), transparent)", animation: "heroShimmer 9s ease-in-out infinite" }}
-      />
-      {Icon && (
-        <Icon
-          className="absolute -right-8 -top-10 text-white opacity-[0.05] max-md:hidden"
-          size={260}
-          strokeWidth={1.2}
-        />
-      )}
+      <div className="absolute inset-0 opacity-[0.6]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(1,128,207,0.06) 1px, transparent 0)", backgroundSize: "28px 28px" }} />
+      <div className="hero-anim absolute -left-28 -top-32 h-[420px] w-[420px] rounded-full" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.16), transparent 66%)", filter: "blur(30px)", animation: "heroFloat1 16s ease-in-out infinite" }} />
+      <div className="hero-anim absolute right-[-7rem] top-[18%] h-[440px] w-[440px] rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.15), transparent 66%)", filter: "blur(34px)", animation: "heroFloat2 20s ease-in-out infinite" }} />
+      {Icon && <Icon className="absolute -right-8 -top-10 text-slate-900 opacity-[0.04] max-md:hidden" size={260} strokeWidth={1.2} />}
     </div>
   );
 }
@@ -130,18 +113,18 @@ export function HeroBackdrop({ Icon }: { Icon?: LucideIcon }) {
 function HeroStatTile({ stat }: { stat: HeroStat }) {
   const Icon = stat.icon;
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-white/[0.07] p-4 ring-1 ring-white/10 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:bg-white/[0.11]">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
       <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: `linear-gradient(90deg, ${stat.from}, ${stat.to})` }} />
-      <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -translate-x-[200%] -skew-x-12 bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
+      <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -translate-x-[200%] -skew-x-12 bg-gradient-to-r from-transparent via-slate-100/80 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
       <div className="relative flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-white/55">{stat.label}</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">{stat.label}</span>
         <span className="inline-flex size-7 items-center justify-center rounded-lg text-white shadow" style={{ background: `linear-gradient(135deg, ${stat.from}, ${stat.to})` }}>
           <Icon size={15} strokeWidth={2.4} />
         </span>
       </div>
       <Counter
         value={stat.value}
-        className="relative mt-2.5 block tabular-nums text-white"
+        className="relative mt-2.5 block tabular-nums text-slate-900"
         style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(26px, 2.6vw, 36px)", letterSpacing: "-0.025em", lineHeight: 1 }}
       />
     </div>

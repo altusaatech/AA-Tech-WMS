@@ -40,11 +40,11 @@ export function HeaderStatusBar({ moduleCount }: { moduleCount: number }) {
 function Pill({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <span
-      className="inline-flex items-center gap-2 rounded-xl bg-white/[0.07] px-3 py-1.5 ring-1 ring-white/12 backdrop-blur"
+      className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-1.5 shadow-sm backdrop-blur"
       suppressHydrationWarning
     >
-      <span className="text-white/55">{icon}</span>
-      <span className="text-[12px] font-semibold tabular-nums text-white/85">{text}</span>
+      <span className="text-[#0180cf]">{icon}</span>
+      <span className="text-[12px] font-semibold tabular-nums text-slate-600">{text}</span>
     </span>
   );
 }
