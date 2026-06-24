@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { CalendarDays, Clock, LayoutGrid } from "lucide-react";
 
 /**
- * Compact live system-status + clock for the command-center header band.
- * Renders nothing until mounted (so SSR/client clocks never mismatch), then
- * ticks every 30s. Pure presentation — a premium "control tower" touch.
+ * Live status-pill bar for the command-center header band: date · time ·
+ * system status · active-modules count. Renders placeholder dashes until
+ * mounted (so SSR and client clocks never mismatch), then ticks every 30s.
  */
-export function HeaderClock() {
+export function HeaderStatusBar({ moduleCount }: { moduleCount: number }) {
   const [now, setNow] = React.useState<Date | null>(null);
   React.useEffect(() => {
     setNow(new Date());
@@ -15,22 +16,35 @@ export function HeaderClock() {
     return () => clearInterval(id);
   }, []);
 
-  const date = now ? now.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" }) : "";
-  const time = now ? now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "";
+  const date = now ? now.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "—";
+  const time = now ? now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "—";
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 ring-1 ring-white/15 backdrop-blur">
-        <span className="relative flex size-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#63b81e] opacity-75" />
-          <span className="relative inline-flex size-2 rounded-full bg-[#63b81e]" />
-        </span>
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-white/80">Operational</span>
-      </span>
-      <span className="flex flex-col leading-none text-white/70 max-md:hidden" suppressHydrationWarning>
-        <span className="text-[12px] font-bold tabular-nums text-white/90">{time || "—"}</span>
-        <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/45">{date || ""}</span>
-      </span>
+    <div className="flex flex-wrap items-center justify-center gap-2.5">
+      <Pill icon={<CalendarDays size={13} strokeWidth={2.3} />} text={date} />
+      <Pill icon={<Clock size={13} strokeWidth={2.3} />} text={time} />
+      <Pill
+        icon={
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#63b81e] opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-[#63b81e]" />
+          </span>
+        }
+        text="System Online"
+      />
+      <Pill icon={<LayoutGrid size={13} strokeWidth={2.3} />} text={`${moduleCount} Modules Active`} />
     </div>
+  );
+}
+
+function Pill({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <span
+      className="inline-flex items-center gap-2 rounded-xl bg-white/[0.07] px-3 py-1.5 ring-1 ring-white/12 backdrop-blur"
+      suppressHydrationWarning
+    >
+      <span className="text-white/55">{icon}</span>
+      <span className="text-[12px] font-semibold tabular-nums text-white/85">{text}</span>
+    </span>
   );
 }
