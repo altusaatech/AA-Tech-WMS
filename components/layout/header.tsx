@@ -63,7 +63,7 @@ export async function DashboardHeader({
                 className="group relative flex shrink-0 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white transition-transform hover:scale-[1.04]"
                 style={{ width: 86, height: 86, boxShadow: "0 14px 30px -16px rgba(1,128,207,0.45)" }}
               >
-                <img src="/logo-mark.png" alt="A A Tech" className="relative h-9 w-auto" style={{ display: "block" }} />
+                <img src="/logo-mark.png?v=2" alt="A A Tech" className="relative h-9 w-auto" style={{ display: "block" }} />
                 <span className="relative mt-1 text-[8px] font-black uppercase tracking-[0.22em] text-slate-500">AA Tech</span>
               </a>
 
@@ -100,9 +100,9 @@ export async function DashboardHeader({
 
               {/* RIGHT — powered by Altus Corp */}
               <div className="flex shrink-0 flex-col items-center gap-1.5 max-lg:hidden" aria-label="Powered by Altus Corp">
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Powered by</span>
-                <span className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                  <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-9 w-auto" style={{ display: "block" }} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Powered by</span>
+                <span className="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+                  <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-16 w-auto max-md:h-12" style={{ display: "block" }} />
                 </span>
               </div>
             </div>
