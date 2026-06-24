@@ -1,5 +1,6 @@
 import { MainNavServer } from "./main-nav-server";
 import { MobileMenuServer } from "./mobile-menu-server";
+import { HeaderClock } from "./header-clock";
 import { UserMenuServer } from "@/components/header/user-menu-server";
 import { NewTaskTrigger } from "@/components/header/new-task-trigger";
 import { AdminPill } from "@/components/header/admin-pill";
@@ -7,16 +8,18 @@ import { GlobalSearch } from "@/components/header/global-search";
 import { getCurrentEmployee } from "@/lib/auth/current";
 
 /**
- * Light glassy application header — single row, ~72px tall.
+ * Command-center application header — two stacked bands inside one sticky shell:
  *
- * Cyan triangle mark + bold "A A Tech" wordmark on the left, primary
- * nav centered with airy spacing, right cluster carries live indicator +
- * actions + avatar. Frosted-glass white surface with a single hairline
- * bottom border — no decorative washes, no rainbow strip. The nav-pill
- * colors flip to ink-on-light via `.header-light` scope.
+ *  1. HERO BAND (dark, animated): AA Tech logo in a glass pill + live system
+ *     status/clock on the left, the gradient "AA Tech WMS" wordmark + tagline
+ *     as the centerpiece, and the "Powered by Altus Corp" partner mark on the
+ *     right. A rotating-free, transform-only animated backdrop (grid, drifting
+ *     glow blobs, a light streak) gives it a premium control-tower feel.
+ *  2. NAV ROW (light frosted): the primary pill nav + search + actions + avatar.
+ *     The `.header-light` scope keeps the nav pills ink-on-light.
  *
- * `generatedAt` is accepted to keep the prop contract stable for callers
- * but no longer rendered.
+ * `generatedAt` is accepted to keep the prop contract stable for callers but
+ * no longer rendered.
  */
 export async function DashboardHeader({
   generatedAt: _generatedAt,
@@ -26,6 +29,86 @@ export async function DashboardHeader({
 
   return (
     <header className="sticky top-0 z-50 header-light">
+      {/* ─────────────── HERO COMMAND BAND ─────────────── */}
+      <div
+        className="relative overflow-hidden"
+        style={{
+          background: "linear-gradient(120deg, #04203a 0%, #061a30 50%, #06352b 100%)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        {/* animated backdrop */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="absolute inset-0 opacity-[0.5]"
+            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0)", backgroundSize: "26px 26px" }}
+          />
+          <div className="hero-anim absolute -left-20 -top-24 h-64 w-64 rounded-full" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.5), transparent 68%)", filter: "blur(26px)", animation: "heroFloat1 17s ease-in-out infinite" }} />
+          <div className="hero-anim absolute right-16 -bottom-28 h-72 w-72 rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.4), transparent 68%)", filter: "blur(30px)", animation: "heroFloat2 21s ease-in-out infinite" }} />
+          <div className="hero-anim absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-transparent via-white/10 to-transparent" style={{ animation: "headerStreak 8s ease-in-out infinite" }} />
+        </div>
+
+        <div className="relative mx-auto flex h-[60px] max-w-[1760px] items-center justify-between gap-4 px-6 max-md:h-[52px] max-md:px-4">
+          {/* LEFT — logo glass pill + live status/clock */}
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href="/"
+              aria-label="A A Tech home"
+              className="relative inline-flex items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15 backdrop-blur transition-transform hover:scale-105"
+              style={{ padding: "6px 10px", boxShadow: "0 10px 26px -12px rgba(1,128,207,0.7)" }}
+            >
+              <span aria-hidden className="absolute -inset-2 rounded-3xl opacity-60 blur-lg" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.4), transparent 70%)" }} />
+              <img src="/logo-mark.png" alt="A A Tech" className="relative h-8 w-auto max-md:h-7" style={{ display: "block", filter: "drop-shadow(0 2px 8px rgba(1,128,207,0.55))" }} />
+            </a>
+            <span className="h-9 w-px bg-white/12 max-md:hidden" aria-hidden />
+            <div className="max-md:hidden">
+              <HeaderClock />
+            </div>
+          </div>
+
+          {/* CENTER — the hero wordmark */}
+          <a href="/" className="min-w-0 flex-1 text-center" aria-label="AA Tech WMS home">
+            <h1
+              className="truncate"
+              style={{
+                fontFamily: "var(--font-display), system-ui, sans-serif",
+                fontWeight: 900,
+                fontSize: "clamp(18px, 2.1vw, 27px)",
+                letterSpacing: "-0.02em",
+                lineHeight: 1.04,
+                background: "linear-gradient(90deg, #7fd4ff, #ffffff 28%, #aef07f 56%, #7fd4ff 90%)",
+                backgroundSize: "200% auto",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+                WebkitTextFillColor: "transparent",
+                animation: "headerTextShimmer 6s linear infinite",
+              }}
+            >
+              AA Tech WMS
+            </h1>
+            <p className="mt-0.5 flex items-center justify-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.26em] text-white/45 max-md:hidden">
+              <span className="inline-block h-px w-4 bg-white/25" aria-hidden />
+              Intelligent Operations Platform
+              <span className="inline-block h-px w-4 bg-white/25" aria-hidden />
+            </p>
+          </a>
+
+          {/* RIGHT — powered by Altus Corp */}
+          <div className="flex items-center gap-2.5 shrink-0 max-md:hidden" aria-label="Powered by Altus Corp">
+            <span className="text-[8.5px] font-bold uppercase tracking-[0.18em] text-white/45 leading-tight text-right">
+              Powered
+              <br />
+              by
+            </span>
+            <span className="inline-flex items-center rounded-xl bg-white px-2.5 py-1.5 shadow-lg">
+              <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-7 w-auto" style={{ display: "block" }} />
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ─────────────── FUNCTIONAL NAV ROW ─────────────── */}
       <div
         className="relative"
         style={{
@@ -35,36 +118,19 @@ export async function DashboardHeader({
           borderBottom: "1px solid var(--color-hairline)",
         }}
       >
-        <div className="relative w-full h-[96px] px-6 max-md:h-[72px] max-md:px-4 flex items-center gap-4 2xl:gap-6 max-md:gap-3">
+        <div className="relative w-full h-[64px] px-6 max-md:h-[60px] max-md:px-4 flex items-center gap-4 2xl:gap-6 max-md:gap-3">
           {/* Mobile hamburger menu (phones only). */}
           <MobileMenuServer isAdmin={isAdmin} />
 
-          {/* LEFT: A A Tech compact mark — the square triangle logo, so it
-              stays short and doesn't eat horizontal space in the header. */}
-          <a href="/" className="flex items-center shrink-0" aria-label="A A Tech home">
-            <img
-              src="/logo-mark.png"
-              alt="A A Tech"
-              className="h-11 w-auto max-md:h-10"
-              style={{ display: "block" }}
-            />
-          </a>
-
-          {/* CENTER: primary pill nav — visible on every desktop width (and
-              under zoom). It stays centred while it fits; when space gets tight
-              it scrolls horizontally FROM THE LEFT (w-max + mx-auto) so pills
-              are never clipped, never overlap, and never disappear. Collapses
-              to the hamburger drawer only on real phones (max-md). */}
+          {/* CENTER: primary pill nav — scrolls horizontally when tight, collapses
+              to the hamburger drawer on phones. */}
           <div className="flex-1 min-w-0 overflow-x-auto nav-scroll max-md:hidden">
             <div className="flex w-max mx-auto">
               <MainNavServer />
             </div>
           </div>
 
-          {/* RIGHT: search + live indicator + actions + avatar. Every item is
-              shrink-0; secondary chrome (Live / Admin pill) hides below 2xl and
-              the search collapses to an icon there too, so the nav always has
-              room and nothing ever overlaps. */}
+          {/* RIGHT: search + actions + avatar. */}
           <div className="flex items-center gap-2.5 2xl:gap-3 shrink-0 max-xl:ml-auto max-md:gap-1.5">
             <GlobalSearch />
             <NewTaskTrigger />
@@ -74,24 +140,6 @@ export async function DashboardHeader({
               </span>
             )}
             <UserMenuServer />
-            {/* Altus Corp — "Powered by" partner mark at the top-right corner */}
-            <span
-              className="flex items-center gap-2.5 pl-0.5 max-lg:hidden"
-              aria-label="Powered by Altus Corp"
-            >
-              <span className="h-10 w-px bg-hairline-strong" aria-hidden />
-              <span className="flex flex-col items-center leading-none">
-                <span className="mb-1 text-[8.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
-                  Powered by
-                </span>
-                <img
-                  src="/altus-corp-logo.png"
-                  alt="Altus Corp"
-                  className="h-10 w-auto"
-                  style={{ display: "block" }}
-                />
-              </span>
-            </span>
           </div>
         </div>
       </div>
