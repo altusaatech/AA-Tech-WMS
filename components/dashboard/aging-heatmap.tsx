@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import * as Popover from "@radix-ui/react-popover";
-import { AlertTriangle, Flame, ArrowDownUp, ChevronRight } from "lucide-react";
+import { AlertTriangle, Flame, ArrowDownUp, ChevronRight, ChevronsDown } from "lucide-react";
 import Link from "next/link";
 import type { Route } from "next";
 import { AGE_BUCKETS, type AgeBucketId } from "@/db/enums";
@@ -71,8 +71,7 @@ export function AgingHeatmap({
     return copy;
   }, [enriched, sortMode]);
 
-  const top12 = sorted.slice(0, 12);
-  const maxTotal = Math.max(...top12.map((r) => r.total), 1);
+  const maxTotal = Math.max(...sorted.map((r) => r.total), 1);
 
   const totalAging = enriched.reduce((s, r) => s + r.total, 0);
   const criticalTotal = enriched.reduce(
@@ -144,22 +143,41 @@ export function AgingHeatmap({
 
           <Legend />
 
-          {top12.length === 0 ? (
+          {sorted.length === 0 ? (
             <p className="mt-6 font-semibold" style={{ fontSize: 17, color: "var(--color-ink-muted)" }}>
               No pending tasks for the current filter.
             </p>
           ) : (
-            <div className="mt-6 space-y-2">
-              <LaneHeader />
-              {top12.map((r, i) => (
-                <Lane
-                  key={r.employeeId}
-                  row={r}
-                  maxTotal={maxTotal}
-                  index={i}
-                  employeeTasks={cellTasks[r.employeeId] ?? {}}
-                />
-              ))}
+            <div className="mt-6">
+              {/* 5-lane viewport — the rest scrolls (sticky lane header, thin brand scrollbar) */}
+              <div className="thin-scroll overflow-auto pr-1" style={{ maxHeight: 360 }}>
+                <div className="sticky top-0 z-20 pb-2" style={{ background: "linear-gradient(180deg, #fffefb 70%, rgba(255,254,251,0) 100%)" }}>
+                  <LaneHeader />
+                </div>
+                <div className="space-y-2">
+                  {sorted.map((r, i) => (
+                    <Lane
+                      key={r.employeeId}
+                      row={r}
+                      maxTotal={maxTotal}
+                      index={i}
+                      employeeTasks={cellTasks[r.employeeId] ?? {}}
+                    />
+                  ))}
+                </div>
+              </div>
+              {sorted.length > 5 && (
+                <div className="mt-3 flex items-center justify-between gap-3 border-t border-hairline pt-3">
+                  <span className="text-[12.5px] font-semibold text-ink-soft">
+                    Showing <b className="text-ink-strong">5</b> of{" "}
+                    <b className="text-ink-strong tabular-nums">{sorted.length}</b>{" "}
+                    {sorted.length === 1 ? "person" : "people"}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-ink-subtle">
+                    <ChevronsDown size={13} strokeWidth={2.6} className="animate-bounce" /> Scroll to view more
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
