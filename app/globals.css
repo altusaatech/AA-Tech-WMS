@@ -1044,12 +1044,12 @@ html[data-density="compact"] body {
   }
 }
 @utility nav-pill-active {
-  background: linear-gradient(135deg, rgb(var(--vp-cyan)), rgb(var(--vp-cyan-deep)));
+  background: linear-gradient(135deg, #63b81e, #0180cf);
   color: #ffffff;
   border-color: transparent;
   box-shadow:
-    0 8px 24px rgba(1, 128, 207, 0.38),
-    0 0 0 4px rgba(1, 128, 207, 0.18);
+    0 8px 24px rgba(99, 184, 30, 0.32),
+    0 0 0 4px rgba(1, 128, 207, 0.16);
   transform: translateY(-1px);
 }
 @utility nav-pill-count {
@@ -1091,11 +1091,11 @@ html[data-density="compact"] body {
 }
 .header-light .nav-pill-active,
 .header-light .nav-pill-active:hover {
-  background: linear-gradient(135deg, rgb(var(--vp-cyan)), rgb(var(--vp-cyan-deep)));
+  background: linear-gradient(135deg, #63b81e, #0180cf);
   color: #ffffff;
   border-color: transparent;
   box-shadow:
-    0 10px 24px rgba(1, 128, 207, 0.38),
+    0 10px 24px rgba(99, 184, 30, 0.30),
     0 0 0 4px rgba(1, 128, 207, 0.16);
 }
 .header-light .nav-pill-count {
