@@ -56,15 +56,14 @@ export async function DashboardHeader({
             </div>
 
             <div className="relative flex items-center justify-between gap-6 px-8 py-5 max-md:px-4 max-md:py-4 max-md:gap-3">
-              {/* LEFT — logo tile */}
+              {/* LEFT — logo (no tile) */}
               <a
                 href="/"
                 aria-label="A A Tech home"
-                className="group relative flex shrink-0 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white transition-transform hover:scale-[1.04]"
-                style={{ width: 86, height: 86, boxShadow: "0 14px 30px -16px rgba(1,128,207,0.45)" }}
+                className="group relative flex shrink-0 flex-col items-center justify-center transition-transform hover:scale-[1.05]"
               >
-                <img src="/logo-mark.png?v=3" alt="A A Tech" className="relative h-10 w-auto" style={{ display: "block" }} />
-                <span className="relative mt-1 text-[8px] font-black uppercase tracking-[0.22em] text-slate-500">AA Tech</span>
+                <img src="/logo-mark.png?v=3" alt="A A Tech" className="relative h-16 w-auto max-md:h-12" style={{ display: "block", filter: "drop-shadow(0 6px 14px rgba(1,128,207,0.3))" }} />
+                <span className="relative mt-1.5 text-[11px] font-black uppercase tracking-[0.24em] text-slate-700 max-md:text-[9px]">AA Tech</span>
               </a>
 
               {/* CENTER — wordmark + tagline + status pills */}
@@ -98,12 +97,15 @@ export async function DashboardHeader({
                 </div>
               </div>
 
-              {/* RIGHT — powered by Altus Corp */}
+              {/* RIGHT — powered by Altus Corp (no chip) */}
               <div className="flex shrink-0 flex-col items-center gap-1.5 max-lg:hidden" aria-label="Powered by Altus Corp">
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Powered by</span>
-                <span className="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
-                  <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-16 w-auto max-md:h-12" style={{ display: "block" }} />
-                </span>
+                <img
+                  src="/altus-corp-logo.png?v=2"
+                  alt="Altus Corp"
+                  className="h-[68px] w-auto max-md:h-14"
+                  style={{ display: "block", filter: "drop-shadow(0 6px 14px rgba(0,0,0,0.18))" }}
+                />
               </div>
             </div>
           </div>
