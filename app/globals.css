@@ -162,6 +162,26 @@
   .hero-anim { animation: none !important; }
 }
 
+/* Thin, elegant, brand-tinted scrollbar for capped scroll containers
+   (e.g. the Status-by-Doer 5-row viewport). */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(1, 128, 207, 0.4) transparent;
+}
+.thin-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+.thin-scroll::-webkit-scrollbar-track { background: transparent; }
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #63b81e, #0180cf);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.thin-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #57a82b, #0069b3);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
 /* ────────────────────────────────────────────────────────────────────
    Profile v2 — density swap
    Light-only theme; the root layout writes data-density on <html>.

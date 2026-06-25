@@ -9,7 +9,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Search, X, Users, ChevronRight } from "lucide-react";
+import { Search, X, Users, ChevronRight, ChevronsDown } from "lucide-react";
 import type { EmployeeStatusRow, ViewMode } from "@/lib/types";
 import { CriticalBadge } from "@/components/ui/critical-badge";
 import { EmployeeAvatar } from "@/components/ui/employee-avatar";
@@ -53,7 +53,23 @@ function buildColumns(): ColumnDef<EmployeeStatusRow>[] {
         </span>
       ),
     },
-    { accessorKey: "department", header: "Department" },
+    {
+      accessorKey: "department",
+      header: "Department",
+      cell: (info) => {
+        const d = info.getValue<string>();
+        if (!d) return <span className="text-ink-subtle text-mono">—</span>;
+        const tone = deptTone(d);
+        return (
+          <span
+            className="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold"
+            style={{ background: `color-mix(in srgb, var(--color-${tone}) 12%, transparent)`, color: `var(--color-${tone}-deep)` }}
+          >
+            {d}
+          </span>
+        );
+      },
+    },
     {
       accessorKey: "criticalCount",
       header: "Critical",
@@ -176,8 +192,8 @@ export function StatusTable({
         <div className="flex items-start gap-3">
           <span
             aria-hidden
-            className="mt-1 inline-flex size-10 shrink-0 items-center justify-center rounded-xl"
-            style={{ background: "rgba(15, 23, 42, 0.05)", color: "var(--color-ink-strong)" }}
+            className="mt-0.5 inline-flex size-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg"
+            style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)", boxShadow: "0 12px 26px -12px rgba(1,128,207,0.6)" }}
           >
             <Users size={20} strokeWidth={2.2} />
           </span>
@@ -249,28 +265,29 @@ export function StatusTable({
           )}
         </div>
       ) : (
-        <div
-          className="premium-card bg-surface-card rounded-section border border-hairline overflow-x-auto"
-        >
-          <table className="w-full min-w-[720px]">
-            <thead>
-              {table.getHeaderGroups().map((hg) => (
-                <tr key={hg.id} className="border-b border-hairline">
-                  {hg.headers.map((h, i) => (
-                    <th
-                      key={h.id}
-                      className={`px-5 py-4 text-table-head whitespace-nowrap ${
-                        i <= 1 ? "text-left" : "text-right"
-                      } ${i === 0 ? "sticky left-0 z-10 bg-surface-card" : ""}`}
-                    >
-                      {flexRender(h.column.columnDef.header, h.getContext())}
-                    </th>
-                  ))}
-                  {/* Chevron column header — silent, just claims width */}
-                  <th aria-hidden style={{ width: 36 }} />
-                </tr>
-              ))}
-            </thead>
+        <div className="premium-card overflow-hidden rounded-[22px] border border-hairline bg-surface-card">
+          {/* 5-row viewport — the rest scrolls (sticky header, thin brand scrollbar) */}
+          <div className="thin-scroll overflow-auto" style={{ maxHeight: 372 }}>
+            <table className="w-full min-w-[720px]">
+              <thead>
+                {table.getHeaderGroups().map((hg) => (
+                  <tr key={hg.id}>
+                    {hg.headers.map((h, i) => (
+                      <th
+                        key={h.id}
+                        className={`sticky top-0 px-5 py-3.5 text-table-head whitespace-nowrap ${
+                          i <= 1 ? "text-left" : "text-right"
+                        } ${i === 0 ? "left-0 z-30" : "z-20"}`}
+                        style={{ background: "linear-gradient(180deg, #f3f9fe, #eaf3fb)", borderBottom: "1px solid var(--color-hairline)" }}
+                      >
+                        {flexRender(h.column.columnDef.header, h.getContext())}
+                      </th>
+                    ))}
+                    {/* Chevron column header — silent, just claims width */}
+                    <th aria-hidden className="sticky top-0 z-20" style={{ width: 36, background: "linear-gradient(180deg, #f3f9fe, #eaf3fb)", borderBottom: "1px solid var(--color-hairline)" }} />
+                  </tr>
+                ))}
+              </thead>
             <tbody>
               {table.getRowModel().rows.map((row) => {
                 const empId = row.original.employeeId;
@@ -322,6 +339,19 @@ export function StatusTable({
               })}
             </tbody>
           </table>
+          </div>
+          {filtered.length > 5 && (
+            <div className="flex items-center justify-between gap-3 border-t border-hairline bg-[#f8fbfe] px-5 py-2.5">
+              <span className="text-[12.5px] font-semibold text-ink-soft">
+                Showing <b className="text-ink-strong">5</b> of{" "}
+                <b className="text-ink-strong tabular-nums">{filtered.length}</b>{" "}
+                {filtered.length === 1 ? "employee" : "employees"}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-ink-subtle">
+                <ChevronsDown size={13} strokeWidth={2.6} className="animate-bounce" /> Scroll to view more
+              </span>
+            </div>
+          )}
         </div>
       )}
     </section>
