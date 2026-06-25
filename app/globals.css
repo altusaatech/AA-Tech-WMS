@@ -1092,22 +1092,23 @@ html[data-density="compact"] body {
    chips by default (not transparent), so the nav has visible weight
    on the white surface. Active pill stays full cyan gradient. */
 .header-light .nav-pill {
-  background: var(--vp-cyan-tint);
-  border: 1.5px solid rgba(1, 128, 207, 0.28);
-  color: rgb(var(--vp-cyan-deep));
+  background: linear-gradient(135deg, #63b81e, #0180cf);
+  border: 1.5px solid transparent;
+  color: #ffffff;
   font-size: 15px;
   font-weight: 700;
   padding: 12px 18px;
   letter-spacing: 0.005em;
   gap: 9px;
   line-height: 1;
+  box-shadow: 0 4px 12px -5px rgba(1, 128, 207, 0.45);
 }
 .header-light .nav-pill:hover {
-  background: rgba(1, 128, 207, 0.16);
-  border-color: rgb(var(--vp-cyan));
-  color: rgb(var(--vp-cyan-deep));
+  background: linear-gradient(135deg, #57a82b, #0069b3);
+  border-color: transparent;
+  color: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(1, 128, 207, 0.22);
+  box-shadow: 0 7px 18px -6px rgba(1, 128, 207, 0.5);
 }
 .header-light .nav-pill-active,
 .header-light .nav-pill-active:hover {
@@ -1119,8 +1120,8 @@ html[data-density="compact"] body {
     0 0 0 4px rgba(1, 128, 207, 0.16);
 }
 .header-light .nav-pill-count {
-  background: rgba(1, 128, 207, 0.18);
-  color: rgb(var(--vp-cyan-deep));
+  background: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
   font-weight: 800;
 }
 .header-light .nav-pill-active .nav-pill-count {
