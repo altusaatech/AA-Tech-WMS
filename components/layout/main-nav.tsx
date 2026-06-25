@@ -1,6 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListTodo, CalendarDays, FolderKanban, SquareKanban, Target, CalendarCheck, CalendarRange, IndianRupee, Compass, Receipt, Sparkles, BookMarked, FileSpreadsheet } from "lucide-react";
+import { LayoutDashboard, ListTodo, CalendarDays, FolderKanban, SquareKanban, Target, CalendarCheck, CalendarRange, IndianRupee, Compass, Receipt, Sparkles, BookMarked, FileSpreadsheet, Database } from "lucide-react";
 import type { Route } from "next";
 import { MainNavPill } from "./main-nav-pill";
 
@@ -71,6 +71,12 @@ export function MainNav({ activeTasks, isAdmin, variant }: Props) {
         label="Production"
         Icon={FileSpreadsheet}
         active={isActive("/sales")}
+        variant={variant}      />
+      <MainNavPill
+        href={"/masters" as Route}
+        label="Masters"
+        Icon={Database}
+        active={isActive("/masters")}
         variant={variant}      />
       <MainNavPill
         href={"/attendance" as Route}
