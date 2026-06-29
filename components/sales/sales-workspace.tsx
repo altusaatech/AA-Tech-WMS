@@ -32,8 +32,11 @@ import {
 } from "@/lib/sales/columns";
 import type { SaleKind, SalesRow } from "@/app/(app)/sales/actions";
 
+/** The five production-workflow kinds (subset of SaleKind, which also covers masters). */
+type Kind = Extract<SaleKind, "quote" | "bom" | "so" | "ga" | "wo">;
+
 interface FormDef {
-  key: SaleKind;
+  key: Kind;
   label: string;
   desc: string;
   icon: LucideIcon;
@@ -119,8 +122,8 @@ export function SalesWorkspace({
   woRows: SalesRow[];
 }) {
   const [view, setView] = React.useState<View>("hub");
-  const [active, setActive] = React.useState<SaleKind>("quote");
-  const [rowsByKind, setRowsByKind] = React.useState<Record<SaleKind, SalesRow[]>>({
+  const [active, setActive] = React.useState<Kind>("quote");
+  const [rowsByKind, setRowsByKind] = React.useState<Record<Kind, SalesRow[]>>({
     quote: quoteRows,
     so: soRows,
     ga: gaRows,
@@ -132,15 +135,15 @@ export function SalesWorkspace({
 
   const current = FORMS.find((f) => f.key === active)!;
   const rows = rowsByKind[active];
-  const countOf = (k: SaleKind) => rowsByKind[k].length;
+  const countOf = (k: Kind) => rowsByKind[k].length;
   const totalEntries = Object.values(rowsByKind).reduce((n, list) => n + list.length, 0);
 
-  function openForm(k: SaleKind) {
+  function openForm(k: Kind) {
     setActive(k);
     setModalRow(null);
     setModalOpen(true);
   }
-  function openRegister(k: SaleKind) {
+  function openRegister(k: Kind) {
     setActive(k);
     setView("register");
   }

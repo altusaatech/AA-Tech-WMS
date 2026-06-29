@@ -2,13 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { salesQuotes, salesBom, salesSo, salesGa, salesWo } from "@/db/schema";
+import { salesQuotes, salesBom, salesSo, salesGa, salesWo, masterProduct, masterHardware } from "@/db/schema";
 import { requireUser } from "@/lib/auth/current";
-import { QUOTE_KEYS, BOM_KEYS, SO_KEYS, GA_KEYS, WO_KEYS } from "@/lib/sales/columns";
+import { QUOTE_KEYS, BOM_KEYS, SO_KEYS, GA_KEYS, WO_KEYS, PRODUCT_KEYS, HARDWARE_KEYS } from "@/lib/sales/columns";
 
-export type SaleKind = "quote" | "bom" | "so" | "ga" | "wo";
+export type SaleKind = "quote" | "bom" | "so" | "ga" | "wo" | "product" | "hardware";
 
-/** One registry entry per workflow module. Adding a module = one line here. */
+/** One registry entry per workflow/master module. Adding one = one line here. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const REGISTRY: Record<SaleKind, { table: any; keys: string[] }> = {
   quote: { table: salesQuotes, keys: QUOTE_KEYS },
@@ -16,6 +16,8 @@ const REGISTRY: Record<SaleKind, { table: any; keys: string[] }> = {
   so: { table: salesSo, keys: SO_KEYS },
   ga: { table: salesGa, keys: GA_KEYS },
   wo: { table: salesWo, keys: WO_KEYS },
+  product: { table: masterProduct, keys: PRODUCT_KEYS },
+  hardware: { table: masterHardware, keys: HARDWARE_KEYS },
 };
 
 export type SalesRow = Record<string, string | number | boolean | null> & { id: string };

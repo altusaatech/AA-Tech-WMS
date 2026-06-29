@@ -237,6 +237,43 @@ export const salesWo = pgTable(
   (t) => [index("sales_wo_so_idx").on(t.ourSoNo)],
 );
 
+export const masterProduct = pgTable(
+  "master_product",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    srNo: integer("sr_no").generatedAlwaysAsIdentity(),
+    fgGroup: text("fg_group"),
+    typeOfFinishedGood: text("type_of_finished_good"),
+    uom: text("uom"),
+    specification: text("specification"),
+    insulation: text("insulation"),
+    sellingPrice: numeric("selling_price"),
+    remarks: text("remarks"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("master_product_group_idx").on(t.fgGroup)],
+);
+
+export const masterHardware = pgTable(
+  "master_hardware",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    srNo: integer("sr_no").generatedAlwaysAsIdentity(),
+    hardwareType: text("hardware_type"),
+    make: text("make"),
+    model: text("model"),
+    description: text("description"),
+    uom: text("uom"),
+    buyingRate: numeric("buying_rate"),
+    sellingRate: numeric("selling_rate"),
+    image: text("image"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("master_hardware_type_idx").on(t.hardwareType)],
+);
+
 export const employees = pgTable("employees", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),

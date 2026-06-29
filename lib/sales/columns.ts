@@ -158,8 +158,35 @@ export const WO_COLUMNS: SalesColDef[] = [
   { key: "boStatus", label: "BO Status", type: "text", width: 130 },
 ];
 
+// ── Masters: Product ───────────────────────────────────────────
+export const PRODUCT_COLUMNS: SalesColDef[] = [
+  { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
+  { key: "fgGroup", label: "FG Group", type: "text", width: 130 },
+  { key: "typeOfFinishedGood", label: "Type of Finished Good", type: "text", required: true, width: 230 },
+  { key: "uom", label: "UOM", type: "select", options: ["SQmt", "Nos", "Set", "Mtr", "Kg", "Lot"], width: 100 },
+  { key: "specification", label: "Specification", type: "text", width: 280 },
+  { key: "insulation", label: "Insulation", type: "select", options: ["Honeycomb", "Mineral Wool", "PUF", "Rockwool", "None"], width: 140 },
+  { key: "sellingPrice", label: "Selling Price", type: "number", width: 120 },
+  { key: "remarks", label: "Remarks", type: "text", width: 200 },
+];
+
+// ── Masters: Hardware ──────────────────────────────────────────
+export const HARDWARE_COLUMNS: SalesColDef[] = [
+  { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
+  { key: "hardwareType", label: "Hardware Type", type: "text", required: true, width: 180 },
+  { key: "make", label: "Make", type: "text", width: 130 },
+  { key: "model", label: "Model", type: "text", width: 150 },
+  { key: "description", label: "Description", type: "text", width: 280 },
+  { key: "uom", label: "UOM", type: "select", options: ["Nos", "Set", "Pair", "Mtr", "Kg", "Lot"], width: 100 },
+  { key: "buyingRate", label: "Buying Rate", type: "number", width: 120 },
+  { key: "sellingRate", label: "Selling Rate", type: "number", width: 120 },
+  { key: "image", label: "Image", type: "url", width: 120 },
+];
+
 export const QUOTE_KEYS = QUOTE_COLUMNS.map((c) => c.key);
 export const BOM_KEYS = BOM_COLUMNS.map((c) => c.key);
 export const SO_KEYS = SO_COLUMNS.map((c) => c.key);
 export const GA_KEYS = GA_COLUMNS.map((c) => c.key);
 export const WO_KEYS = WO_COLUMNS.map((c) => c.key);
+export const PRODUCT_KEYS = PRODUCT_COLUMNS.map((c) => c.key);
+export const HARDWARE_KEYS = HARDWARE_COLUMNS.map((c) => c.key);
