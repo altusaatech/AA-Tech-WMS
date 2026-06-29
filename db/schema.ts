@@ -274,6 +274,20 @@ export const masterHardware = pgTable(
   (t) => [index("master_hardware_type_idx").on(t.hardwareType)],
 );
 
+export const quotations = pgTable("quotations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  offerNo: text("offer_no"),
+  quoteDate: date("quote_date"),
+  project: text("project"),
+  customer: text("customer"),
+  subject: text("subject"),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  lines: jsonb("lines").$type<any[]>().notNull().default([]),
+  notes: jsonb("notes").$type<string[]>().notNull().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const employees = pgTable("employees", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),

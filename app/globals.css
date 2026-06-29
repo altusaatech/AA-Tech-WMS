@@ -162,6 +162,15 @@
   .hero-anim { animation: none !important; }
 }
 
+/* Print isolation — when printing a quotation, hide the whole app and show
+   only the .q-print container, laid out for A4 landscape. */
+@media print {
+  @page { size: A4 landscape; margin: 8mm; }
+  body * { visibility: hidden !important; }
+  .q-print, .q-print * { visibility: visible !important; }
+  .q-print { position: absolute !important; left: 0; top: 0; width: 100%; }
+}
+
 /* Thin, elegant, brand-tinted scrollbar for capped scroll containers
    (e.g. the Status-by-Doer 5-row viewport). */
 .thin-scroll {
