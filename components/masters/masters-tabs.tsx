@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { Database, Package, Wrench, Plus, RefreshCw, type LucideIcon } from "lucide-react";
+import { Database, Package, Wrench, Plus, RefreshCw, Receipt, ArrowRight, type LucideIcon } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { PageHero } from "@/components/layout/page-hero";
 import { SalesDataGrid } from "@/components/sales/sales-grid";
@@ -115,6 +117,16 @@ export function MastersTabs({
         title="Masters"
         subtitle="Product & Hardware master catalogues — the reference data the whole system reuses."
         Icon={Database}
+        actions={
+          <Link
+            href={"/quotation" as Route}
+            className="group inline-flex h-11 items-center gap-2 rounded-xl px-5 text-[14px] font-extrabold text-white shadow-lg transition-all hover:-translate-y-0.5"
+            style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)", boxShadow: "0 14px 30px -14px rgba(1,128,207,0.6)" }}
+          >
+            <Receipt size={16} strokeWidth={2.4} /> Go to Quotation
+            <ArrowRight size={15} strokeWidth={2.6} className="transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        }
         stats={[
           { label: "Products", value: rowsByKind.product.length, icon: Package, from: "#0180cf", to: "#0069b3" },
           { label: "Hardware", value: rowsByKind.hardware.length, icon: Wrench, from: "#63b81e", to: "#0069b3" },
