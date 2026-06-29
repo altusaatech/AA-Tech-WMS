@@ -81,14 +81,13 @@ export function MastersTabs({
     setModalOpen(true);
   }
   function onSaved(saved: SalesRow, opts: { close: boolean }) {
-    const wasUpdate = rowsByKind[active].some((r) => r.id === saved.id);
     setRowsByKind((prev) => {
       const list = prev[active];
       const i = list.findIndex((r) => r.id === saved.id);
       const next = i >= 0 ? list.map((r) => (r.id === saved.id ? saved : r)) : [...list, saved];
       return { ...prev, [active]: next };
     });
-    fireToast({ message: wasUpdate ? "Changes Saved" : `${tab.label} added`, type: "success" });
+    fireToast({ message: "Changes Saved", type: "success" });
     if (opts.close) setModalOpen(false);
   }
   function onDeleted(id: string) {
