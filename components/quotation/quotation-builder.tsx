@@ -321,26 +321,37 @@ function QuotationPrint({
   notes: string[];
   totals: ReturnType<typeof computeTotals>;
 }) {
-  const th = "border border-slate-400 px-1 py-1 text-center font-bold";
+  const th = "border border-[#0a5a93] px-1 py-1 text-center font-bold text-white";
   const td = "border border-slate-300 px-1 py-1 text-center";
   return (
     <div className="q-print hidden bg-white text-slate-900 print:block" style={{ fontSize: 8 }}>
-      {/* header */}
-      <div className="text-center">
-        <div style={{ fontSize: 15, fontWeight: 800 }}>ANANTA AVINYA TECH LLP</div>
-        <div style={{ fontSize: 11, fontWeight: 600 }}>{header.subject || "Quotation"}</div>
+      {/* ── AA Tech branded header ── */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "3px solid #0180cf", paddingBottom: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="/logo-mark.png?v=3" alt="" style={{ height: 44, width: "auto" }} />
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-0.02em", color: "#0a0a0a" }}>Anant Avinya Technologies</div>
+            <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: "0.22em", color: "#63b81e" }}>SMART WAREHOUSE MANAGEMENT SYSTEM</div>
+          </div>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.04em", color: "#0069b3" }}>QUOTATION</div>
+          <div style={{ fontSize: 8.5, color: "#475569", fontWeight: 600 }}>{header.subject || "Supply of Clean Room Doors"}</div>
+        </div>
       </div>
-      <div className="mt-1 flex justify-between" style={{ fontSize: 9 }}>
-        <span><b>Offer No:</b> {header.offerNo || "—"}</span>
-        <span><b>Date:</b> {header.quoteDate || "—"}</span>
-        <span><b>Customer:</b> {header.customer || "—"}</span>
-        <span><b>Project:</b> {header.project || "—"}</span>
+
+      {/* meta band */}
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, background: "linear-gradient(90deg, #eef6fc, #eef7e6)", border: "1px solid #d7e7f3", borderRadius: 4, padding: "4px 10px", marginTop: 6, fontSize: 9 }}>
+        <span><b style={{ color: "#0069b3" }}>Offer No:</b> {header.offerNo || "—"}</span>
+        <span><b style={{ color: "#0069b3" }}>Date:</b> {header.quoteDate || "—"}</span>
+        <span><b style={{ color: "#0069b3" }}>Customer:</b> {header.customer || "—"}</span>
+        <span><b style={{ color: "#0069b3" }}>Project:</b> {header.project || "—"}</span>
       </div>
 
       {/* door table */}
       <table className="mt-2 w-full border-collapse" style={{ fontSize: 7 }}>
         <thead>
-          <tr style={{ background: "#e8f1fb" }}>
+          <tr style={{ background: "linear-gradient(180deg, #0180cf, #0069b3)" }}>
             <th className={th}>SR</th>
             <th className={th}>CODE</th>
             <th className={th}>TYPE</th>
@@ -405,7 +416,7 @@ function QuotationPrint({
           })}
         </tbody>
         <tfoot>
-          <tr>
+          <tr style={{ background: "#eef6fc" }}>
             <td className={td} colSpan={12 + HARDWARE_SLOTS.length + 4} style={{ textAlign: "right", fontWeight: 700 }}>Sub Total (Supply)</td>
             <td className={td} style={{ fontWeight: 800 }}>{inr(totals.subtotal)}</td>
           </tr>
@@ -417,18 +428,18 @@ function QuotationPrint({
             <td className={td} colSpan={12 + HARDWARE_SLOTS.length + 4} style={{ textAlign: "right" }}>SGST @ 9%</td>
             <td className={td}>{inr2(totals.sgst)}</td>
           </tr>
-          <tr style={{ background: "#e8f1fb" }}>
-            <td className={td} colSpan={12 + HARDWARE_SLOTS.length + 4} style={{ textAlign: "right", fontWeight: 800 }}>GRAND TOTAL (incl GST)</td>
-            <td className={td} style={{ fontWeight: 800 }}>{inr2(totals.grandTotal)}</td>
+          <tr style={{ background: "linear-gradient(90deg, #0069b3, #63b81e)" }}>
+            <td className="border border-[#0a5a93] px-1 py-1.5 text-white" colSpan={12 + HARDWARE_SLOTS.length + 4} style={{ textAlign: "right", fontWeight: 800, fontSize: 9.5 }}>GRAND TOTAL (incl GST)</td>
+            <td className="border border-[#0a5a93] px-1 py-1.5 text-center text-white" style={{ fontWeight: 800, fontSize: 9.5 }}>{inr2(totals.grandTotal)}</td>
           </tr>
         </tfoot>
       </table>
 
       {/* notes */}
       <div className="mt-3" style={{ fontSize: 8 }}>
-        <div style={{ fontWeight: 800 }}>NOTES &amp; TERMS:</div>
+        <div style={{ fontWeight: 800, color: "#0069b3", borderBottom: "1.5px solid #63b81e", display: "inline-block", paddingBottom: 1, marginBottom: 2 }}>NOTES &amp; TERMS</div>
         {notes.filter((n) => n.trim()).map((nt, i) => (
-          <div key={i}>{i + 1}. {nt}</div>
+          <div key={i} style={{ lineHeight: 1.5 }}>{i + 1}. {nt}</div>
         ))}
       </div>
 
@@ -436,6 +447,11 @@ function QuotationPrint({
       <div className="mt-8 flex justify-between" style={{ fontSize: 9 }}>
         <span>Prepared by: ________________</span>
         <span>Authorised Signatory: ________________</span>
+      </div>
+
+      {/* brand footer */}
+      <div style={{ marginTop: 10, borderTop: "2px solid #0180cf", paddingTop: 4, textAlign: "center", fontSize: 7.5, fontWeight: 700, letterSpacing: "0.1em", color: "#0069b3" }}>
+        ANANT AVINYA TECHNOLOGIES · POWERED BY ALTUS CORP
       </div>
     </div>
   );
