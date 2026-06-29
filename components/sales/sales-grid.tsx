@@ -17,6 +17,7 @@ import {
   X,
   Loader2,
   CheckCircle2,
+  Pencil,
 } from "lucide-react";
 import { deleteSalesRow, importSalesRows, type SaleKind, type SalesRow } from "@/app/(app)/sales/actions";
 import type { SalesColDef } from "@/lib/sales/columns";
@@ -351,15 +352,28 @@ export function SalesDataGrid({
                         <CellValue row={row} col={c} />
                       </td>
                     ))}
-                    <td className="sticky right-0 bg-inherit px-1 text-center">
-                      <button
-                        type="button"
-                        onClick={(e) => del(e, row.id)}
-                        className="rounded-lg p-1.5 text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                    <td className="sticky right-0 bg-inherit px-1.5">
+                      <div className="flex items-center justify-end gap-0.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(row);
+                          }}
+                          className="rounded-lg p-1.5 text-slate-400 transition-all hover:-translate-y-0.5 hover:bg-[#0180cf]/10 hover:text-[#0069b3]"
+                          title="Edit"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => del(e, row.id)}
+                          className="rounded-lg p-1.5 text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

@@ -13,6 +13,12 @@ export interface SalesColDef {
   options?: string[];
   /** Marks the field required in the entry form (client-side validation). */
   required?: boolean;
+  /** For `type: "select"` — also derive options from the distinct values
+   *  already present in the register (so the dropdown grows with the data). */
+  dynamic?: boolean;
+  /** For `type: "select"` — allow typing a value not in the option list
+   *  (free-entry searchable combobox). */
+  allowCustom?: boolean;
 }
 
 export const QUOTE_COLUMNS: SalesColDef[] = [
@@ -161,7 +167,7 @@ export const WO_COLUMNS: SalesColDef[] = [
 // ── Masters: Product ───────────────────────────────────────────
 export const PRODUCT_COLUMNS: SalesColDef[] = [
   { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
-  { key: "fgGroup", label: "FG Group", type: "text", width: 130 },
+  { key: "fgGroup", label: "FG Group", type: "select", options: ["Doors", "Fabrication", "Job Work"], dynamic: true, allowCustom: true, width: 130 },
   { key: "typeOfFinishedGood", label: "Type of Finished Good", type: "text", required: true, width: 230 },
   { key: "uom", label: "UOM", type: "select", options: ["SQmt", "Nos", "Set", "Mtr", "Kg", "Lot"], width: 100 },
   { key: "specification", label: "Specification", type: "text", width: 280 },
@@ -173,8 +179,8 @@ export const PRODUCT_COLUMNS: SalesColDef[] = [
 // ── Masters: Hardware ──────────────────────────────────────────
 export const HARDWARE_COLUMNS: SalesColDef[] = [
   { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
-  { key: "hardwareType", label: "Hardware Type", type: "text", required: true, width: 180 },
-  { key: "make", label: "Make", type: "text", width: 130 },
+  { key: "hardwareType", label: "Hardware Type", type: "select", required: true, dynamic: true, allowCustom: true, width: 180 },
+  { key: "make", label: "Make", type: "select", dynamic: true, allowCustom: true, options: ["Kich", "Magnum", "Dorset"], width: 130 },
   { key: "model", label: "Model", type: "text", width: 150 },
   { key: "description", label: "Description", type: "text", width: 280 },
   { key: "uom", label: "UOM", type: "select", options: ["Nos", "Set", "Pair", "Mtr", "Kg", "Lot"], width: 100 },

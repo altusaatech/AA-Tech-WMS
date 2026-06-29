@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Database, Package, Wrench, Plus, RefreshCw, type LucideIcon } from "lucide-react";
+import { fireToast } from "@/lib/toast";
 import { PageHero } from "@/components/layout/page-hero";
 import { SalesDataGrid } from "@/components/sales/sales-grid";
 import { SalesEntryModal } from "@/components/sales/sales-entry-modal";
@@ -75,16 +76,19 @@ export function MastersTabs({
     setModalOpen(true);
   }
   function openEdit(row: SalesRow) {
+    fireToast({ message: "You can now edit this record.", type: "info" });
     setModalRow(row);
     setModalOpen(true);
   }
   function onSaved(saved: SalesRow, opts: { close: boolean }) {
+    const wasUpdate = rowsByKind[active].some((r) => r.id === saved.id);
     setRowsByKind((prev) => {
       const list = prev[active];
       const i = list.findIndex((r) => r.id === saved.id);
       const next = i >= 0 ? list.map((r) => (r.id === saved.id ? saved : r)) : [...list, saved];
       return { ...prev, [active]: next };
     });
+    fireToast({ message: wasUpdate ? "Changes Saved" : `${tab.label} added`, type: "success" });
     if (opts.close) setModalOpen(false);
   }
   function onDeleted(id: string) {

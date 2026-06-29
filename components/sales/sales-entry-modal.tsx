@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import * as Popover from "@radix-ui/react-popover";
 import {
   X,
   Loader2,
@@ -21,6 +22,8 @@ import {
   ListChecks,
   Save,
   Plus,
+  Search,
+  Check,
   type LucideIcon,
   ClipboardList,
 } from "lucide-react";
@@ -201,6 +204,26 @@ function FormBody({
   const errorCount = Object.keys(errors).length;
   const isNew = !row;
 
+  // Build the option list for a select field: fixed options + (when dynamic)
+  // the distinct values already present in the register.
+  const optionsFor = React.useCallback(
+    (col: SalesColDef): string[] => {
+      const fixed = col.options ?? [];
+      if (!col.dynamic) return fixed;
+      const seen = new Set(fixed.map((o) => o.toLowerCase()));
+      const dyn: string[] = [];
+      for (const r of existingRows) {
+        const v = r[col.key];
+        if (typeof v === "string" && v.trim() && !seen.has(v.trim().toLowerCase())) {
+          seen.add(v.trim().toLowerCase());
+          dyn.push(v.trim());
+        }
+      }
+      return [...fixed, ...dyn.sort((a, b) => a.localeCompare(b))];
+    },
+    [existingRows],
+  );
+
   return (
     <>
       {/* ── header ── */}
@@ -231,6 +254,7 @@ function FormBody({
             value={vals[c.key] ?? ""}
             error={errors[c.key]}
             accent={to}
+            options={c.type === "select" ? optionsFor(c) : undefined}
             onChange={(v) => {
               setVals((s) => ({ ...s, [c.key]: v }));
               if (errors[c.key]) setErrors((e) => ({ ...e, [c.key]: "" }));
@@ -328,12 +352,14 @@ function Field({
   value,
   error,
   accent,
+  options,
   onChange,
 }: {
   col: SalesColDef;
   value: FieldVal;
   error?: string;
   accent: string;
+  options?: string[];
   onChange: (v: FieldVal) => void;
 }) {
   const id = `salesf-${col.key}`;
@@ -370,14 +396,15 @@ function Field({
             options={[{ v: "no", l: "No" }, { v: "yes", l: "Yes" }]}
           />
         ) : col.type === "select" ? (
-          <SelectBox
+          <SearchSelect
             id={id}
             value={typeof value === "string" ? value : ""}
-            onChange={(v) => onChange(v)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            options={options ?? []}
+            allowCustom={!!col.allowCustom}
+            accent={accent}
             ringStyle={ringStyle}
-            options={[{ v: "", l: "Select…" }, ...(col.options ?? []).map((o) => ({ v: o, l: o }))]}
+            onChange={(v) => onChange(v)}
+            onOpenChange={(o) => setFocused(o)}
           />
         ) : (
           <input
@@ -439,5 +466,114 @@ function SelectBox({
       </select>
       <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
     </>
+  );
+}
+
+/** Searchable, optionally free-entry dropdown (combobox). Portaled via Radix
+ *  Popover so it never clips inside the scrollable form. */
+function SearchSelect({
+  id,
+  value,
+  options,
+  allowCustom,
+  accent,
+  ringStyle,
+  onChange,
+  onOpenChange,
+}: {
+  id: string;
+  value: string;
+  options: string[];
+  allowCustom: boolean;
+  accent: string;
+  ringStyle: React.CSSProperties;
+  onChange: (v: string) => void;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? options.filter((o) => o.toLowerCase().includes(q)) : options;
+  }, [options, query]);
+  const canCreate =
+    allowCustom && query.trim().length > 0 && !options.some((o) => o.toLowerCase() === query.trim().toLowerCase());
+
+  function set(open: boolean) {
+    setOpen(open);
+    onOpenChange(open);
+    if (open) setQuery("");
+  }
+  function choose(v: string) {
+    onChange(v);
+    set(false);
+  }
+
+  return (
+    <Popover.Root open={open} onOpenChange={set}>
+      <Popover.Trigger asChild>
+        <button
+          type="button"
+          id={id}
+          className="flex h-11 w-full items-center justify-between rounded-xl border bg-white pl-10 pr-9 text-left text-[14px] shadow-sm outline-none transition-all"
+          style={ringStyle}
+        >
+          <span className={value ? "text-slate-800" : "text-slate-300"}>{value || "Select…"}</span>
+        </button>
+      </Popover.Trigger>
+      <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <Popover.Portal>
+        <Popover.Content
+          align="start"
+          sideOffset={6}
+          className="z-[260] w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-[0_20px_50px_-20px_rgba(0,40,80,0.4)] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+        >
+          <div className="relative mb-1.5">
+            <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search…"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-2.5 text-[13.5px] outline-none focus:border-[#0180cf]"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (filtered[0]) choose(filtered[0]);
+                  else if (canCreate) choose(query.trim());
+                }
+              }}
+            />
+          </div>
+          <div className="max-h-56 overflow-auto">
+            {filtered.map((o) => (
+              <button
+                key={o}
+                type="button"
+                onClick={() => choose(o)}
+                className="flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                <span className="truncate">{o}</span>
+                {value === o && <Check size={14} style={{ color: accent }} />}
+              </button>
+            ))}
+            {canCreate && (
+              <button
+                type="button"
+                onClick={() => choose(query.trim())}
+                className="flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] font-bold transition-colors hover:bg-slate-50"
+                style={{ color: accent }}
+              >
+                <Plus size={13} strokeWidth={2.6} /> Use “{query.trim()}”
+              </button>
+            )}
+            {filtered.length === 0 && !canCreate && (
+              <div className="px-2.5 py-4 text-center text-[13px] text-slate-400">No matches</div>
+            )}
+          </div>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }
