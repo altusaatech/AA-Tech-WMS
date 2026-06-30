@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { quotations } from "@/db/schema";
 import { requireUser } from "@/lib/auth/current";
-import type { DoorLine, QuotationHeader } from "@/lib/quotation/types";
+import type { DoorLine, QuotationHeader, PiMeta } from "@/lib/quotation/types";
 
 export async function createQuotation(): Promise<{ id: string }> {
   await requireUser();
@@ -17,6 +17,7 @@ export async function saveQuotation(
   header: QuotationHeader,
   lines: DoorLine[],
   notes: string[],
+  piMeta: PiMeta,
 ): Promise<{ ok: boolean }> {
   await requireUser();
   await db
@@ -29,6 +30,7 @@ export async function saveQuotation(
       subject: header.subject || null,
       lines,
       notes,
+      piMeta,
       updatedAt: new Date(),
     })
     .where(eq(quotations.id, id));

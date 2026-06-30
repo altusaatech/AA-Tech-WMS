@@ -312,6 +312,8 @@ export const quotations = pgTable("quotations", {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lines: jsonb("lines").$type<any[]>().notNull().default([]),
   notes: jsonb("notes").$type<string[]>().notNull().default([]),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  piMeta: jsonb("pi_meta").$type<Record<string, any>>().notNull().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

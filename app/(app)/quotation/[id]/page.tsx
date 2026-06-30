@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
 import { quotations, masterProduct, masterHardware } from "@/db/schema";
 import { QuotationBuilder } from "@/components/quotation/quotation-builder";
-import { DEFAULT_NOTES, DEFAULT_SUBJECT, type DoorLine } from "@/lib/quotation/types";
+import { DEFAULT_NOTES, DEFAULT_SUBJECT, DEFAULT_PI_META, type DoorLine, type PiMeta } from "@/lib/quotation/types";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +62,7 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
         lines: (q.lines ?? []) as DoorLine[],
         notes: q.notes && q.notes.length ? q.notes : DEFAULT_NOTES,
       }}
+      initialPiMeta={{ ...DEFAULT_PI_META, ...((q.piMeta ?? {}) as Partial<PiMeta>) }}
       productOptions={productOptions}
       hardwareDefaults={hardwareDefaults}
     />

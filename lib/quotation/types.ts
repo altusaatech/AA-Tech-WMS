@@ -24,6 +24,9 @@ export interface DoorLine {
   ratePerSqm: number; // ₹ / sq.m (door supply)
   installPerSqm: number; // ₹ / sq.m (installation)
   hardware: HardwareLine[];
+  // ── Proforma-Invoice specific (manual) ──
+  location?: string;
+  piInstall?: number; // flat ₹ installation per door (PI)
 }
 
 export interface QuotationHeader {
@@ -133,6 +136,84 @@ export function computeTotals(lines: DoorLine[]): QuoteTotals {
   const cgst = subtotal * (GST_RATE / 2);
   const sgst = subtotal * (GST_RATE / 2);
   return { subtotalSupply, subtotalInstall, subtotal, cgst, sgst, grandTotal: subtotal + cgst + sgst };
+}
+
+/* ── Proforma Invoice ───────────────────────────────────────── */
+
+export interface PiMeta {
+  customerAddress: string;
+  customerContact: string;
+  customerRefDate: string;
+  termsDelivery: string;
+  modeShipping: string;
+  termsPayment: string;
+  hsnCode: string;
+  freightNote: string;
+}
+
+export const DEFAULT_PI_META: PiMeta = {
+  customerAddress: "",
+  customerContact: "",
+  customerRefDate: "",
+  termsDelivery: "Within 3-4 weeks from the date of Technical & Commercial PO with Advance.",
+  modeShipping: "By road",
+  termsPayment: "60% Advance against Purchase Order, 40% against prior to dispatch.",
+  hsnCode: "73083000",
+  freightNote: "Extra to your a/c",
+};
+
+/** Company / seller details on the Proforma Invoice (edit here if they change). */
+export const COMPANY = {
+  name: "ANANT AVINYA TECHNOLOGIES LLP.",
+  address: ["A-299, S Central Road, MIDC Industrial Area,", "Near Antony Motors, Mahape,", "Navi Mumbai 400701, India"],
+  email: "sales@aatech.co.in",
+  web: "www.aatech.co.in",
+  gstNo: "27ACEFA9263B1ZJ",
+  panNo: "ACEFA9263B",
+  bank: { name: "HDFC Bank Ltd, Sion (East) Branch, Mumbai", acNo: "99995544554455", ifsc: "HDFC0000163", micr: "400240030" },
+};
+
+export interface PiLine {
+  rate: number; // per-unit door + hardware
+  install: number; // flat per door
+  amount: number; // qty × (rate + install)
+}
+export function computePiLine(d: DoorLine): PiLine {
+  const rate = computeDoor(d).doorHw;
+  const install = n(d.piInstall ?? 0);
+  const amount = (n(d.qty) || 0) * (rate + install);
+  return { rate, install, amount };
+}
+export function computePiTotals(lines: DoorLine[]): QuoteTotals & { totalQty: number } {
+  let subtotal = 0;
+  let totalQty = 0;
+  for (const d of lines) {
+    subtotal += computePiLine(d).amount;
+    totalQty += n(d.qty) || 0;
+  }
+  const cgst = subtotal * (GST_RATE / 2);
+  const sgst = subtotal * (GST_RATE / 2);
+  return { subtotalSupply: subtotal, subtotalInstall: 0, subtotal, cgst, sgst, grandTotal: subtotal + cgst + sgst, totalQty };
+}
+
+/** Indian rupee amount in words (e.g. "Rs. Five Lakhs ... Only"). */
+export function inrWords(num: number): string {
+  const n0 = Math.round(Number.isFinite(num) ? num : 0);
+  if (n0 === 0) return "Rs. Zero Only";
+  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+  const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+  const two = (x: number): string => (x < 20 ? ones[x]! : `${tens[Math.floor(x / 10)]}${x % 10 ? " " + ones[x % 10] : ""}`);
+  const three = (x: number): string => (x >= 100 ? `${ones[Math.floor(x / 100)]} Hundred${x % 100 ? " " + two(x % 100) : ""}` : two(x));
+  const crore = Math.floor(n0 / 10000000);
+  const lakh = Math.floor((n0 % 10000000) / 100000);
+  const thousand = Math.floor((n0 % 100000) / 1000);
+  const hundred = n0 % 1000;
+  let s = "";
+  if (crore) s += `${three(crore)} Crore `;
+  if (lakh) s += `${two(lakh)} Lakh${lakh > 1 ? "s" : ""} `;
+  if (thousand) s += `${two(thousand)} Thousand `;
+  if (hundred) s += `${three(hundred)} `;
+  return `Rs. ${s.trim()} Only`;
 }
 
 export const inr = (v: number) =>
