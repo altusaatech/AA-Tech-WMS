@@ -14,8 +14,8 @@ import {
   TrendingUp,
   ArrowRight,
   ChevronRight,
-  Layers,
   Receipt,
+  Search,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -133,11 +133,11 @@ export function SalesWorkspace({
   });
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalRow, setModalRow] = React.useState<SalesRow | null>(null);
+  const [hubQuery, setHubQuery] = React.useState("");
 
   const current = FORMS.find((f) => f.key === active)!;
   const rows = rowsByKind[active];
   const countOf = (k: Kind) => rowsByKind[k].length;
-  const totalEntries = Object.values(rowsByKind).reduce((n, list) => n + list.length, 0);
 
   function openForm(k: Kind) {
     setActive(k);
@@ -190,19 +190,36 @@ export function SalesWorkspace({
             title="AA-Tech Production System"
             subtitle="Pick a module — open its Form to add an entry, or its Register to view stored data."
             Icon={TrendingUp}
-            stats={[
-              { label: "Total entries", value: totalEntries, icon: Layers, from: "#0180cf", to: "#0069b3" },
-              { label: "Quote Status", value: rowsByKind.quote.length, icon: FileText, from: "#0180cf", to: "#63b81e" },
-              { label: "BOM Status", value: rowsByKind.bom.length, icon: ClipboardList, from: "#63b81e", to: "#0069b3" },
-              { label: "Work Orders", value: rowsByKind.wo.length, icon: Factory, from: "#0d9488", to: "#63b81e" },
-            ]}
+            actions={
+              <div className="relative">
+                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  value={hubQuery}
+                  onChange={(e) => setHubQuery(e.target.value)}
+                  placeholder="Search modules…"
+                  className="h-11 w-[240px] max-w-[55vw] rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-[13.5px] shadow-sm outline-none transition-all focus:border-[#0180cf] focus:ring-2 focus:ring-[#0180cf]/20"
+                />
+              </div>
+            }
           />
-          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {FORMS.map((f) => (
-              <WindowCard key={f.key} form={f} count={countOf(f.key)} onForm={() => openForm(f.key)} onRegister={() => openRegister(f.key)} />
-            ))}
-            <QuotationLinkCard />
-          </div>
+          {(() => {
+            const q = hubQuery.trim().toLowerCase();
+            const forms = q ? FORMS.filter((f) => f.label.toLowerCase().includes(q)) : FORMS;
+            const showQuote = !q || "quotation".includes(q);
+            const empty = forms.length === 0 && !showQuote;
+            return empty ? (
+              <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-16 text-center text-[14px] font-semibold text-slate-500 backdrop-blur">
+                No modules match “{hubQuery}”.
+              </div>
+            ) : (
+              <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {forms.map((f) => (
+                  <WindowCard key={f.key} form={f} count={countOf(f.key)} onForm={() => openForm(f.key)} onRegister={() => openRegister(f.key)} />
+                ))}
+                {showQuote && <QuotationLinkCard />}
+              </div>
+            );
+          })()}
         </>
       ) : (
         <div className="mt-5">
