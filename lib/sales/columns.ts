@@ -189,10 +189,33 @@ export const HARDWARE_COLUMNS: SalesColDef[] = [
   { key: "image", label: "Image", type: "url", width: 120 },
 ];
 
+// ── PI (Proforma Invoice) ──────────────────────────────────────
+export const PI_COLUMNS: SalesColDef[] = [
+  { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
+  { key: "piNo", label: "PI No", type: "text", required: true, width: 120 },
+  { key: "piDate", label: "PI Date", type: "date", width: 150 },
+  { key: "companyName", label: "Company Name", type: "text", width: 180 },
+  { key: "quoteRef", label: "Quote / Offer Ref", type: "text", width: 150 },
+  { key: "soNo", label: "SO No", type: "text", width: 120 },
+  { key: "poNo", label: "PO No", type: "text", width: 120 },
+  { key: "description", label: "Description", type: "text", width: 240 },
+  { key: "itemNameCode", label: "Item Name/Code", type: "text", width: 160 },
+  { key: "qty", label: "Qty", type: "number", width: 80 },
+  { key: "uom", label: "UOM", type: "select", options: ["Nos", "SQmt", "Set", "Mtr", "Kg", "Lot"], width: 100 },
+  { key: "rate", label: "Rate", type: "number", width: 100 },
+  { key: "basicAmount", label: "Basic Amount", type: "number", width: 130 },
+  { key: "gstPercent", label: "GST %", type: "number", width: 90 },
+  { key: "gstAmount", label: "GST Amount", type: "number", width: 120 },
+  { key: "totalAmount", label: "Total Amount", type: "number", width: 130 },
+  { key: "piStatus", label: "PI Status", type: "select", options: ["Draft", "Sent", "Accepted", "Cancelled"], width: 130 },
+  { key: "remarks", label: "Remarks", type: "text", width: 200 },
+];
+
 export const QUOTE_KEYS = QUOTE_COLUMNS.map((c) => c.key);
 export const BOM_KEYS = BOM_COLUMNS.map((c) => c.key);
 export const SO_KEYS = SO_COLUMNS.map((c) => c.key);
 export const GA_KEYS = GA_COLUMNS.map((c) => c.key);
 export const WO_KEYS = WO_COLUMNS.map((c) => c.key);
+export const PI_KEYS = PI_COLUMNS.map((c) => c.key);
 export const PRODUCT_KEYS = PRODUCT_COLUMNS.map((c) => c.key);
 export const HARDWARE_KEYS = HARDWARE_COLUMNS.map((c) => c.key);

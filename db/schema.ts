@@ -237,6 +237,34 @@ export const salesWo = pgTable(
   (t) => [index("sales_wo_so_idx").on(t.ourSoNo)],
 );
 
+export const salesPi = pgTable(
+  "sales_pi",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    srNo: integer("sr_no").generatedAlwaysAsIdentity(),
+    piNo: text("pi_no"),
+    piDate: date("pi_date"),
+    companyName: text("company_name"),
+    quoteRef: text("quote_ref"),
+    soNo: text("so_no"),
+    poNo: text("po_no"),
+    description: text("description"),
+    itemNameCode: text("item_name_code"),
+    qty: numeric("qty"),
+    uom: text("uom"),
+    rate: numeric("rate"),
+    basicAmount: numeric("basic_amount"),
+    gstPercent: numeric("gst_percent"),
+    gstAmount: numeric("gst_amount"),
+    totalAmount: numeric("total_amount"),
+    piStatus: text("pi_status"),
+    remarks: text("remarks"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("sales_pi_no_idx").on(t.piNo)],
+);
+
 export const masterProduct = pgTable(
   "master_product",
   {

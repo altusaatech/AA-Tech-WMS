@@ -7,6 +7,7 @@ import {
   BadgeCheck,
   ClipboardList,
   Factory,
+  ReceiptText,
   Plus,
   ArrowLeft,
   FilePlus2,
@@ -29,12 +30,13 @@ import {
   SO_COLUMNS,
   GA_COLUMNS,
   WO_COLUMNS,
+  PI_COLUMNS,
   type SalesColDef,
 } from "@/lib/sales/columns";
 import type { SaleKind, SalesRow } from "@/app/(app)/sales/actions";
 
 /** The five production-workflow kinds (subset of SaleKind, which also covers masters). */
-type Kind = Extract<SaleKind, "quote" | "bom" | "so" | "ga" | "wo">;
+type Kind = Extract<SaleKind, "quote" | "bom" | "so" | "ga" | "wo" | "pi">;
 
 interface FormDef {
   key: Kind;
@@ -105,6 +107,17 @@ const FORMS: FormDef[] = [
     columns: WO_COLUMNS,
     primaryKey: "workOrderNo",
   },
+  {
+    key: "pi",
+    label: "PI",
+    desc: "Proforma invoices — quote/SO to PI to dispatch",
+    icon: ReceiptText,
+    from: "#0069b3",
+    to: "#63b81e",
+    steps: ["Quote", "PI", "Sent"],
+    columns: PI_COLUMNS,
+    primaryKey: "piNo",
+  },
 ];
 
 type View = "hub" | "register";
@@ -115,12 +128,14 @@ export function SalesWorkspace({
   soRows,
   gaRows,
   woRows,
+  piRows,
 }: {
   quoteRows: SalesRow[];
   bomRows: SalesRow[];
   soRows: SalesRow[];
   gaRows: SalesRow[];
   woRows: SalesRow[];
+  piRows: SalesRow[];
 }) {
   const [view, setView] = React.useState<View>("hub");
   const [active, setActive] = React.useState<Kind>("quote");
@@ -130,6 +145,7 @@ export function SalesWorkspace({
     ga: gaRows,
     bom: bomRows,
     wo: woRows,
+    pi: piRows,
   });
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalRow, setModalRow] = React.useState<SalesRow | null>(null);
