@@ -70,19 +70,13 @@ export function MainNav({ activeTasks, isAdmin, variant }: Props) {
         href={"/sales" as Route}
         label="Production"
         Icon={FileSpreadsheet}
-        active={isActive("/sales")}
+        active={isActive("/sales") || isActive("/quotation")}
         variant={variant}      />
       <MainNavPill
         href={"/masters" as Route}
         label="Masters"
         Icon={Database}
         active={isActive("/masters")}
-        variant={variant}      />
-      <MainNavPill
-        href={"/quotation" as Route}
-        label="Quotation"
-        Icon={Receipt}
-        active={isActive("/quotation")}
         variant={variant}      />
       <MainNavPill
         href={"/attendance" as Route}
