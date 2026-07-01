@@ -10,12 +10,8 @@ import {
   newDoor,
   computeDoor,
   computeTotals,
-  computePiLine,
-  computePiTotals,
   inr,
   inr2,
-  inrWords,
-  COMPANY,
   HARDWARE_SLOTS,
   type DoorLine,
   type QuotationData,
@@ -66,20 +62,12 @@ export function QuotationBuilder({
   const [subject, setSubject] = React.useState(initial.subject);
   const [lines, setLines] = React.useState<DoorLine[]>(initial.lines);
   const [notes, setNotes] = React.useState<string[]>(initial.notes);
-  const [piMeta, setPiMeta] = React.useState<PiMeta>(initialPiMeta);
-  const [printMode, setPrintMode] = React.useState<"quotation" | "pi">("quotation");
+  // piMeta is edited on the dedicated PI page; kept here only so a quotation
+  // save doesn't wipe it.
+  const [piMeta] = React.useState<PiMeta>(initialPiMeta);
   const [saving, setSaving] = React.useState(false);
 
   const totals = computeTotals(lines);
-  const piTotals = computePiTotals(lines);
-
-  function setPi<K extends keyof PiMeta>(key: K, value: PiMeta[K]) {
-    setPiMeta((m) => ({ ...m, [key]: value }));
-  }
-  function printDoc(mode: "quotation" | "pi") {
-    setPrintMode(mode);
-    requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
-  }
 
   function addDoor() {
     const d = newDoor();
@@ -128,11 +116,11 @@ export function QuotationBuilder({
             <ArrowLeft size={15} strokeWidth={2.6} /> All quotations
           </button>
           <div className="flex items-center gap-2.5">
-            <button type="button" onClick={() => printDoc("quotation")} className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[13.5px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5">
+            <button type="button" onClick={() => window.print()} className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[13.5px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5">
               <Printer size={16} /> Print Quotation
             </button>
-            <button type="button" onClick={() => printDoc("pi")} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/8 px-4 text-[13.5px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5" title="Print Proforma Invoice">
-              <ReceiptText size={16} /> Print PI
+            <button type="button" onClick={() => router.push(`/quotation/${id}/pi` as Route)} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/8 px-4 text-[13.5px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5" title="Go to Proforma Invoice">
+              <ReceiptText size={16} /> Go to PI
             </button>
             <button type="button" onClick={save} disabled={saving} className="inline-flex h-10 items-center gap-2 rounded-xl px-5 text-[14px] font-extrabold text-white shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-60" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)", boxShadow: "0 12px 26px -10px rgba(1,128,207,0.6)" }}>
               {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} strokeWidth={2.4} />} Save
@@ -148,23 +136,6 @@ export function QuotationBuilder({
             <L label="Project"><input className={inp} value={project} onChange={(e) => setProject(e.target.value)} placeholder="Project name" /></L>
             <L label="Customer"><input className={inp} value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" /></L>
             <L label="Subject"><input className={inp} value={subject} onChange={(e) => setSubject(e.target.value)} /></L>
-          </div>
-
-          {/* Proforma Invoice details (used on the PI print) */}
-          <div className="mt-4 border-t border-slate-100 pt-4">
-            <div className="mb-2.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#0069b3]">
-              <ReceiptText size={13} /> Proforma Invoice details
-            </div>
-            <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-2 max-md:grid-cols-1">
-              <L label="Customer Address"><textarea rows={2} className={`${inp} h-auto resize-y py-1.5`} value={piMeta.customerAddress} onChange={(e) => setPi("customerAddress", e.target.value)} placeholder="Plot, area, city - PIN" /></L>
-              <L label="Customer Contact"><input className={inp} value={piMeta.customerContact} onChange={(e) => setPi("customerContact", e.target.value)} placeholder="Mr. Name - 90000 00000" /></L>
-              <L label="Customer Ref Date"><input type="date" className={inp} value={piMeta.customerRefDate} onChange={(e) => setPi("customerRefDate", e.target.value)} /></L>
-              <L label="HSN Code"><input className={inp} value={piMeta.hsnCode} onChange={(e) => setPi("hsnCode", e.target.value)} placeholder="73083000" /></L>
-              <L label="Terms of Delivery"><input className={inp} value={piMeta.termsDelivery} onChange={(e) => setPi("termsDelivery", e.target.value)} /></L>
-              <L label="Mode of Shipping"><input className={inp} value={piMeta.modeShipping} onChange={(e) => setPi("modeShipping", e.target.value)} /></L>
-              <L label="Terms of Payment"><input className={inp} value={piMeta.termsPayment} onChange={(e) => setPi("termsPayment", e.target.value)} /></L>
-              <L label="Freight"><input className={inp} value={piMeta.freightNote} onChange={(e) => setPi("freightNote", e.target.value)} placeholder="Extra to your a/c" /></L>
-            </div>
           </div>
         </div>
 
@@ -219,20 +190,13 @@ export function QuotationBuilder({
         </div>
       </main>
 
-      {/* ───────────── PRINT LAYOUTS ───────────── */}
+      {/* ───────────── PRINT LAYOUT ───────────── */}
       <QuotationPrint
-        active={printMode === "quotation"}
+        active
         header={{ offerNo, quoteDate, project, customer, subject }}
         lines={lines}
         notes={notes}
         totals={totals}
-      />
-      <PiPrint
-        active={printMode === "pi"}
-        header={{ offerNo, quoteDate, project, customer, subject }}
-        piMeta={piMeta}
-        lines={lines}
-        totals={piTotals}
       />
     </>
   );
@@ -311,8 +275,6 @@ function DoorCard({
           <L label="Qty"><input type="number" className={`${inp} text-right`} value={door.qty || ""} onChange={(e) => onPatch({ qty: Number(e.target.value) })} /></L>
           <L label="Rate ₹/sq.m"><input type="number" className={`${inp} text-right`} value={door.ratePerSqm || ""} onChange={(e) => onPatch({ ratePerSqm: Number(e.target.value) })} /></L>
           <L label="Install ₹/sq.m"><input type="number" className={`${inp} text-right`} value={door.installPerSqm || ""} onChange={(e) => onPatch({ installPerSqm: Number(e.target.value) })} /></L>
-          <L label="Location (PI)"><input className={inp} value={door.location ?? ""} onChange={(e) => onPatch({ location: e.target.value })} placeholder="Production Ground Floor" /></L>
-          <L label="PI Installation ₹ / door"><input type="number" className={`${inp} text-right`} value={door.piInstall || ""} onChange={(e) => onPatch({ piInstall: Number(e.target.value) })} placeholder="3500" /></L>
         </div>
 
         {/* computed strip */}
@@ -503,149 +465,6 @@ function QuotationPrint({
       <div style={{ marginTop: 10, borderTop: "2px solid #0180cf", paddingTop: 4, textAlign: "center", fontSize: 7.5, fontWeight: 700, letterSpacing: "0.1em", color: "#0069b3" }}>
         ANANT AVINYA TECHNOLOGIES · POWERED BY ALTUS CORP
       </div>
-    </div>
-  );
-}
-
-/* ── Proforma Invoice print (matches the Supply & Installation format) ── */
-function PiPrint({
-  active,
-  header,
-  piMeta,
-  lines,
-  totals,
-}: {
-  active: boolean;
-  header: { offerNo: string; quoteDate: string; project: string; customer: string; subject: string };
-  piMeta: PiMeta;
-  lines: DoorLine[];
-  totals: ReturnType<typeof computePiTotals>;
-}) {
-  const num = (v: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(v) ? v : 0));
-  const c = "border border-slate-500 px-1.5 py-1 align-top";
-  return (
-    <div className={`${active ? "q-print print:block" : ""} hidden bg-white text-slate-900`} style={{ fontSize: 9, maxWidth: "200mm", margin: "0 auto" }}>
-      {/* company header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <img src="/logo-mark.png?v=3" alt="" style={{ height: 50, width: "auto" }} />
-          <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.06, color: "#0a0a0a" }}>
-            ANANT AVINYA<br />TECHNOLOGIES LLP.
-          </div>
-        </div>
-        <div style={{ textAlign: "right", fontSize: 8, color: "#334155", lineHeight: 1.45 }}>
-          <b>Address:</b>
-          {COMPANY.address.map((a, i) => (
-            <div key={i}>{a}</div>
-          ))}
-          <div>E-mail: {COMPANY.email} · Web: {COMPANY.web}</div>
-        </div>
-      </div>
-
-      {/* title */}
-      <div style={{ border: "1.5px solid #0069b3", background: "#eef6fc", textAlign: "center", fontWeight: 800, fontSize: 13, padding: 4, color: "#0069b3" }}>
-        PROFORMA INVOICE — Supply &amp; Installation
-      </div>
-
-      {/* To + reference */}
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <tbody>
-          <tr>
-            <td className={c} style={{ width: "52%" }}>
-              <div style={{ fontSize: 8, color: "#64748b" }}>To,</div>
-              <div style={{ fontWeight: 700 }}>{header.customer || "—"}</div>
-              <div style={{ whiteSpace: "pre-line" }}>{piMeta.customerAddress}</div>
-              {piMeta.customerContact && <div>Contact: {piMeta.customerContact}</div>}
-            </td>
-            <td className={c} style={{ padding: 0 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <tbody>
-                  <tr><td className={c}>Offer Ref:</td><td className={c}><b>{header.offerNo || "—"}</b></td><td className={c}>Date:</td><td className={c}>{header.quoteDate || "—"}</td></tr>
-                  <tr><td className={c}>Customer Reference:</td><td className={c}>Email</td><td className={c}>Date:</td><td className={c}>{piMeta.customerRefDate || "—"}</td></tr>
-                  <tr><td className={c} colSpan={4}>Other Reference: -</td></tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td className={c}><b>Terms of Delivery</b><br />{piMeta.termsDelivery}</td>
-            <td className={c} style={{ padding: 0 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", height: "100%" }}>
-                <tbody>
-                  <tr>
-                    <td className={c} style={{ textAlign: "center", width: "40%" }}><b>MODE OF SHIPPING</b><br />{piMeta.modeShipping}</td>
-                    <td className={c}><b>Terms of payment</b><br />{piMeta.termsPayment}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      {/* line items */}
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ background: "linear-gradient(180deg,#0180cf,#0069b3)", color: "#fff" }}>
-            {["Sr No", "Door Code", "Location", "Door Width", "Door Height", "Description", "HSN Code", "UOM", "Qty Nos", "Rate ₹", "Install ₹", "Amount ₹"].map((h) => (
-              <th key={h} className={c} style={{ textAlign: "center", fontWeight: 700 }}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td className={c} colSpan={12} style={{ fontWeight: 700, textAlign: "center", background: "#f1f7fc" }}>SUPPLY &amp; INSTALLATION OF CLEAN ROOM DOORS WITH HARDWARE</td></tr>
-          {lines.map((d, i) => {
-            const p = computePiLine(d);
-            return (
-              <tr key={d.id}>
-                <td className={c} style={{ textAlign: "center" }}>{i + 1}</td>
-                <td className={c}>{d.doorCode}</td>
-                <td className={c}>{d.location || ""}</td>
-                <td className={c} style={{ textAlign: "center" }}>{d.width || ""}</td>
-                <td className={c} style={{ textAlign: "center" }}>{d.height || ""}</td>
-                <td className={c}>{d.doorType}</td>
-                <td className={c} style={{ textAlign: "center" }}>{piMeta.hsnCode}</td>
-                <td className={c} style={{ textAlign: "center" }}>Nos</td>
-                <td className={c} style={{ textAlign: "center" }}>{d.qty || ""}</td>
-                <td className={c} style={{ textAlign: "right" }}>{num(p.rate)}</td>
-                <td className={c} style={{ textAlign: "right" }}>{p.install ? num(p.install) : ""}</td>
-                <td className={c} style={{ textAlign: "right", fontWeight: 700 }}>{num(p.amount)}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      {/* bottom: bank/declaration + totals */}
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <tbody>
-          <tr>
-            <td className={c} style={{ width: "55%" }}>
-              <div><b>GST No.</b> {COMPANY.gstNo}</div>
-              <div><b>PAN No:</b> {COMPANY.panNo}</div>
-              <div style={{ marginTop: 4 }}><b>Amount in words:</b> {inrWords(totals.grandTotal)}</div>
-              <div style={{ marginTop: 4, fontSize: 8 }}><b>RTGS Details:</b> {COMPANY.bank.name}; A/c No. {COMPANY.bank.acNo}; IFSC {COMPANY.bank.ifsc}; MICR {COMPANY.bank.micr}</div>
-              <div style={{ marginTop: 4, fontSize: 7.5, color: "#475569" }}>Declaration: We declare that this Invoice shows the actual price of the goods described and that all particulars are true and correct.</div>
-            </td>
-            <td className={c} style={{ padding: 0 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <tbody>
-                  <tr><td className={c}><b>Total</b></td><td className={c} style={{ textAlign: "center" }}>{totals.totalQty}</td><td className={c} style={{ textAlign: "right", fontWeight: 700 }}>{num(totals.subtotal)}</td></tr>
-                  <tr><td className={c} colSpan={2}><b>Subtotal</b></td><td className={c} style={{ textAlign: "right", fontWeight: 700 }}>{num(totals.subtotal)}</td></tr>
-                  <tr><td className={c} colSpan={2}>CGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.cgst)}</td></tr>
-                  <tr><td className={c} colSpan={2}>SGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.sgst)}</td></tr>
-                  <tr><td className={c} colSpan={2}>Freight</td><td className={c} style={{ textAlign: "right", fontSize: 7.5 }}>{piMeta.freightNote}</td></tr>
-                  <tr style={{ background: "linear-gradient(90deg,#0069b3,#63b81e)" }}><td className={c} colSpan={2} style={{ color: "#fff", fontWeight: 800 }}>Grand Total</td><td className={c} style={{ textAlign: "right", color: "#fff", fontWeight: 800 }}>{num(totals.grandTotal)}</td></tr>
-                </tbody>
-              </table>
-              <div style={{ padding: "26px 8px 8px", textAlign: "right", fontSize: 8.5 }}>
-                <div>For {COMPANY.name}</div>
-                <div style={{ marginTop: 20 }}>Signature &amp; Date</div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   );
 }

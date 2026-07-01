@@ -30,7 +30,6 @@ import {
   SO_COLUMNS,
   GA_COLUMNS,
   WO_COLUMNS,
-  PI_COLUMNS,
   type SalesColDef,
 } from "@/lib/sales/columns";
 import type { SaleKind, SalesRow } from "@/app/(app)/sales/actions";
@@ -106,17 +105,6 @@ const FORMS: FormDef[] = [
     steps: ["BOM", "Pre-Production", "Work Order"],
     columns: WO_COLUMNS,
     primaryKey: "workOrderNo",
-  },
-  {
-    key: "pi",
-    label: "PI",
-    desc: "Proforma invoices — quote/SO to PI to dispatch",
-    icon: ReceiptText,
-    from: "#0069b3",
-    to: "#63b81e",
-    steps: ["Quote", "PI", "Sent"],
-    columns: PI_COLUMNS,
-    primaryKey: "piNo",
   },
 ];
 
@@ -222,7 +210,8 @@ export function SalesWorkspace({
             const q = hubQuery.trim().toLowerCase();
             const forms = q ? FORMS.filter((f) => f.label.toLowerCase().includes(q)) : FORMS;
             const showQuote = !q || "quotation".includes(q);
-            const empty = forms.length === 0 && !showQuote;
+            const showPi = !q || "pi".includes(q) || "proforma invoice".includes(q);
+            const empty = forms.length === 0 && !showQuote && !showPi;
             return empty ? (
               <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-16 text-center text-[14px] font-semibold text-slate-500 backdrop-blur">
                 No modules match “{hubQuery}”.
@@ -233,6 +222,7 @@ export function SalesWorkspace({
                   <WindowCard key={f.key} form={f} count={countOf(f.key)} onForm={() => openForm(f.key)} onRegister={() => openRegister(f.key)} />
                 ))}
                 {showQuote && <QuotationLinkCard />}
+                {showPi && <PiLinkCard />}
               </div>
             );
           })()}
@@ -442,6 +432,68 @@ function QuotationLinkCard() {
             style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}aa` }}
           >
             <Receipt size={16} strokeWidth={2.4} /> Open Quotations
+            <ArrowRight size={14} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ── PI launcher card (Proforma Invoice — made from a quotation) ── */
+function PiLinkCard() {
+  const from = "#0069b3";
+  const to = "#0180cf";
+  const steps = ["Quote", "Fill", "Print"];
+  return (
+    <Link href={"/quotation" as Route} className="group relative block">
+      <div
+        aria-hidden
+        className="absolute -inset-0.5 rounded-[26px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-50"
+        style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+      />
+      <div
+        className="relative overflow-hidden rounded-[24px] border border-white/70 bg-white/80 p-5 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1.5"
+        style={{ boxShadow: "0 14px 36px -20px rgba(15,40,80,0.30), 0 1px 4px rgba(15,23,42,0.04)" }}
+      >
+        <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
+        <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-2/3 -translate-x-[180%] -skew-x-12 bg-gradient-to-r from-transparent via-white/55 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
+        <ReceiptText className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={120} strokeWidth={1.4} style={{ opacity: 0.04 }} />
+
+        <div className="relative flex items-start gap-3.5">
+          <span
+            className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
+            style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}cc` }}
+          >
+            <ReceiptText size={24} strokeWidth={2.3} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[17px] font-black tracking-[-0.01em] text-slate-800">PI · Proforma Invoice</h3>
+            <p className="mt-0.5 line-clamp-1 text-[12px] text-slate-500">Made from a quotation — open a quote &amp; “Go to PI”</p>
+          </div>
+        </div>
+
+        <div className="relative mt-3.5 flex flex-wrap items-center gap-1">
+          {steps.map((s, i) => (
+            <React.Fragment key={s}>
+              <span className="rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.02em]" style={{ background: `color-mix(in srgb, ${to} 11%, transparent)`, color: from }}>
+                {s}
+              </span>
+              {i < steps.length - 1 && <ChevronRight size={11} className="text-slate-300" strokeWidth={3} />}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="relative mt-3 flex items-baseline gap-1.5">
+          <span className="text-[13px] font-semibold text-slate-400">Supply &amp; Installation invoice</span>
+        </div>
+
+        <div className="relative mt-4">
+          <span
+            className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
+            style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}aa` }}
+          >
+            <ReceiptText size={16} strokeWidth={2.4} /> Open PI
             <ArrowRight size={14} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-0.5" />
           </span>
         </div>
