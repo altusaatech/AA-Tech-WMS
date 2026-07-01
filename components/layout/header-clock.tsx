@@ -32,7 +32,6 @@ export function HeaderStatusBar({ moduleCount }: { moduleCount: number }) {
         }
         text="System Online"
       />
-      <Pill icon={<LayoutGrid size={13} strokeWidth={2.3} />} text={`${moduleCount} Modules Active`} />
     </div>
   );
 }
