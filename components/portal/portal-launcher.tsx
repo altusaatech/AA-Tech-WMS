@@ -10,16 +10,17 @@ import {
   LayoutDashboard,
   ShieldCheck,
   Database,
+  FileSpreadsheet,
+  FolderKanban,
+  CalendarCheck,
   ArrowRight,
   LogOut,
   Lock,
   type LucideIcon,
 } from "lucide-react";
-import { PortalBackground } from "./portal-background";
 
 interface WorkspaceDef {
   key: string;
-  label: string;
   title: string;
   desc: string;
   href: Route;
@@ -29,37 +30,63 @@ interface WorkspaceDef {
   adminOnly?: boolean;
 }
 
+// Vibrant workspace cards — AA Tech palette (blue / green / deep-blue / amber
+// accent), plus a neutral slate for the access-gated Admin card. No red.
 const WORKSPACES: WorkspaceDef[] = [
   {
     key: "wms",
-    label: "WMS",
-    title: "Warehouse Management",
-    desc: "The work dashboard — tasks, projects, production & the daily loop.",
+    title: "WMS",
+    desc: "The work dashboard — tasks, projects & the daily loop.",
     href: "/" as Route,
     icon: LayoutDashboard,
     from: "#0180cf",
     to: "#0069b3",
   },
   {
-    key: "admin",
-    label: "Admin",
-    title: "Administration",
-    desc: "Employees, departments, settings & the control room.",
-    href: "/admin" as Route,
-    icon: ShieldCheck,
-    from: "#0069b3",
-    to: "#0180cf",
-    adminOnly: true,
-  },
-  {
     key: "masters",
-    label: "Masters",
-    title: "Master Data",
-    desc: "Products, hardware, quotations & the reference catalogues.",
+    title: "Masters",
+    desc: "Products, hardware & the reference catalogues.",
     href: "/masters" as Route,
     icon: Database,
     from: "#63b81e",
-    to: "#0069b3",
+    to: "#4a9616",
+  },
+  {
+    key: "production",
+    title: "Production",
+    desc: "Quotations, BOMs, PI & the production floor.",
+    href: "/sales" as Route,
+    icon: FileSpreadsheet,
+    from: "#0069b3",
+    to: "#024a7d",
+  },
+  {
+    key: "projects",
+    title: "Projects",
+    desc: "Live projects, milestones & delivery tracking.",
+    href: "/projects" as Route,
+    icon: FolderKanban,
+    from: "#0ea5c4",
+    to: "#0784a5",
+  },
+  {
+    key: "attendance",
+    title: "Attendance",
+    desc: "Attendance, leave & the team roster.",
+    href: "/attendance" as Route,
+    icon: CalendarCheck,
+    from: "#f5a623",
+    to: "#e08608",
+  },
+  {
+    key: "admin",
+    title: "Admin",
+    desc: "Employees, departments & the control room.",
+    href: "/admin" as Route,
+    icon: ShieldCheck,
+    from: "#3b4859",
+    to: "#232d3b",
+    adminOnly: true,
   },
 ];
 
@@ -73,9 +100,6 @@ export function PortalLauncher({
   isAdmin: boolean;
 }) {
   const router = useRouter();
-  const [active, setActive] = React.useState("wms");
-  const ws = WORKSPACES.find((w) => w.key === active)!;
-  const locked = !!ws.adminOnly && !isAdmin;
 
   async function signOutNow() {
     try {
@@ -88,8 +112,13 @@ export function PortalLauncher({
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <PortalBackground />
+    <div className="relative min-h-screen overflow-hidden bg-[#f4f7fb]">
+      {/* soft ambient wash */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0" style={{ background: "linear-gradient(160deg, #f7fafd 0%, #eef4f9 55%, #eaf3ec 100%)" }} />
+        <div className="absolute -left-32 -top-40 h-[540px] w-[540px] rounded-full" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.12), transparent 70%)", filter: "blur(60px)" }} />
+        <div className="absolute -right-32 top-1/3 h-[560px] w-[560px] rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.10), transparent 70%)", filter: "blur(64px)" }} />
+      </div>
 
       {/* ── top bar ── */}
       <header className="relative z-10 flex items-center justify-between gap-4 px-8 py-5 max-md:px-4">
@@ -123,97 +152,85 @@ export function PortalLauncher({
       </header>
 
       {/* ── content ── */}
-      <main className="relative z-10 mx-auto flex max-w-[880px] flex-col items-center px-6 pb-20 pt-6 max-md:px-4">
-        <div className="w-full rounded-[32px] border border-white/70 bg-white/75 p-9 shadow-[0_50px_120px_-40px_rgba(12,38,74,0.5)] backdrop-blur-2xl max-md:p-6">
-          {/* hero */}
-          <div className="text-center">
-            <div className="text-[12px] font-black uppercase tracking-[0.2em] text-[#0180cf]">
-              A A Tech <span className="text-slate-300">/</span> Workspaces
-            </div>
-            <h1
-              className="mt-2 text-slate-900"
-              style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(30px, 4vw, 46px)", letterSpacing: "-0.03em", lineHeight: 1.03 }}
-            >
-              Welcome back, {firstName}
-            </h1>
-            <p className="mt-2 text-[15px] text-slate-500">Choose a workspace to get started</p>
+      <main className="relative z-10 mx-auto max-w-[1180px] px-8 pb-20 pt-4 max-md:px-4">
+        {/* welcome */}
+        <div className="mb-8 max-md:mb-6">
+          <div className="text-[12px] font-black uppercase tracking-[0.2em] text-[#0180cf]">
+            A A Tech <span className="text-slate-300">/</span> Workspaces
           </div>
+          <h1
+            className="mt-1.5 text-slate-900"
+            style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(28px, 3.6vw, 42px)", letterSpacing: "-0.03em", lineHeight: 1.03 }}
+          >
+            Welcome back, {firstName}
+          </h1>
+          <p className="mt-1.5 text-[15px] text-slate-500">Pick a workspace to jump into.</p>
+        </div>
 
-          {/* tabs */}
-          <div className="mt-7 flex justify-center">
-            <div className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white/70 p-1.5 shadow-sm backdrop-blur max-md:w-full max-md:flex-col max-md:items-stretch">
-              {WORKSPACES.map((w) => {
-                const on = w.key === active;
-                const Icon = w.icon;
-                return (
-                  <button
-                    key={w.key}
-                    type="button"
-                    onClick={() => setActive(w.key)}
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-[14.5px] font-extrabold transition-all max-md:w-full"
-                    style={
-                      on
-                        ? { background: `linear-gradient(135deg, ${w.from}, ${w.to})`, color: "#fff", boxShadow: `0 10px 24px -10px ${w.to}aa` }
-                        : { color: "#64748b" }
-                    }
-                  >
-                    <Icon size={17} strokeWidth={2.4} />
-                    {w.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* active workspace */}
-          <div className="mt-7">
-            <div
-              className="relative overflow-hidden rounded-[24px] border border-white/80 bg-white p-8 shadow-lg max-md:p-6"
-              style={{ boxShadow: "0 24px 60px -34px rgba(15,40,80,0.4)" }}
-            >
-              <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${ws.from}, ${ws.to})` }} />
-              <ws.icon className="pointer-events-none absolute -bottom-8 -right-8 text-slate-900" size={190} strokeWidth={1.2} style={{ opacity: 0.04 }} />
-
-              <div className="relative flex items-start gap-5 max-md:flex-col">
-                <span
-                  className="inline-flex size-16 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg"
-                  style={{ background: `linear-gradient(135deg, ${ws.from}, ${ws.to})`, boxShadow: `0 16px 34px -14px ${ws.to}cc` }}
-                >
-                  <ws.icon size={30} strokeWidth={2.2} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-[24px] font-black tracking-[-0.01em] text-slate-800">{ws.title}</h2>
-                    {locked && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.06em] text-slate-500">
-                        <Lock size={11} /> No access
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1.5 text-[14.5px] leading-relaxed text-slate-500">{ws.desc}</p>
-
-                  <div className="mt-6">
-                    {locked ? (
-                      <span className="inline-flex h-12 items-center gap-2 rounded-xl bg-slate-100 px-6 text-[14.5px] font-extrabold text-slate-400">
-                        <Lock size={16} /> No access
-                      </span>
-                    ) : (
-                      <Link
-                        href={ws.href}
-                        className="group/btn inline-flex h-12 items-center gap-2 rounded-xl px-6 text-[15px] font-extrabold text-white shadow-lg transition-all hover:-translate-y-0.5"
-                        style={{ background: `linear-gradient(135deg, ${ws.from}, ${ws.to})`, boxShadow: `0 16px 34px -14px ${ws.to}cc` }}
-                      >
-                        Enter workspace
-                        <ArrowRight size={17} strokeWidth={2.6} className="transition-transform group-hover/btn:translate-x-0.5" />
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* card grid */}
+        <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-2 max-sm:grid-cols-1">
+          {WORKSPACES.map((w) => (
+            <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} />
+          ))}
         </div>
       </main>
     </div>
+  );
+}
+
+function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
+  const Icon = ws.icon;
+
+  const inner = (
+    <div
+      className="group relative flex h-full min-h-[196px] flex-col overflow-hidden rounded-[22px] p-6 shadow-lg transition-all duration-200"
+      style={{
+        background: `linear-gradient(145deg, ${ws.from}, ${ws.to})`,
+        boxShadow: `0 22px 46px -22px ${ws.to}cc`,
+      }}
+    >
+      {/* decorative oversized icon */}
+      <Icon
+        aria-hidden
+        className="pointer-events-none absolute -bottom-6 -right-4 text-white transition-transform duration-300 group-hover:scale-105"
+        size={168}
+        strokeWidth={1.2}
+        style={{ opacity: 0.14 }}
+      />
+      {/* subtle sheen */}
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 42%)" }} />
+
+      {/* icon chip */}
+      <span className="relative inline-flex size-11 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm">
+        <Icon size={21} strokeWidth={2.3} />
+      </span>
+
+      {/* text */}
+      <div className="relative mt-auto pt-5">
+        <h2 className="text-[26px] font-black leading-none tracking-[-0.01em] text-white">{ws.title}</h2>
+        <p className="mt-2 max-w-[78%] text-[13.5px] font-medium leading-snug text-white/85">{ws.desc}</p>
+
+        <div className="mt-4">
+          {locked ? (
+            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-black/20 px-3.5 text-[13px] font-bold text-white/80 ring-1 ring-white/15">
+              <Lock size={13} strokeWidth={2.5} /> No access
+            </span>
+          ) : (
+            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-white px-4 text-[13.5px] font-extrabold shadow-sm transition-transform group-hover:translate-x-0.5" style={{ color: ws.to }}>
+              Enter workspace
+              <ArrowRight size={15} strokeWidth={2.7} />
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (locked) return inner;
+
+  return (
+    <Link href={ws.href} className="block transition-transform duration-200 hover:-translate-y-1">
+      {inner}
+    </Link>
   );
 }
