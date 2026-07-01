@@ -35,7 +35,7 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
   return (
     <section className="mt-8 mx-auto max-w-[1600px] px-12 max-md:px-4" aria-label="Task summary">
       <div
-        className="grid grid-cols-6 gap-4 max-xl:grid-cols-3 max-md:grid-cols-2"
+        className="grid grid-cols-6 gap-3 max-md:grid-cols-3 max-sm:grid-cols-2"
         role="list"
       >
         {ITEMS.map((item) => {
@@ -76,7 +76,7 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
                   aria-hidden
                   className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -translate-x-[200%] -skew-x-12 bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]"
                 />
-                <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3.5">
+                <div className="flex items-start justify-between gap-2 px-3.5 pt-3 pb-3">
                   <Link
                     href={item.href}
                     className="group/link min-w-0 flex-1 outline-none"
@@ -95,17 +95,17 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
                     </span>
                     <Counter
                       value={kpi.current}
-                      className="block tabular-nums leading-none mt-2.5 text-ink-strong"
+                      className="block tabular-nums leading-none mt-1.5 text-ink-strong"
                       style={{
                         fontFamily: "var(--font-display), system-ui, sans-serif",
                         fontWeight: 900,
-                        fontSize: 38,
+                        fontSize: 29,
                         letterSpacing: "-0.02em",
                       }}
                     />
                     <span
-                      className="mt-2 inline-flex items-center gap-1 tabular-nums font-extrabold"
-                      style={{ fontSize: 12.5, color: deltaColor }}
+                      className="mt-1.5 inline-flex items-center gap-1 tabular-nums font-extrabold"
+                      style={{ fontSize: 12, color: deltaColor }}
                     >
                       {arrow} {Math.abs(delta)}
                       <span className="font-semibold opacity-60">vs last</span>
@@ -117,7 +117,7 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
                     onClick={() => setExpanded((cur) => (cur === item.key ? null : item.key))}
                     aria-expanded={isOpen}
                     aria-label={isOpen ? `Collapse ${item.label} details` : `Expand ${item.label} details`}
-                    className="inline-flex size-7 shrink-0 items-center justify-center rounded-full transition-colors"
+                    className="inline-flex size-6 shrink-0 items-center justify-center rounded-full transition-colors"
                     style={{
                       color: isOpen ? "#fff" : `rgb(${neonDeep})`,
                       background: isOpen ? `rgb(${neonDeep})` : `color-mix(in srgb, rgb(${neon}) 14%, transparent)`,
