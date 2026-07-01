@@ -29,7 +29,7 @@ function firstString(v: string | string[] | undefined): string | undefined {
 export default async function LoginPage({ searchParams }: PageProps) {
   const me = await getCurrentEmployee();
   if (me && me.isActive) {
-    redirect("/" as Route);
+    redirect("/portal" as Route);
   }
 
   const sp = await searchParams;

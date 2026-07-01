@@ -61,7 +61,9 @@ async function exchangeIdTokenForSession(idToken: string): Promise<void> {
 export function LoginFormCanva() {
   const router = useRouter();
   const params = useSearchParams();
-  const requestedNext = params.get("next") || "/";
+  // After a plain sign-in, land on the workspace launcher (/portal). An
+  // explicit ?next (e.g. a deep link the user was bounced off of) is honored.
+  const requestedNext = params.get("next") || "/portal";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
