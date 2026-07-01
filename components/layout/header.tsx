@@ -87,11 +87,6 @@ export async function DashboardHeader({
                 >
                   Anant Avinya Technologies
                 </h1>
-                <div className="mt-1 flex items-center gap-3 max-md:hidden">
-                  <span aria-hidden className="h-px w-10" style={{ background: "linear-gradient(90deg, transparent, #0180cf)" }} />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-slate-400">Smart Warehouse Management System</span>
-                  <span aria-hidden className="h-px w-10" style={{ background: "linear-gradient(90deg, #63b81e, transparent)" }} />
-                </div>
                 <div className="mt-3.5 max-md:mt-2.5">
                   <HeaderStatusBar moduleCount={moduleCount} />
                 </div>
