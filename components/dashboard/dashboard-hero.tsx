@@ -61,7 +61,7 @@ export function DashboardHero({
   ];
 
   return (
-    <section className="mx-auto max-w-[1600px] px-8 max-md:px-4 mt-4">
+    <section className="mx-auto max-w-[1600px] px-12 max-md:px-4 mt-6">
       <div
         className="relative overflow-hidden rounded-[26px] border border-white/80 px-8 py-6 max-md:px-5 max-md:py-6"
         style={{

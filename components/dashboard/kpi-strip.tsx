@@ -33,7 +33,7 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
   const active = expanded ? ITEMS.find((i) => i.key === expanded) ?? null : null;
 
   return (
-    <section className="mt-10 mx-auto max-w-[1600px] px-12 max-md:px-4" aria-label="Task summary">
+    <section className="mt-8 mx-auto max-w-[1600px] px-12 max-md:px-4" aria-label="Task summary">
       <div
         className="grid grid-cols-6 gap-4 max-xl:grid-cols-3 max-md:grid-cols-2"
         role="list"

@@ -182,7 +182,7 @@ export function StatusTable({
 
   return (
     <section
-      className="mx-auto max-w-[1600px] px-12 max-md:px-4 mt-12"
+      className="mx-auto max-w-[1600px] px-12 max-md:px-4 mt-8"
       style={{
         opacity: 0,
         animation: "fadeUp 500ms ease-out 700ms forwards",
