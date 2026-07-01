@@ -113,43 +113,61 @@ export function PortalLauncher({
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#f4f7fb]">
-      {/* soft ambient wash */}
+      {/* pastel mesh backdrop */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0" style={{ background: "linear-gradient(160deg, #f7fafd 0%, #eef4f9 55%, #eaf3ec 100%)" }} />
-        <div className="absolute -left-32 -top-40 h-[540px] w-[540px] rounded-full" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.12), transparent 70%)", filter: "blur(60px)" }} />
-        <div className="absolute -right-32 top-1/3 h-[560px] w-[560px] rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.10), transparent 70%)", filter: "blur(64px)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(160deg, #eef5fc 0%, #f4f8fc 46%, #edf6e8 100%)" }} />
+        {/* bold pastel blobs */}
+        <div className="absolute -left-44 -top-48 h-[580px] w-[580px] rounded-full" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.20), transparent 66%)", filter: "blur(72px)" }} />
+        <div className="absolute -right-48 top-4 h-[540px] w-[540px] rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.18), transparent 66%)", filter: "blur(74px)" }} />
+        <div className="absolute bottom-[-200px] left-1/3 h-[600px] w-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(0,105,179,0.15), transparent 66%)", filter: "blur(80px)" }} />
+        <div className="absolute bottom-0 right-1/4 h-[380px] w-[380px] rounded-full" style={{ background: "radial-gradient(circle, rgba(245,166,35,0.12), transparent 68%)", filter: "blur(64px)" }} />
+        {/* fine dot grid */}
+        <div className="absolute inset-0 opacity-70" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(1,128,207,0.06) 1px, transparent 0)", backgroundSize: "30px 30px" }} />
       </div>
 
-      {/* ── top bar ── */}
-      <header className="relative z-10 flex items-center justify-between gap-4 px-8 py-5 max-md:px-4">
-        {/* AA Tech logo — left */}
-        <Link href={"/" as Route} className="flex items-center gap-2.5 shrink-0" aria-label="A A Tech">
-          <img src="/logo-mark.png?v=3" alt="A A Tech" className="h-11 w-auto" />
-          <span className="flex flex-col leading-none">
-            <span className="text-[15px] font-black tracking-[-0.01em] text-slate-800">A A Tech</span>
-            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#63b81e]">WMS</span>
-          </span>
-        </Link>
+      {/* ── top bar (floating glass) ── */}
+      <div className="relative z-10 px-6 pt-5 max-md:px-3">
+        <header
+          className="relative mx-auto flex max-w-[1180px] items-center justify-between gap-4 overflow-hidden rounded-[20px] border border-white/70 px-6 py-3.5 backdrop-blur-xl max-md:px-4"
+          style={{
+            background: "linear-gradient(120deg, rgba(1,128,207,0.12), rgba(255,255,255,0.86) 42%, rgba(99,184,30,0.13))",
+            boxShadow: "0 22px 48px -22px rgba(12,38,74,0.42), inset 0 1px 0 rgba(255,255,255,0.7)",
+          }}
+        >
+          {/* top accent strip */}
+          <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: "linear-gradient(90deg, #0180cf, #0069b3 45%, #63b81e)" }} />
 
-        {/* right cluster — user + Altus */}
-        <div className="flex items-center gap-3 max-md:gap-2">
-          <span className="text-[13.5px] text-slate-500 max-sm:hidden">
-            Hi, <b className="text-slate-800">{firstName}</b>
-          </span>
-          <button
-            type="button"
-            onClick={signOutNow}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
-          >
-            <LogOut size={14} strokeWidth={2.4} /> Sign out
-          </button>
-          <span className="h-8 w-px bg-slate-200 max-lg:hidden" aria-hidden />
-          <span className="flex flex-col items-center leading-none max-lg:hidden" aria-label="Powered by Altus Corp">
-            <span className="mb-0.5 text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400">Powered by</span>
-            <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-9 w-auto" />
-          </span>
-        </div>
-      </header>
+          {/* AA Tech logo — left */}
+          <Link href={"/" as Route} className="flex items-center gap-3 shrink-0" aria-label="A A Tech">
+            <span className="inline-flex items-center justify-center rounded-xl bg-white p-1.5 shadow-md ring-1 ring-black/5">
+              <img src="/logo-mark.png?v=3" alt="A A Tech" className="h-9 w-auto" />
+            </span>
+            <span className="flex flex-col leading-none">
+              <span className="text-[16px] font-black tracking-[-0.01em] text-slate-900">A A Tech</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#63b81e]">Workspaces</span>
+            </span>
+          </Link>
+
+          {/* right cluster — user + Altus */}
+          <div className="flex items-center gap-3 max-md:gap-2">
+            <span className="text-[13.5px] text-slate-600 max-sm:hidden">
+              Hi, <b className="text-slate-900">{firstName}</b>
+            </span>
+            <button
+              type="button"
+              onClick={signOutNow}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white/90 px-3.5 text-[13px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
+            >
+              <LogOut size={14} strokeWidth={2.4} /> Sign out
+            </button>
+            <span className="h-8 w-px bg-slate-300/70 max-lg:hidden" aria-hidden />
+            <span className="flex flex-col items-center leading-none max-lg:hidden" aria-label="Powered by Altus Corp">
+              <span className="mb-0.5 text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400">Powered by</span>
+              <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-9 w-auto" />
+            </span>
+          </div>
+        </header>
+      </div>
 
       {/* ── content ── */}
       <main className="relative z-10 mx-auto max-w-[1180px] px-8 pb-20 pt-4 max-md:px-4">
