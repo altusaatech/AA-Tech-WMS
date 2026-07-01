@@ -61,9 +61,9 @@ export function DashboardHero({
   ];
 
   return (
-    <section className="mx-auto max-w-[1600px] px-12 max-md:px-4 mt-6">
+    <section className="mx-auto max-w-[1600px] px-8 max-md:px-4 mt-4">
       <div
-        className="relative overflow-hidden rounded-[30px] border border-white/80 px-11 py-9 max-md:px-5 max-md:py-7"
+        className="relative overflow-hidden rounded-[26px] border border-white/80 px-8 py-6 max-md:px-5 max-md:py-6"
         style={{
           background: "linear-gradient(120deg, #e9f3fd 0%, #ffffff 46%, #edf7e3 100%)",
           boxShadow: "0 30px 70px -38px rgba(15,60,100,0.30), inset 0 1px 0 rgba(255,255,255,0.9)",
@@ -120,14 +120,14 @@ export function DashboardHero({
         </div>
 
         {/* metric strip */}
-        <div className="relative mt-7 grid grid-cols-4 gap-3 max-lg:grid-cols-2">
+        <div className="relative mt-5 grid grid-cols-4 gap-3 max-lg:grid-cols-2">
           {metrics.map((m) => (
             <HeroMetric key={m.label} metric={m} />
           ))}
         </div>
 
         {/* completion bar */}
-        <div className="relative mt-5">
+        <div className="relative mt-4">
           <div className="flex items-center justify-between text-[12px] font-semibold text-slate-500">
             <span className="inline-flex items-center gap-1.5">
               {overdue > 0 && (
@@ -156,19 +156,27 @@ export function DashboardHero({
 function HeroMetric({ metric }: { metric: Metric }) {
   const Icon = metric.icon;
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
       <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: `linear-gradient(90deg, ${metric.from}, ${metric.to})` }} />
       <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -translate-x-[200%] -skew-x-12 bg-gradient-to-r from-transparent via-slate-100/80 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
       <div className="relative flex items-center justify-between">
         <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">{metric.label}</span>
-        <span className="inline-flex size-7 items-center justify-center rounded-lg text-white shadow" style={{ background: `linear-gradient(135deg, ${metric.from}, ${metric.to})` }}>
-          <Icon size={15} strokeWidth={2.4} />
+        {/* small pastel chip — soft tint + colour icon + inner ring */}
+        <span
+          className="inline-flex size-6 items-center justify-center rounded-[9px] transition-transform group-hover:scale-110"
+          style={{
+            background: `linear-gradient(135deg, ${metric.from}26, ${metric.to}1a)`,
+            color: metric.from,
+            boxShadow: `inset 0 0 0 1.5px ${metric.from}3d`,
+          }}
+        >
+          <Icon size={14} strokeWidth={2.7} />
         </span>
       </div>
       <Counter
         value={metric.value}
-        className="relative mt-2.5 block tabular-nums text-slate-900"
-        style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(28px, 2.8vw, 38px)", letterSpacing: "-0.025em", lineHeight: 1 }}
+        className="relative mt-1.5 block tabular-nums text-slate-900"
+        style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(24px, 2.4vw, 32px)", letterSpacing: "-0.025em", lineHeight: 1 }}
       />
     </div>
   );
