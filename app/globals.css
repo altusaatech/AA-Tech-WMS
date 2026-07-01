@@ -1106,11 +1106,11 @@ html[data-density="compact"] body {
   background: linear-gradient(135deg, #63b81e, #0180cf);
   border: 1.5px solid transparent;
   color: #ffffff;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  padding: 12px 18px;
+  padding: 10px 14px;
   letter-spacing: 0.005em;
-  gap: 9px;
+  gap: 8px;
   line-height: 1;
   box-shadow: 0 4px 12px -5px rgba(1, 128, 207, 0.45);
 }

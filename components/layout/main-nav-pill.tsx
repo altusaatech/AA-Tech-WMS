@@ -39,9 +39,10 @@ export function MainNavPill({ href, label, Icon, active, count, badge, grow, var
       }
     >
       <Icon size={16} strokeWidth={2.2} />
-      {/* Labels collapse to icon-only below xl so the centred nav never
-          overflows into the logo / right cluster on a maximized laptop. */}
-      <span className={variant === "drawer" ? "" : "max-xl:hidden"}>{label}</span>
+      {/* Labels show on every desktop width (md+); the nav bar is horizontally
+          scrollable (see header.tsx), so a narrow window scrolls rather than
+          overflowing. Below md the whole desktop nav is hidden for the drawer. */}
+      <span className={variant === "drawer" ? "" : "max-md:hidden"}>{label}</span>
       {typeof count === "number" && (
         <span className={variant === "drawer" ? "nav-pill-count" : "nav-pill-count max-md:hidden"}>{formatCount(count)}</span>
       )}
