@@ -10,28 +10,34 @@ import {
   LayoutDashboard,
   ShieldCheck,
   Database,
-  FileSpreadsheet,
-  FolderKanban,
-  CalendarCheck,
+  Users,
   ArrowRight,
   LogOut,
   Lock,
   type LucideIcon,
 } from "lucide-react";
 
+interface ModuleLink {
+  label: string;
+  href: Route;
+}
+
 interface WorkspaceDef {
   key: string;
   title: string;
   desc: string;
-  href: Route;
   icon: LucideIcon;
   from: string;
   to: string;
+  /** Single-destination card (WMS, Admin). */
+  href?: Route;
+  /** Grouped card — shows one chip per module (Masters, Employees). */
+  modules?: ModuleLink[];
   adminOnly?: boolean;
 }
 
-// Vibrant workspace cards — AA Tech palette (blue / green / deep-blue / amber
-// accent), plus a neutral slate for the access-gated Admin card. No red.
+// Grouped workspace cards — AA Tech palette (blue / green / deep-blue), plus a
+// neutral slate for the access-gated Admin card. No red.
 const WORKSPACES: WorkspaceDef[] = [
   {
     key: "wms",
@@ -45,38 +51,27 @@ const WORKSPACES: WorkspaceDef[] = [
   {
     key: "masters",
     title: "Masters",
-    desc: "Products, hardware & the reference catalogues.",
-    href: "/masters" as Route,
+    desc: "Production floor, products, hardware & quotations.",
     icon: Database,
     from: "#63b81e",
     to: "#4a9616",
+    modules: [
+      { label: "Production", href: "/sales" as Route },
+      { label: "Masters", href: "/masters" as Route },
+    ],
   },
   {
-    key: "production",
-    title: "Production",
-    desc: "Quotations, BOMs, PI & the production floor.",
-    href: "/sales" as Route,
-    icon: FileSpreadsheet,
+    key: "employees",
+    title: "Employees",
+    desc: "Attendance, leave, salary & the team roster.",
+    icon: Users,
     from: "#0069b3",
     to: "#024a7d",
-  },
-  {
-    key: "projects",
-    title: "Projects",
-    desc: "Live projects, milestones & delivery tracking.",
-    href: "/projects" as Route,
-    icon: FolderKanban,
-    from: "#0ea5c4",
-    to: "#0784a5",
-  },
-  {
-    key: "attendance",
-    title: "Attendance",
-    desc: "Attendance, leave & the team roster.",
-    href: "/attendance" as Route,
-    icon: CalendarCheck,
-    from: "#f5a623",
-    to: "#e08608",
+    modules: [
+      { label: "Attendance", href: "/attendance" as Route },
+      { label: "Leave", href: "/attendance/leave" as Route },
+      { label: "Salary", href: "/salary" as Route },
+    ],
   },
   {
     key: "admin",
@@ -186,7 +181,7 @@ export function PortalLauncher({
         </div>
 
         {/* card grid */}
-        <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-2 max-sm:grid-cols-1">
+        <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
           {WORKSPACES.map((w) => (
             <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} />
           ))}
@@ -198,10 +193,11 @@ export function PortalLauncher({
 
 function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
   const Icon = ws.icon;
+  const grouped = !locked && !!ws.modules?.length;
 
   const inner = (
     <div
-      className="group relative flex h-full min-h-[196px] flex-col overflow-hidden rounded-[22px] p-6 shadow-lg transition-all duration-200"
+      className="group relative flex h-full min-h-[200px] flex-col overflow-hidden rounded-[22px] p-6 shadow-lg transition-all duration-200"
       style={{
         background: `linear-gradient(145deg, ${ws.from}, ${ws.to})`,
         boxShadow: `0 22px 46px -22px ${ws.to}cc`,
@@ -226,13 +222,25 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
       {/* text */}
       <div className="relative mt-auto pt-5">
         <h2 className="text-[26px] font-black leading-none tracking-[-0.01em] text-white">{ws.title}</h2>
-        <p className="mt-2 max-w-[78%] text-[13.5px] font-medium leading-snug text-white/85">{ws.desc}</p>
+        <p className="mt-2 max-w-[80%] text-[13.5px] font-medium leading-snug text-white/85">{ws.desc}</p>
 
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap gap-2">
           {locked ? (
             <span className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-black/20 px-3.5 text-[13px] font-bold text-white/80 ring-1 ring-white/15">
               <Lock size={13} strokeWidth={2.5} /> No access
             </span>
+          ) : grouped ? (
+            ws.modules!.map((m) => (
+              <Link
+                key={m.label}
+                href={m.href}
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-white px-3.5 text-[13px] font-extrabold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                style={{ color: ws.to }}
+              >
+                {m.label}
+                <ArrowRight size={14} strokeWidth={2.7} />
+              </Link>
+            ))
           ) : (
             <span className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-white px-4 text-[13.5px] font-extrabold shadow-sm transition-transform group-hover:translate-x-0.5" style={{ color: ws.to }}>
               Enter workspace
@@ -244,10 +252,12 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
     </div>
   );
 
-  if (locked) return inner;
+  // Grouped cards have several destinations, so the card itself isn't a link —
+  // each module chip links on its own. Single-destination cards wrap in a Link.
+  if (locked || grouped) return inner;
 
   return (
-    <Link href={ws.href} className="block transition-transform duration-200 hover:-translate-y-1">
+    <Link href={ws.href!} className="block transition-transform duration-200 hover:-translate-y-1">
       {inner}
     </Link>
   );
