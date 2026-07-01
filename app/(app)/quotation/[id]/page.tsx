@@ -50,6 +50,17 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
     hardwareDefaults[slot] = m ? Number(m.sellingRate) || 0 : 0;
   }
 
+  // Full hardware catalogue for the "Hardware Name" dropdown — deduped by name,
+  // each carrying its selling rate so picking a name auto-fills the rate.
+  const hardwareOptions = Array.from(
+    new Map(
+      hardware
+        .map((h) => ({ name: (h.hardwareType || h.description || "").trim(), rate: Number(h.sellingRate) || 0 }))
+        .filter((o) => o.name)
+        .map((o) => [o.name, o] as const),
+    ).values(),
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <QuotationBuilder
       id={id}
@@ -65,6 +76,7 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
       initialPiMeta={{ ...DEFAULT_PI_META, ...((q.piMeta ?? {}) as Partial<PiMeta>) }}
       productOptions={productOptions}
       hardwareDefaults={hardwareDefaults}
+      hardwareOptions={hardwareOptions}
     />
   );
 }

@@ -8,12 +8,14 @@ import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
 import {
   newDoor,
+  newHardware,
   computeDoor,
   computeTotals,
   inr,
   inr2,
   HARDWARE_SLOTS,
   type DoorLine,
+  type HardwareLine,
   type QuotationData,
   type PiMeta,
 } from "@/lib/quotation/types";
@@ -23,6 +25,11 @@ interface ProductOption {
   ratePerSqm: number;
   insulation: string;
   uom: string;
+}
+
+interface HardwareOption {
+  name: string;
+  rate: number;
 }
 
 const HW_ABBR: Record<string, string> = {
@@ -47,12 +54,14 @@ export function QuotationBuilder({
   initialPiMeta,
   productOptions,
   hardwareDefaults,
+  hardwareOptions,
 }: {
   id: string;
   initial: QuotationData;
   initialPiMeta: PiMeta;
   productOptions: ProductOption[];
   hardwareDefaults: Record<string, number>;
+  hardwareOptions: HardwareOption[];
 }) {
   const router = useRouter();
   const [offerNo, setOfferNo] = React.useState(initial.offerNo);
@@ -77,12 +86,18 @@ export function QuotationBuilder({
   function patchDoor(doorId: string, patch: Partial<DoorLine>) {
     setLines((p) => p.map((d) => (d.id === doorId ? { ...d, ...patch } : d)));
   }
-  function patchHw(doorId: string, idx: number, patch: { qty?: number; rate?: number }) {
+  function patchHw(doorId: string, idx: number, patch: Partial<HardwareLine>) {
     setLines((p) =>
       p.map((d) =>
         d.id === doorId ? { ...d, hardware: d.hardware.map((h, i) => (i === idx ? { ...h, ...patch } : h)) } : d,
       ),
     );
+  }
+  function addHw(doorId: string) {
+    setLines((p) => p.map((d) => (d.id === doorId ? { ...d, hardware: [...d.hardware, newHardware()] } : d)));
+  }
+  function removeHw(doorId: string, idx: number) {
+    setLines((p) => p.map((d) => (d.id === doorId ? { ...d, hardware: d.hardware.filter((_, i) => i !== idx) } : d)));
   }
   function removeDoor(doorId: string) {
     setLines((p) => p.filter((d) => d.id !== doorId));
@@ -147,9 +162,12 @@ export function QuotationBuilder({
               door={d}
               index={i}
               productOptions={productOptions}
+              hardwareOptions={hardwareOptions}
               onPickProduct={(t) => pickProduct(d.id, t)}
               onPatch={(p) => patchDoor(d.id, p)}
               onPatchHw={(idx, p) => patchHw(d.id, idx, p)}
+              onAddHw={() => addHw(d.id)}
+              onRemoveHw={(idx) => removeHw(d.id, idx)}
               onRemove={() => removeDoor(d.id)}
             />
           ))}
@@ -176,9 +194,12 @@ export function QuotationBuilder({
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm h-fit">
-            <h3 className="mb-3 text-[12px] font-black uppercase tracking-[0.1em] text-slate-400">Totals</h3>
-            <Row label="Sub Total (Supply)" value={inr(totals.subtotalSupply)} />
-            {totals.subtotalInstall > 0 && <Row label="Sub Total (Install)" value={inr(totals.subtotalInstall)} />}
+            <h3 className="mb-3 text-[12px] font-black uppercase tracking-[0.1em] text-slate-400">Grand Total</h3>
+            <Row label="Door Total (Qty × Unit Price)" value={inr(totals.doorSupply)} />
+            <Row label="Hardware Total" value={inr(totals.hardwareSupply)} />
+            <Row label="Installation Total" value={inr(totals.subtotalInstall)} />
+            <div className="my-2.5 h-px bg-slate-100" />
+            <Row label="Sub Total" value={inr(totals.subtotal)} />
             <Row label="CGST @ 9%" value={inr2(totals.cgst)} muted />
             <Row label="SGST @ 9%" value={inr2(totals.sgst)} muted />
             <div className="my-3 h-px bg-slate-100" />
@@ -226,20 +247,33 @@ function DoorCard({
   door,
   index,
   productOptions,
+  hardwareOptions,
   onPickProduct,
   onPatch,
   onPatchHw,
+  onAddHw,
+  onRemoveHw,
   onRemove,
 }: {
   door: DoorLine;
   index: number;
   productOptions: ProductOption[];
+  hardwareOptions: HardwareOption[];
   onPickProduct: (type: string) => void;
   onPatch: (p: Partial<DoorLine>) => void;
-  onPatchHw: (idx: number, p: { qty?: number; rate?: number }) => void;
+  onPatchHw: (idx: number, p: Partial<HardwareLine>) => void;
+  onAddHw: () => void;
+  onRemoveHw: (idx: number) => void;
   onRemove: () => void;
 }) {
   const c = computeDoor(door);
+  // Distinct hardware names for the dropdown — the common fixed slots plus
+  // everything in the hardware master.
+  const hwNames = React.useMemo(() => {
+    const set = new Set<string>(HARDWARE_SLOTS as readonly string[]);
+    for (const o of hardwareOptions) set.add(o.name);
+    return Array.from(set);
+  }, [hardwareOptions]);
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-[#f3f9fe] to-white px-4 py-2.5">
@@ -288,17 +322,42 @@ function DoorCard({
 
         {/* hardware grid */}
         <div className="mt-4">
-          <div className="mb-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-slate-400">Hardware (qty × rate)</div>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <div className="text-[11px] font-black uppercase tracking-[0.08em] text-slate-400">Hardware (name × qty × rate)</div>
+            <button type="button" onClick={onAddHw} className="inline-flex h-7 items-center gap-1 rounded-lg border border-[#0180cf]/40 bg-[#0180cf]/5 px-2.5 text-[12px] font-bold text-[#0069b3] transition-colors hover:bg-[#0180cf]/10">
+              <Plus size={13} strokeWidth={2.8} /> Add Item
+            </button>
+          </div>
+          {door.hardware.length === 0 && (
+            <div className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-[12.5px] text-slate-400">No hardware yet — click <b>Add Item</b> to add one.</div>
+          )}
           <div className="grid grid-cols-2 gap-2 max-md:grid-cols-1">
             {door.hardware.map((h, idx) => {
               const amt = (Number(h.qty) || 0) * (Number(h.rate) || 0);
+              const known = hwNames.includes(h.name);
               return (
-                <div key={h.name} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/60 px-2.5 py-1.5">
-                  <span className="flex-1 truncate text-[12.5px] font-semibold text-slate-600" title={h.name}>{HW_ABBR[h.name] ?? h.name}</span>
-                  <input type="number" className="h-8 w-16 rounded-md border border-slate-200 bg-white px-2 text-right text-[12.5px] outline-none focus:border-[#0180cf]" value={h.qty || ""} onChange={(e) => onPatchHw(idx, { qty: Number(e.target.value) })} placeholder="qty" />
+                <div key={idx} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/60 px-2.5 py-1.5">
+                  <select
+                    className="h-8 min-w-0 flex-1 cursor-pointer rounded-md border border-slate-200 bg-white px-1.5 text-[12.5px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
+                    value={h.name}
+                    title={h.name}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      const opt = hardwareOptions.find((o) => o.name === name);
+                      onPatchHw(idx, { name, ...(opt && opt.rate ? { rate: opt.rate } : {}) });
+                    }}
+                  >
+                    <option value="">Select hardware…</option>
+                    {!known && h.name && <option value={h.name}>{h.name}</option>}
+                    {hwNames.map((nm) => (
+                      <option key={nm} value={nm}>{nm}</option>
+                    ))}
+                  </select>
+                  <input type="number" className="h-8 w-14 shrink-0 rounded-md border border-slate-200 bg-white px-2 text-right text-[12.5px] outline-none focus:border-[#0180cf]" value={h.qty || ""} onChange={(e) => onPatchHw(idx, { qty: Number(e.target.value) })} placeholder="qty" />
                   <span className="text-[12px] text-slate-300">×</span>
-                  <input type="number" className="h-8 w-20 rounded-md border border-slate-200 bg-white px-2 text-right text-[12.5px] outline-none focus:border-[#0180cf]" value={h.rate || ""} onChange={(e) => onPatchHw(idx, { rate: Number(e.target.value) })} placeholder="rate" />
-                  <span className="w-20 shrink-0 text-right text-[12.5px] font-black tabular-nums text-slate-700">{inr(amt)}</span>
+                  <input type="number" className="h-8 w-20 shrink-0 rounded-md border border-slate-200 bg-white px-2 text-right text-[12.5px] outline-none focus:border-[#0180cf]" value={h.rate || ""} onChange={(e) => onPatchHw(idx, { rate: Number(e.target.value) })} placeholder="rate" />
+                  <span className="w-[70px] shrink-0 text-right text-[12.5px] font-black tabular-nums text-slate-700">{inr(amt)}</span>
+                  <button type="button" onClick={() => onRemoveHw(idx)} className="shrink-0 rounded-md p-1 text-slate-300 hover:bg-red-50 hover:text-red-600" title="Remove item"><Trash2 size={13} /></button>
                 </div>
               );
             })}
@@ -335,6 +394,10 @@ function QuotationPrint({
 }) {
   const th = "border border-[#0a5a93] px-1 py-1 text-center font-bold text-white";
   const td = "border border-slate-300 px-1 py-1 text-center";
+  // Columns left of the final TOTAL ₹ value column (for the footer colSpans):
+  // SR CODE TYPE FRAME SHUTTER INSUL FINISH CONFIG W H AREA QTY (12)
+  // + HARDWARE (1) + RATE/m² BASIC HW DOOR+HW (4) = 17
+  const FOOT_SPAN = 17;
   return (
     <div className={`${active ? "q-print print:block" : ""} hidden bg-white text-slate-900`} style={{ fontSize: 8 }}>
       {/* ── AA Tech branded header ── */}
@@ -376,9 +439,7 @@ function QuotationPrint({
             <th className={th}>H</th>
             <th className={th}>AREA</th>
             <th className={th}>QTY</th>
-            {HARDWARE_SLOTS.map((s) => (
-              <th key={s} className={th} style={{ width: 34 }}>{HW_ABBR[s] ?? s}</th>
-            ))}
+            <th className={th} style={{ minWidth: 90 }}>HARDWARE</th>
             <th className={th}>RATE/m²</th>
             <th className={th}>BASIC ₹</th>
             <th className={th}>HW ₹</th>
@@ -403,21 +464,15 @@ function QuotationPrint({
                 <td className={td}>{d.height || ""}</td>
                 <td className={td}>{c.area ? c.area.toFixed(3) : ""}</td>
                 <td className={td}>{d.qty || ""}</td>
-                {d.hardware.map((h, hi) => {
-                  const amt = (Number(h.qty) || 0) * (Number(h.rate) || 0);
-                  return (
-                    <td key={hi} className={td}>
-                      {amt > 0 ? (
-                        <>
-                          <div>{h.qty}</div>
-                          <div style={{ fontWeight: 700 }}>{inr(amt)}</div>
-                        </>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                  );
-                })}
+                <td className={td} style={{ textAlign: "left", lineHeight: 1.35 }}>
+                  {(() => {
+                    const items = d.hardware.filter((h) => (Number(h.qty) || 0) > 0);
+                    if (!items.length) return "-";
+                    return items.map((h, hi) => (
+                      <div key={hi}>{HW_ABBR[h.name] ?? h.name} ×{h.qty}</div>
+                    ));
+                  })()}
+                </td>
                 <td className={td}>{inr(d.ratePerSqm)}</td>
                 <td className={td}>{inr(c.basicSupply)}</td>
                 <td className={td}>{inr(c.hardwareTotal)}</td>
@@ -428,20 +483,34 @@ function QuotationPrint({
           })}
         </tbody>
         <tfoot>
+          <tr style={{ background: "#f6faf0" }}>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Door Total (Qty × Unit Price)</td>
+            <td className={td} style={{ fontWeight: 700 }}>{inr(totals.doorSupply)}</td>
+          </tr>
+          <tr style={{ background: "#f6faf0" }}>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Hardware Total</td>
+            <td className={td} style={{ fontWeight: 700 }}>{inr(totals.hardwareSupply)}</td>
+          </tr>
+          {totals.subtotalInstall > 0 && (
+            <tr style={{ background: "#f6faf0" }}>
+              <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Installation Total</td>
+              <td className={td} style={{ fontWeight: 700 }}>{inr(totals.subtotalInstall)}</td>
+            </tr>
+          )}
           <tr style={{ background: "#eef6fc" }}>
-            <td className={td} colSpan={12 + HARDWARE_SLOTS.length + 4} style={{ textAlign: "right", fontWeight: 700 }}>Sub Total (Supply)</td>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Sub Total</td>
             <td className={td} style={{ fontWeight: 800 }}>{inr(totals.subtotal)}</td>
           </tr>
           <tr>
-            <td className={td} colSpan={12 + HARDWARE_SLOTS.length + 4} style={{ textAlign: "right" }}>CGST @ 9%</td>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right" }}>CGST @ 9%</td>
             <td className={td}>{inr2(totals.cgst)}</td>
           </tr>
           <tr>
-            <td className={td} colSpan={12 + HARDWARE_SLOTS.length + 4} style={{ textAlign: "right" }}>SGST @ 9%</td>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right" }}>SGST @ 9%</td>
             <td className={td}>{inr2(totals.sgst)}</td>
           </tr>
           <tr style={{ background: "linear-gradient(90deg, #0069b3, #63b81e)" }}>
-            <td className="border border-[#0a5a93] px-1 py-1.5 text-white" colSpan={12 + HARDWARE_SLOTS.length + 4} style={{ textAlign: "right", fontWeight: 800, fontSize: 9.5 }}>GRAND TOTAL (incl GST)</td>
+            <td className="border border-[#0a5a93] px-1 py-1.5 text-white" colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 800, fontSize: 9.5 }}>GRAND TOTAL (incl GST)</td>
             <td className="border border-[#0a5a93] px-1 py-1.5 text-center text-white" style={{ fontWeight: 800, fontSize: 9.5 }}>{inr2(totals.grandTotal)}</td>
           </tr>
         </tfoot>

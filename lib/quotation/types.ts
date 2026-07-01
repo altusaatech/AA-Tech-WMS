@@ -69,6 +69,11 @@ export const DEFAULT_NOTES: string[] = [
 
 export const DEFAULT_SUBJECT = "Supply of Clean Room Doors";
 
+/** A blank hardware item — used by the builder's "Add Item" action. */
+export function newHardware(name = "", rate = 0): HardwareLine {
+  return { name, qty: 0, rate };
+}
+
 let _id = 0;
 export function newDoor(): DoorLine {
   _id += 1;
@@ -116,7 +121,9 @@ export function computeDoor(d: DoorLine): DoorCompute {
 }
 
 export interface QuoteTotals {
-  subtotalSupply: number;
+  doorSupply: number; // Σ (basic door supply × qty) — doors only, no hardware
+  hardwareSupply: number; // Σ (hardware × qty)
+  subtotalSupply: number; // doorSupply + hardwareSupply
   subtotalInstall: number;
   subtotal: number;
   cgst: number;
@@ -125,17 +132,22 @@ export interface QuoteTotals {
 }
 
 export function computeTotals(lines: DoorLine[]): QuoteTotals {
+  let doorSupply = 0;
+  let hardwareSupply = 0;
   let subtotalSupply = 0;
   let subtotalInstall = 0;
   for (const d of lines) {
     const c = computeDoor(d);
+    const qty = n(d.qty) || 0;
+    doorSupply += c.basicSupply * qty;
+    hardwareSupply += c.hardwareTotal * qty;
     subtotalSupply += c.totalSupply;
     subtotalInstall += c.installTotal;
   }
   const subtotal = subtotalSupply + subtotalInstall;
   const cgst = subtotal * (GST_RATE / 2);
   const sgst = subtotal * (GST_RATE / 2);
-  return { subtotalSupply, subtotalInstall, subtotal, cgst, sgst, grandTotal: subtotal + cgst + sgst };
+  return { doorSupply, hardwareSupply, subtotalSupply, subtotalInstall, subtotal, cgst, sgst, grandTotal: subtotal + cgst + sgst };
 }
 
 /* ── Proforma Invoice ───────────────────────────────────────── */
@@ -193,7 +205,7 @@ export function computePiTotals(lines: DoorLine[]): QuoteTotals & { totalQty: nu
   }
   const cgst = subtotal * (GST_RATE / 2);
   const sgst = subtotal * (GST_RATE / 2);
-  return { subtotalSupply: subtotal, subtotalInstall: 0, subtotal, cgst, sgst, grandTotal: subtotal + cgst + sgst, totalQty };
+  return { doorSupply: subtotal, hardwareSupply: 0, subtotalSupply: subtotal, subtotalInstall: 0, subtotal, cgst, sgst, grandTotal: subtotal + cgst + sgst, totalQty };
 }
 
 /** Indian rupee amount in words (e.g. "Rs. Five Lakhs ... Only"). */
