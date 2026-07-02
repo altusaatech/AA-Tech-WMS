@@ -177,6 +177,15 @@ export function StatusDistributionChart({
           index={rows.length + 1}
           href={"/tasks?status=not_approved" as Route}
         />
+        {/* Display-only card (no read/unread data source yet — renders at 0). */}
+        <SummaryTile
+          label="Not read"
+          value={0}
+          tone="slate"
+          denom={denom}
+          index={rows.length + 2}
+          href={"/tasks" as Route}
+        />
         {/* Archived view is admin-only — hide the jump-to-archive tile from doers. */}
         {isAdmin && (
           <SummaryTile
@@ -184,7 +193,7 @@ export function StatusDistributionChart({
             value={summary.archived}
             tone="slate"
             denom={denom}
-            index={rows.length + 2}
+            index={rows.length + 3}
             href={"/archived" as Route}
           />
         )}
