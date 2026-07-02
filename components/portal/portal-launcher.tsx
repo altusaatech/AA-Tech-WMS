@@ -112,51 +112,71 @@ export function PortalLauncher({
       {/* poster-wall backdrop — same drifting mosaic as the sign-in screen.
           z-0 (not -z-10) so it paints above the root background, below content. */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <LoginMosaic />
+        <LoginMosaic overlay="soft" />
       </div>
 
-      {/* ── top bar (floating glass) ── */}
-      <div className="relative z-10 px-6 pt-5 max-md:px-3">
-        <header
-          className="relative mx-auto flex max-w-[1180px] items-center justify-between gap-4 overflow-hidden rounded-[20px] border border-white/70 px-6 py-3.5 backdrop-blur-xl max-md:px-4"
-          style={{
-            background: "linear-gradient(120deg, rgba(1,128,207,0.12), rgba(255,255,255,0.86) 42%, rgba(99,184,30,0.13))",
-            boxShadow: "0 22px 48px -22px rgba(12,38,74,0.42), inset 0 1px 0 rgba(255,255,255,0.7)",
-          }}
-        >
-          {/* top accent strip */}
-          <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: "linear-gradient(90deg, #0180cf, #0069b3 45%, #63b81e)" }} />
+      {/* ── top bar (premium dark glass, matches the sign-in card) ── */}
+      <div className="relative z-10 px-6 pt-6 max-md:px-3">
+        <div className="relative mx-auto max-w-[1180px]">
+          {/* soft brand glow behind the bar */}
+          <div
+            aria-hidden
+            className="absolute -inset-[3px] rounded-[26px] opacity-45 blur-2xl"
+            style={{ background: "linear-gradient(110deg, #0180cf, #0a7d8a 52%, #63b81e)" }}
+          />
+          <header
+            className="relative flex items-center justify-between gap-4 overflow-hidden rounded-[22px] px-6 py-4 backdrop-blur-2xl max-md:px-4"
+            style={{
+              background: "linear-gradient(180deg, rgba(26,21,20,0.90), rgba(14,11,10,0.95))",
+              border: "1px solid rgba(255,255,255,0.10)",
+              boxShadow:
+                "0 34px 80px -34px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -40px 70px -55px rgba(1,128,207,0.5)",
+            }}
+          >
+            {/* animated top accent strip */}
+            <span
+              aria-hidden
+              className="absolute inset-x-0 top-0 h-[3px]"
+              style={{ background: "linear-gradient(90deg, #0180cf, #0069b3 45%, #63b81e)", backgroundSize: "200% auto", animation: "headerTextShimmer 7s linear infinite" }}
+            />
+            {/* faint dotted texture */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-50"
+              style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)", backgroundSize: "22px 22px" }}
+            />
 
-          {/* AA Tech logo — left */}
-          <Link href={"/" as Route} className="flex items-center gap-3 shrink-0" aria-label="A A Tech">
-            <span className="inline-flex items-center justify-center rounded-xl bg-white p-1.5 shadow-md ring-1 ring-black/5">
-              <img src="/logo-mark.png?v=3" alt="A A Tech" className="h-9 w-auto" />
-            </span>
-            <span className="flex flex-col leading-none">
-              <span className="text-[16px] font-black tracking-[-0.01em] text-slate-900">A A Tech</span>
-              <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#63b81e]">Workspaces</span>
-            </span>
-          </Link>
+            {/* AA Tech logo — left */}
+            <Link href={"/" as Route} className="group relative flex items-center gap-3 shrink-0" aria-label="A A Tech">
+              <span className="inline-flex items-center justify-center rounded-xl bg-white p-1.5 shadow-lg ring-1 ring-white/25 transition-transform group-hover:scale-105">
+                <img src="/logo-mark.png?v=3" alt="A A Tech" className="h-9 w-auto" />
+              </span>
+              <span className="flex flex-col leading-none">
+                <span className="text-[16px] font-black tracking-[-0.01em] text-white">A A Tech</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.24em] text-[#7ed957]">Workspaces</span>
+              </span>
+            </Link>
 
-          {/* right cluster — user + Altus */}
-          <div className="flex items-center gap-3 max-md:gap-2">
-            <span className="text-[13.5px] text-slate-600 max-sm:hidden">
-              Hi, <b className="text-slate-900">{firstName}</b>
-            </span>
-            <button
-              type="button"
-              onClick={signOutNow}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white/90 px-3.5 text-[13px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
-            >
-              <LogOut size={14} strokeWidth={2.4} /> Sign out
-            </button>
-            <span className="h-8 w-px bg-slate-300/70 max-lg:hidden" aria-hidden />
-            <span className="flex flex-col items-center leading-none max-lg:hidden" aria-label="Powered by Altus Corp">
-              <span className="mb-0.5 text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400">Powered by</span>
-              <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-9 w-auto" />
-            </span>
-          </div>
-        </header>
+            {/* right cluster — user + Altus */}
+            <div className="relative flex items-center gap-3.5 max-md:gap-2">
+              <span className="text-[13.5px] text-white/60 max-sm:hidden">
+                Hi, <b className="text-white">{firstName}</b>
+              </span>
+              <button
+                type="button"
+                onClick={signOutNow}
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-3.5 text-[13px] font-bold text-white/90 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/20 hover:text-white"
+              >
+                <LogOut size={14} strokeWidth={2.4} /> Sign out
+              </button>
+              <span className="h-8 w-px bg-white/15 max-lg:hidden" aria-hidden />
+              <span className="flex flex-col items-center leading-none max-lg:hidden" aria-label="Powered by Altus Corp">
+                <span className="mb-0.5 text-[8px] font-bold uppercase tracking-[0.18em] text-white/40">Powered by</span>
+                <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-9 w-auto" />
+              </span>
+            </div>
+          </header>
+        </div>
       </div>
 
       {/* ── content ── */}

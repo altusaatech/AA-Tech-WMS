@@ -15,10 +15,17 @@ const COLUMN_COUNT = 6;
 // never visibly "lines up". Deterministic (no random) so SSR is stable.
 const DRIFT = [62, 78, 54, 88, 70, 96]; // seconds
 
-export function LoginMosaic() {
+export function LoginMosaic({ overlay = "strong" }: { overlay?: "strong" | "soft" }) {
   const columns = Array.from({ length: COLUMN_COUNT }, (_, c) =>
     POSTER_TILES.filter((_, i) => i % COLUMN_COUNT === c),
   );
+
+  // "strong" keeps the busy wall readable behind the centred login card;
+  // "soft" (portal) lets more of the wall show through around the cards.
+  const dim =
+    overlay === "soft"
+      ? "radial-gradient(64% 68% at 50% 40%, rgba(8,5,4,0.68), rgba(8,5,4,0.46) 55%, rgba(8,5,4,0.30) 100%), linear-gradient(180deg, rgba(8,5,4,0.40), rgba(8,5,4,0.18) 30%, rgba(8,5,4,0.46))"
+      : "radial-gradient(58% 62% at 50% 50%, rgba(8,5,4,0.86), rgba(8,5,4,0.62) 55%, rgba(8,5,4,0.42) 100%), linear-gradient(180deg, rgba(8,5,4,0.55), rgba(8,5,4,0.30) 30%, rgba(8,5,4,0.55))";
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden" style={{ background: "#0c0807" }}>
@@ -69,13 +76,7 @@ export function LoginMosaic() {
       </div>
 
       {/* Dim + brand vignette so the card reads clearly over the busy wall. */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(58% 62% at 50% 50%, rgba(8,5,4,0.86), rgba(8,5,4,0.62) 55%, rgba(8,5,4,0.42) 100%), linear-gradient(180deg, rgba(8,5,4,0.55), rgba(8,5,4,0.30) 30%, rgba(8,5,4,0.55))",
-        }}
-      />
+      <div className="absolute inset-0" style={{ background: dim }} />
       <div
         className="absolute inset-0"
         style={{
