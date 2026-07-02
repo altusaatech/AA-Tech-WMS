@@ -61,9 +61,10 @@ async function exchangeIdTokenForSession(idToken: string): Promise<void> {
 export function LoginFormCanva() {
   const router = useRouter();
   const params = useSearchParams();
-  // After a plain sign-in, land on the workspace launcher (/portal). An
-  // explicit ?next (e.g. a deep link the user was bounced off of) is honored.
-  const requestedNext = params.get("next") || "/portal";
+  // Every sign-in must land on the workspace launcher (/portal), regardless
+  // of any ?next — the portal is the mandatory entry point after login.
+  void params;
+  const requestedNext = "/portal";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

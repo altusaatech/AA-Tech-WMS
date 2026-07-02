@@ -62,7 +62,9 @@ async function exchangeIdTokenForSession(idToken: string): Promise<void> {
 export function LoginFormGlass() {
   const router = useRouter();
   const params = useSearchParams();
-  const requestedNext = params.get("next") || "/";
+  // Every sign-in must land on the workspace launcher (/portal).
+  void params;
+  const requestedNext = "/portal";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
