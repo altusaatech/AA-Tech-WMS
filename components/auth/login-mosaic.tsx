@@ -24,7 +24,7 @@ export function LoginMosaic({ overlay = "strong" }: { overlay?: "strong" | "soft
   // "soft" (portal) lets more of the wall show through around the cards.
   const dim =
     overlay === "soft"
-      ? "radial-gradient(64% 68% at 50% 40%, rgba(8,5,4,0.68), rgba(8,5,4,0.46) 55%, rgba(8,5,4,0.30) 100%), linear-gradient(180deg, rgba(8,5,4,0.40), rgba(8,5,4,0.18) 30%, rgba(8,5,4,0.46))"
+      ? "radial-gradient(70% 74% at 50% 42%, rgba(6,4,3,0.90), rgba(6,4,3,0.78) 52%, rgba(6,4,3,0.66) 100%), linear-gradient(180deg, rgba(6,4,3,0.72), rgba(6,4,3,0.56) 30%, rgba(6,4,3,0.74))"
       : "radial-gradient(58% 62% at 50% 50%, rgba(8,5,4,0.86), rgba(8,5,4,0.62) 55%, rgba(8,5,4,0.42) 100%), linear-gradient(180deg, rgba(8,5,4,0.55), rgba(8,5,4,0.30) 30%, rgba(8,5,4,0.55))";
 
   return (
