@@ -16,6 +16,7 @@ import {
   Lock,
   type LucideIcon,
 } from "lucide-react";
+import { LoginMosaic } from "@/components/auth/login-mosaic";
 
 interface ModuleLink {
   label: string;
@@ -107,17 +108,10 @@ export function PortalLauncher({
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#f4f7fb]">
-      {/* pastel mesh backdrop */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0" style={{ background: "linear-gradient(160deg, #eef5fc 0%, #f4f8fc 46%, #edf6e8 100%)" }} />
-        {/* bold pastel blobs */}
-        <div className="absolute -left-44 -top-48 h-[580px] w-[580px] rounded-full" style={{ background: "radial-gradient(circle, rgba(1,128,207,0.20), transparent 66%)", filter: "blur(72px)" }} />
-        <div className="absolute -right-48 top-4 h-[540px] w-[540px] rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.18), transparent 66%)", filter: "blur(74px)" }} />
-        <div className="absolute bottom-[-200px] left-1/3 h-[600px] w-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(0,105,179,0.15), transparent 66%)", filter: "blur(80px)" }} />
-        <div className="absolute bottom-0 right-1/4 h-[380px] w-[380px] rounded-full" style={{ background: "radial-gradient(circle, rgba(245,166,35,0.12), transparent 68%)", filter: "blur(64px)" }} />
-        {/* fine dot grid */}
-        <div className="absolute inset-0 opacity-70" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(1,128,207,0.06) 1px, transparent 0)", backgroundSize: "30px 30px" }} />
+    <div className="relative min-h-screen overflow-hidden bg-[#0c0807]">
+      {/* poster-wall backdrop — same drifting mosaic as the sign-in screen */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <LoginMosaic />
       </div>
 
       {/* ── top bar (floating glass) ── */}
@@ -168,16 +162,16 @@ export function PortalLauncher({
       <main className="relative z-10 mx-auto max-w-[1180px] px-8 pb-20 pt-4 max-md:px-4">
         {/* welcome */}
         <div className="mb-8 max-md:mb-6">
-          <div className="text-[12px] font-black uppercase tracking-[0.2em] text-[#0180cf]">
-            A A Tech <span className="text-slate-300">/</span> Workspaces
+          <div className="text-[12px] font-black uppercase tracking-[0.2em] text-[#5cc0f5]">
+            A A Tech <span className="text-white/30">/</span> Workspaces
           </div>
           <h1
-            className="mt-1.5 text-slate-900"
-            style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(28px, 3.6vw, 42px)", letterSpacing: "-0.03em", lineHeight: 1.03 }}
+            className="mt-1.5 text-white"
+            style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(28px, 3.6vw, 42px)", letterSpacing: "-0.03em", lineHeight: 1.03, textShadow: "0 2px 24px rgba(0,0,0,0.5)" }}
           >
             Welcome back, {firstName}
           </h1>
-          <p className="mt-1.5 text-[15px] text-slate-500">Pick a workspace to jump into.</p>
+          <p className="mt-1.5 text-[15px] text-white/70">Pick a workspace to jump into.</p>
         </div>
 
         {/* card grid */}
