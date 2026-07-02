@@ -108,9 +108,10 @@ export function PortalLauncher({
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0c0807]">
-      {/* poster-wall backdrop — same drifting mosaic as the sign-in screen */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div className="relative isolate min-h-screen overflow-hidden bg-[#0c0807]">
+      {/* poster-wall backdrop — same drifting mosaic as the sign-in screen.
+          z-0 (not -z-10) so it paints above the root background, below content. */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <LoginMosaic />
       </div>
 
