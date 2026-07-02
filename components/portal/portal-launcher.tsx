@@ -195,11 +195,13 @@ export function PortalLauncher({
           <p className="mt-1.5 text-[15px] text-white/70">Pick a workspace to jump into.</p>
         </div>
 
-        {/* card grid */}
-        <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
-          {WORKSPACES.map((w) => (
-            <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} />
-          ))}
+        {/* card grid on a black stage (behind the cards only, not full page) */}
+        <div className="rounded-[30px] border border-white/10 bg-black/70 p-5 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] backdrop-blur-sm max-md:p-3.5">
+          <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
+            {WORKSPACES.map((w) => (
+              <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} />
+            ))}
+          </div>
         </div>
       </main>
     </div>
