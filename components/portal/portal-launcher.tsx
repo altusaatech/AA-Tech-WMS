@@ -170,9 +170,11 @@ export function PortalLauncher({
                 <LogOut size={14} strokeWidth={2.4} /> Sign out
               </button>
               <span className="h-8 w-px bg-white/15 max-lg:hidden" aria-hidden />
-              <span className="flex flex-col items-center leading-none max-lg:hidden" aria-label="Powered by Altus Corp">
-                <span className="mb-0.5 text-[8px] font-bold uppercase tracking-[0.18em] text-white/40">Powered by</span>
-                <img src="/altus-corp-logo.png" alt="Altus Corp" className="h-9 w-auto" />
+              <span className="flex flex-col items-center gap-1 leading-none max-lg:hidden" aria-label="Powered by Altus Corp">
+                <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-white/50">Powered by</span>
+                <span className="inline-flex items-center justify-center rounded-lg bg-white px-2 py-1 shadow-md ring-1 ring-white/25">
+                  <img src="/altus-corp-logo.png?v=2" alt="Altus Corp" className="h-7 w-auto" />
+                </span>
               </span>
             </div>
           </header>
