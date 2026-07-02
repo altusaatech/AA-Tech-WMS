@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { Database, Package, Wrench, Plus, RefreshCw, Receipt, ArrowRight, type LucideIcon } from "lucide-react";
+import { Database, Package, Wrench, Plus, RefreshCw, Receipt, Factory, ArrowRight, type LucideIcon } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { PageHero } from "@/components/layout/page-hero";
 import { SalesDataGrid } from "@/components/sales/sales-grid";
@@ -17,6 +17,8 @@ type MasterKind = "product" | "hardware";
 interface TabDef {
   key: MasterKind;
   label: string;
+  /** Singular noun for the "Add …" button. */
+  addLabel: string;
   desc: string;
   icon: LucideIcon;
   from: string;
@@ -28,7 +30,8 @@ interface TabDef {
 const TABS: TabDef[] = [
   {
     key: "product",
-    label: "Product",
+    label: "Products",
+    addLabel: "Product",
     desc: "Finished-goods catalogue — groups, specs, insulation & pricing",
     icon: Package,
     from: "#0180cf",
@@ -38,8 +41,9 @@ const TABS: TabDef[] = [
   },
   {
     key: "hardware",
-    label: "Hardware",
-    desc: "Hardware catalogue — make, model, rates & images",
+    label: "Masters",
+    addLabel: "Master",
+    desc: "Hardware & component masters — make, model, rates & images",
     icon: Wrench,
     from: "#63b81e",
     to: "#0069b3",
@@ -115,21 +119,30 @@ export function MastersTabs({
       <PageHero
         eyebrow="Master Data"
         title="Masters"
-        subtitle="Product & Hardware master catalogues — the reference data the whole system reuses."
+        subtitle="Masters & Products catalogues — the reference data the whole system reuses."
         Icon={Database}
         actions={
-          <Link
-            href={"/quotation" as Route}
-            className="group inline-flex h-11 items-center gap-2 rounded-xl px-5 text-[14px] font-extrabold text-white shadow-lg transition-all hover:-translate-y-0.5"
-            style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)", boxShadow: "0 14px 30px -14px rgba(1,128,207,0.6)" }}
-          >
-            <Receipt size={16} strokeWidth={2.4} /> Go to Quotation
-            <ArrowRight size={15} strokeWidth={2.6} className="transition-transform group-hover:translate-x-0.5" />
-          </Link>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href={"/sales" as Route}
+              className="group inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[14px] font-extrabold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-50"
+            >
+              <Factory size={16} strokeWidth={2.4} /> Go to Production
+              <ArrowRight size={15} strokeWidth={2.6} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href={"/quotation" as Route}
+              className="group inline-flex h-11 items-center gap-2 rounded-xl px-5 text-[14px] font-extrabold text-white shadow-lg transition-all hover:-translate-y-0.5"
+              style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)", boxShadow: "0 14px 30px -14px rgba(1,128,207,0.6)" }}
+            >
+              <Receipt size={16} strokeWidth={2.4} /> Go to Quotation
+              <ArrowRight size={15} strokeWidth={2.6} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
         }
         stats={[
           { label: "Products", value: rowsByKind.product.length, icon: Package, from: "#0180cf", to: "#0069b3" },
-          { label: "Hardware", value: rowsByKind.hardware.length, icon: Wrench, from: "#63b81e", to: "#0069b3" },
+          { label: "Masters", value: rowsByKind.hardware.length, icon: Wrench, from: "#63b81e", to: "#0069b3" },
         ]}
       />
 
@@ -170,7 +183,7 @@ export function MastersTabs({
             <tab.icon size={20} strokeWidth={2.3} />
           </span>
           <div>
-            <h2 className="text-[19px] font-black text-slate-800">{tab.label} Master</h2>
+            <h2 className="text-[19px] font-black text-slate-800">{tab.label}</h2>
             <p className="text-[12.5px] text-slate-500">{tab.desc}</p>
           </div>
         </div>
@@ -188,14 +201,14 @@ export function MastersTabs({
             className="inline-flex h-10 items-center gap-2 rounded-xl px-5 text-[14px] font-extrabold text-white shadow-lg transition-all hover:-translate-y-0.5"
             style={{ background: `linear-gradient(135deg, ${tab.from}, ${tab.to})`, boxShadow: `0 12px 26px -10px ${tab.to}99` }}
           >
-            <Plus size={17} strokeWidth={2.8} /> Add {tab.label}
+            <Plus size={17} strokeWidth={2.8} /> Add {tab.addLabel}
           </button>
         </div>
       </div>
 
       <SalesDataGrid
         kind={active as SaleKind}
-        title={`${tab.label} Master`}
+        title={tab.label}
         columns={tab.columns}
         rows={rows}
         onEdit={openEdit}
@@ -209,7 +222,7 @@ export function MastersTabs({
         open={modalOpen}
         onOpenChange={setModalOpen}
         kind={active as SaleKind}
-        title={`${tab.label} Master`}
+        title={tab.label}
         columns={tab.columns}
         row={modalRow}
         existingRows={rows}
