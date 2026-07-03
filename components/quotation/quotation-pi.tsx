@@ -202,9 +202,9 @@ function PiPrint({
   totals: ReturnType<typeof computePiTotals>;
 }) {
   const num = (v: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(v) ? v : 0));
-  const c = "border border-slate-500 px-1.5 py-1 align-top";
+  const c = "border border-slate-500 px-1 py-1 align-top break-words";
   return (
-    <div className="q-print hidden bg-white text-slate-900 print:block" style={{ fontSize: 9, maxWidth: "200mm", margin: "0 auto" }}>
+    <div className="q-print hidden bg-white text-slate-900 print:block" style={{ fontSize: 7.5, maxWidth: "100%", margin: "0 auto" }}>
       {/* company header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -264,11 +264,16 @@ function PiPrint({
       </table>
 
       {/* line items */}
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+        <colgroup>
+          {["4%", "8%", "10%", "7%", "7%", "20%", "8%", "5%", "6%", "8%", "8%", "9%"].map((w, i) => (
+            <col key={i} style={{ width: w }} />
+          ))}
+        </colgroup>
         <thead>
           <tr style={{ background: "linear-gradient(180deg,#0180cf,#0069b3)", color: "#fff" }}>
             {["Sr No", "Door Code", "Location", "Door Width", "Door Height", "Description", "HSN Code", "UOM", "Qty Nos", "Rate ₹", "Install ₹", "Amount ₹"].map((h) => (
-              <th key={h} className={c} style={{ textAlign: "center", fontWeight: 700 }}>{h}</th>
+              <th key={h} className={c} style={{ textAlign: "center", fontWeight: 700, wordBreak: "break-word" }}>{h}</th>
             ))}
           </tr>
         </thead>

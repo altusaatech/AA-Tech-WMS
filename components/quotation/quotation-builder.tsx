@@ -433,8 +433,8 @@ function QuotationPrint({
   /** Client quotation — hide the totals / grand-total footer. */
   hideTotals?: boolean;
 }) {
-  const th = "border border-[#0a5a93] px-1 py-1 text-center font-bold text-white";
-  const td = "border border-slate-300 px-1 py-1 text-center";
+  const th = "border border-[#0a5a93] px-0.5 py-1 text-center font-bold text-white";
+  const td = "border border-slate-300 px-0.5 py-0.5 text-center align-middle break-words";
   // Columns left of the final TOTAL ₹ value column (for the footer colSpans):
   // SR CODE TYPE FRAME SHUTTER INSUL FINISH CONFIG W H AREA QTY (12)
   // + HARDWARE (1) + RATE/m² BASIC HW DOOR+HW (4) = 17
@@ -465,27 +465,32 @@ function QuotationPrint({
       </div>
 
       {/* door table */}
-      <table className="mt-2 w-full border-collapse" style={{ fontSize: 7 }}>
+      <table className="mt-2 w-full border-collapse" style={{ fontSize: 6, tableLayout: "fixed" }}>
+        <colgroup>
+          {["3%", "4%", "9%", "8%", "6%", "5%", "5%", "5%", "3.5%", "3.5%", "4%", "3%", "10%", "5%", "6%", "5.5%", "6%", "6.5%"].map((w, i) => (
+            <col key={i} style={{ width: w }} />
+          ))}
+        </colgroup>
         <thead>
           <tr style={{ background: "linear-gradient(180deg, #0180cf, #0069b3)" }}>
-            <th className={th}>SR</th>
-            <th className={th}>CODE</th>
-            <th className={th}>TYPE</th>
-            <th className={th}>FRAME</th>
-            <th className={th}>SHUTTER</th>
-            <th className={th}>INSUL</th>
-            <th className={th}>FINISH</th>
-            <th className={th}>CONFIG</th>
-            <th className={th}>W</th>
-            <th className={th}>H</th>
-            <th className={th}>AREA</th>
-            <th className={th}>QTY</th>
-            <th className={th} style={{ minWidth: 90 }}>HARDWARE</th>
-            <th className={th}>RATE/m²</th>
-            <th className={th}>BASIC ₹</th>
-            <th className={th}>HW ₹</th>
-            <th className={th}>DOOR+HW</th>
-            <th className={th}>TOTAL ₹</th>
+            <th className={`${th} th-vert`}>SR</th>
+            <th className={`${th} th-vert`}>CODE</th>
+            <th className={`${th} th-vert`}>TYPE</th>
+            <th className={`${th} th-vert`}>FRAME</th>
+            <th className={`${th} th-vert`}>SHUTTER</th>
+            <th className={`${th} th-vert`}>INSUL</th>
+            <th className={`${th} th-vert`}>FINISH</th>
+            <th className={`${th} th-vert`}>CONFIG</th>
+            <th className={`${th} th-vert`}>W</th>
+            <th className={`${th} th-vert`}>H</th>
+            <th className={`${th} th-vert`}>AREA</th>
+            <th className={`${th} th-vert`}>QTY</th>
+            <th className={th}>HARDWARE</th>
+            <th className={`${th} th-vert`}>RATE/m²</th>
+            <th className={`${th} th-vert`}>BASIC ₹</th>
+            <th className={`${th} th-vert`}>HW ₹</th>
+            <th className={`${th} th-vert`}>DOOR+HW</th>
+            <th className={`${th} th-vert`}>TOTAL ₹</th>
           </tr>
         </thead>
         <tbody>
