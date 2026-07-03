@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { LoginMosaic } from "@/components/auth/login-mosaic";
+import { NavArrows } from "@/components/layout/nav-arrows";
 
 interface WorkspaceDef {
   key: string;
@@ -101,6 +102,7 @@ export function PortalLauncher({
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden bg-[#0c0807]">
+      <NavArrows />
       {/* poster-wall backdrop — same drifting mosaic as the sign-in screen.
           z-0 (not -z-10) so it paints above the root background, below content. */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -164,8 +166,8 @@ export function PortalLauncher({
               <span className="h-8 w-px bg-white/15 max-lg:hidden" aria-hidden />
               <span className="flex flex-col items-center gap-1 leading-none max-lg:hidden" aria-label="Powered by Altus Corp">
                 <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-white/50">Powered by</span>
-                <span className="inline-flex items-center justify-center rounded-lg bg-white px-2 py-1 shadow-md ring-1 ring-white/25">
-                  <img src="/altus-corp-logo.png?v=2" alt="Altus Corp" className="h-7 w-auto" />
+                <span className="inline-flex items-center justify-center rounded-xl bg-white px-3 py-1.5 shadow-lg ring-1 ring-white/40">
+                  <img src="/altus-corp-logo.png?v=2" alt="Altus Corp" className="h-11 w-auto" />
                 </span>
               </span>
             </div>

@@ -103,7 +103,6 @@ export function SalesDataGrid({
 
   async function del(e: React.MouseEvent, id: string) {
     e.stopPropagation();
-    if (!window.confirm("Delete this entry?")) return;
     onDeleted(id);
     await deleteSalesRow(kind, id);
   }

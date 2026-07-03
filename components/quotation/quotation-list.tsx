@@ -35,7 +35,6 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
 
   async function onDelete(e: React.MouseEvent, id: string) {
     e.stopPropagation();
-    if (!window.confirm("Delete this quotation?")) return;
     await deleteQuotation(id);
     fireToast({ message: "Quotation deleted", type: "success" });
     router.refresh();
