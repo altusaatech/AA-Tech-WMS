@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Database,
   Users,
+  BookOpen,
   ArrowRight,
   LogOut,
   Lock,
@@ -76,6 +77,15 @@ const WORKSPACES: WorkspaceDef[] = [
     logo: "/portal/employees.png",
     from: "#0069b3",
     to: "#024a7d",
+  },
+  {
+    key: "user-manual",
+    title: "User Manual",
+    desc: "Guides, walkthroughs, photos & videos for the WMS.",
+    href: "/user-manual" as Route,
+    icon: BookOpen,
+    from: "#0ea5c4",
+    to: "#0784a5",
   },
 ];
 

@@ -446,7 +446,7 @@ function PiLinkCard() {
   const to = "#0180cf";
   const steps = ["Quote", "Fill", "Print"];
   return (
-    <Link href={"/quotation" as Route} className="group relative block">
+    <Link href={"/quotation/pi" as Route} className="group relative block">
       <div
         aria-hidden
         className="absolute -inset-0.5 rounded-[26px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-50"
