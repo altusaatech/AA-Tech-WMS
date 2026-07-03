@@ -60,33 +60,8 @@ export function MainNav({ activeTasks, isAdmin, variant }: Props) {
           variant={variant}
         />
       )}
-      <MainNavPill
-        href={"/projects" as Route}
-        label="Projects"
-        Icon={FolderKanban}
-        active={isActive("/projects")}
-        variant={variant}      />
-      <MainNavPill
-        href={"/sales" as Route}
-        label="Production"
-        Icon={FileSpreadsheet}
-        active={isActive("/sales") || isActive("/quotation")}
-        variant={variant}      />
-      <MainNavPill
-        href={"/masters" as Route}
-        label="Masters"
-        Icon={Database}
-        active={isActive("/masters")}
-        variant={variant}      />
-      <MainNavPill
-        href={"/attendance" as Route}
-        label="Attendance"
-        Icon={CalendarCheck}
-        active={
-          isActive("/attendance") &&
-          !pathname.startsWith("/attendance/dashboard")
-        }
-        variant={variant}      />
+      {/* Projects / Production / Masters / Attendance removed from the top nav —
+          they're reached via the portal workspaces now. */}
     </nav>
   );
 }

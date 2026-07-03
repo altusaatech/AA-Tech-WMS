@@ -2,7 +2,6 @@ import { DashboardHeader } from "@/components/layout/header";
 import { DashboardFooter } from "@/components/layout/footer";
 import { FilterBar } from "@/components/layout/filter-bar";
 import { KpiStrip } from "@/components/dashboard/kpi-strip";
-import { CollapsibleVelocity } from "@/components/dashboard/collapsible-velocity";
 import { StatusTable } from "@/components/dashboard/status-table";
 import { StatusDistributionChart } from "@/components/dashboard/status-distribution";
 import { TopPerformersSection } from "@/components/dashboard/top-performers";
@@ -169,7 +168,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               </div>
               <StatusTable rows={data.statusTable} view={filters.view} />
               <AgingHeatmap rows={data.agingTable} cellTasks={data.agingHeatmapData.byCell} />
-              <CollapsibleVelocity data={data.velocity} />
             </div>
           </>
         )}
