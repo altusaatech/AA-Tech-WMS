@@ -66,6 +66,17 @@ const WORKSPACES: WorkspaceDef[] = [
     ],
   },
   {
+    key: "admin",
+    title: "Admin",
+    desc: "Employees, departments & the control room.",
+    href: "/admin" as Route,
+    icon: ShieldCheck,
+    logo: "/portal/admin.png",
+    from: "#3b4859",
+    to: "#232d3b",
+    adminOnly: true,
+  },
+  {
     key: "employees",
     title: "Employees",
     desc: "Attendance, leave, salary & the team roster.",
@@ -78,17 +89,6 @@ const WORKSPACES: WorkspaceDef[] = [
       { label: "Leave", href: "/attendance/leave" as Route },
       { label: "Salary", href: "/salary" as Route },
     ],
-  },
-  {
-    key: "admin",
-    title: "Admin",
-    desc: "Employees, departments & the control room.",
-    href: "/admin" as Route,
-    icon: ShieldCheck,
-    logo: "/portal/admin.png",
-    from: "#3b4859",
-    to: "#232d3b",
-    adminOnly: true,
   },
 ];
 
