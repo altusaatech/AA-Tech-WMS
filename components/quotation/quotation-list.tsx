@@ -57,7 +57,7 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
             className="inline-flex h-11 items-center gap-2 rounded-xl px-5 text-[14px] font-extrabold text-white shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-60"
             style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)", boxShadow: "0 14px 30px -14px rgba(1,128,207,0.6)" }}
           >
-            {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={17} strokeWidth={2.8} />} New Quotation
+            {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={17} strokeWidth={2.8} />} Working Specification
           </button>
         }
       />
