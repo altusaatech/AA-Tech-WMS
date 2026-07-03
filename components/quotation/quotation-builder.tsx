@@ -133,6 +133,28 @@ export function QuotationBuilder({
     }
   }
 
+  // Print modes: full quotation (with totals) vs client quotation (totals
+  // hidden). We flip the flag then print on the next tick so the print DOM
+  // reflects it.
+  const [hideTotals, setHideTotals] = React.useState(false);
+  const [pendingPrint, setPendingPrint] = React.useState(false);
+  React.useEffect(() => {
+    if (!pendingPrint) return;
+    const t = window.setTimeout(() => {
+      window.print();
+      setPendingPrint(false);
+    }, 60);
+    return () => window.clearTimeout(t);
+  }, [pendingPrint]);
+  function printFull() {
+    setHideTotals(false);
+    setPendingPrint(true);
+  }
+  function printClient() {
+    setHideTotals(true);
+    setPendingPrint(true);
+  }
+
   return (
     <>
       {/* ───────────── EDITOR (screen only) ───────────── */}
@@ -143,8 +165,11 @@ export function QuotationBuilder({
             <ArrowLeft size={15} strokeWidth={2.6} /> All quotations
           </button>
           <div className="flex items-center gap-2.5">
-            <button type="button" onClick={() => window.print()} className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[13.5px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5">
+            <button type="button" onClick={printFull} className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[13.5px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5">
               <Printer size={16} /> Print Quotation
+            </button>
+            <button type="button" onClick={printClient} className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[13.5px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5" title="Client quotation (without totals)">
+              <FileText size={16} /> Client Quotation
             </button>
             <button type="button" onClick={goToPi} disabled={saving} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/8 px-4 text-[13.5px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5 disabled:opacity-60" title="Save & go to Proforma Invoice">
               {saving ? <Loader2 size={15} className="animate-spin" /> : <ReceiptText size={16} />} Go to PI
@@ -230,6 +255,7 @@ export function QuotationBuilder({
         lines={lines}
         notes={notes}
         totals={totals}
+        hideTotals={hideTotals}
       />
     </>
   );
@@ -397,12 +423,15 @@ function QuotationPrint({
   lines,
   notes,
   totals,
+  hideTotals,
 }: {
   active: boolean;
   header: { offerNo: string; quoteDate: string; project: string; customer: string; subject: string };
   lines: DoorLine[];
   notes: string[];
   totals: ReturnType<typeof computeTotals>;
+  /** Client quotation — hide the totals / grand-total footer. */
+  hideTotals?: boolean;
 }) {
   const th = "border border-[#0a5a93] px-1 py-1 text-center font-bold text-white";
   const td = "border border-slate-300 px-1 py-1 text-center";
@@ -494,6 +523,7 @@ function QuotationPrint({
             );
           })}
         </tbody>
+        {!hideTotals && (
         <tfoot>
           <tr style={{ background: "#f6faf0" }}>
             <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Door Total (Qty × Unit Price)</td>
@@ -526,6 +556,7 @@ function QuotationPrint({
             <td className="border border-[#0a5a93] px-1 py-1.5 text-center text-white" style={{ fontWeight: 800, fontSize: 9.5 }}>{inr2(totals.grandTotal)}</td>
           </tr>
         </tfoot>
+        )}
       </table>
 
       {/* notes */}
