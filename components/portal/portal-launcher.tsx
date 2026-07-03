@@ -222,39 +222,30 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
 
   const inner = (
     <div
-      className="group relative flex h-full min-h-[200px] flex-col overflow-hidden rounded-[22px] p-6 shadow-lg transition-all duration-200"
+      className="group relative flex h-full min-h-[188px] items-center gap-6 overflow-hidden rounded-[22px] p-6 shadow-lg transition-all duration-200 max-sm:flex-col max-sm:items-start max-sm:gap-4"
       style={{
         background: `linear-gradient(145deg, ${ws.from}, ${ws.to})`,
         boxShadow: `0 22px 46px -22px ${ws.to}cc`,
       }}
     >
-      {/* decorative oversized icon */}
-      <Icon
-        aria-hidden
-        className="pointer-events-none absolute -bottom-6 -right-4 text-white transition-transform duration-300 group-hover:scale-105"
-        size={168}
-        strokeWidth={1.2}
-        style={{ opacity: 0.14 }}
-      />
       {/* subtle sheen */}
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 42%)" }} />
 
-      {/* badge — brand logo on a white chip (logos aren't transparent), or the
-          line-icon as a glass chip if no logo is set */}
+      {/* LEFT — clear logo on a white panel (the PNGs aren't transparent) */}
       {ws.logo ? (
-        <span className="relative inline-flex size-14 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-white/50 transition-transform group-hover:scale-105">
+        <span className="relative inline-flex size-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-3 shadow-lg ring-1 ring-white/50 transition-transform group-hover:scale-[1.04] max-md:size-24 max-sm:size-20">
           <img src={ws.logo} alt="" className="h-full w-full object-contain" />
         </span>
       ) : (
-        <span className="relative inline-flex size-11 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm">
-          <Icon size={21} strokeWidth={2.3} />
+        <span className="relative inline-flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm">
+          <Icon size={28} strokeWidth={2.2} />
         </span>
       )}
 
-      {/* text */}
-      <div className="relative mt-auto pt-5">
+      {/* RIGHT — title, description, actions */}
+      <div className="relative flex min-w-0 flex-1 flex-col">
         <h2 className="text-[26px] font-black leading-none tracking-[-0.01em] text-white">{ws.title}</h2>
-        <p className="mt-2 max-w-[80%] text-[13.5px] font-medium leading-snug text-white/85">{ws.desc}</p>
+        <p className="mt-2 text-[13.5px] font-medium leading-snug text-white/85">{ws.desc}</p>
 
         <div className="mt-4 flex flex-wrap gap-2">
           {locked ? (
