@@ -28,6 +28,8 @@ interface WorkspaceDef {
   title: string;
   desc: string;
   icon: LucideIcon;
+  /** Brand logo shown in the card's badge (falls back to `icon` if absent). */
+  logo?: string;
   from: string;
   to: string;
   /** Single-destination card (WMS, Admin). */
@@ -46,6 +48,7 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "The work dashboard — tasks, projects & the daily loop.",
     href: "/" as Route,
     icon: LayoutDashboard,
+    logo: "/portal/wms.png",
     from: "#0180cf",
     to: "#0069b3",
   },
@@ -54,6 +57,7 @@ const WORKSPACES: WorkspaceDef[] = [
     title: "Masters",
     desc: "Production floor, products, hardware & quotations.",
     icon: Database,
+    logo: "/portal/masters.png",
     from: "#63b81e",
     to: "#4a9616",
     modules: [
@@ -66,6 +70,7 @@ const WORKSPACES: WorkspaceDef[] = [
     title: "Employees",
     desc: "Attendance, leave, salary & the team roster.",
     icon: Users,
+    logo: "/portal/employees.png",
     from: "#0069b3",
     to: "#024a7d",
     modules: [
@@ -80,6 +85,7 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Employees, departments & the control room.",
     href: "/admin" as Route,
     icon: ShieldCheck,
+    logo: "/portal/admin.png",
     from: "#3b4859",
     to: "#232d3b",
     adminOnly: true,
@@ -233,10 +239,17 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
       {/* subtle sheen */}
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 42%)" }} />
 
-      {/* icon chip */}
-      <span className="relative inline-flex size-11 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm">
-        <Icon size={21} strokeWidth={2.3} />
-      </span>
+      {/* badge — brand logo on a white chip (logos aren't transparent), or the
+          line-icon as a glass chip if no logo is set */}
+      {ws.logo ? (
+        <span className="relative inline-flex size-14 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-white/50 transition-transform group-hover:scale-105">
+          <img src={ws.logo} alt="" className="h-full w-full object-contain" />
+        </span>
+      ) : (
+        <span className="relative inline-flex size-11 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm">
+          <Icon size={21} strokeWidth={2.3} />
+        </span>
+      )}
 
       {/* text */}
       <div className="relative mt-auto pt-5">
