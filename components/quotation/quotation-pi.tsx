@@ -7,6 +7,7 @@ import { ArrowLeft, Save, Printer, Loader2, ReceiptText } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
 import {
+  computeDoor,
   computePiLine,
   computePiTotals,
   inr,
@@ -44,7 +45,18 @@ export function QuotationPi({
   const [project, setProject] = React.useState(initial.project);
   const [customer, setCustomer] = React.useState(initial.customer);
   const [subject, setSubject] = React.useState(initial.subject);
-  const [lines, setLines] = React.useState<DoorLine[]>(initial.lines);
+  // Prefill each door's PI installation from the quotation (Area × Install
+  // ₹/sq.m) so the PI totals match the quotation by default. A door that
+  // already carries a manual piInstall is left untouched; the field stays
+  // editable on the PI.
+  const [lines, setLines] = React.useState<DoorLine[]>(() =>
+    initial.lines.map((d) => {
+      if (d.piInstall != null) return d;
+      const { area } = computeDoor(d);
+      const perDoorInstall = Math.round(area * (Number(d.installPerSqm) || 0));
+      return { ...d, piInstall: perDoorInstall };
+    }),
+  );
   const [piMeta, setPiMeta] = React.useState<PiMeta>(initialPiMeta);
   const [saving, setSaving] = React.useState(false);
 
