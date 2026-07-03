@@ -121,6 +121,18 @@ export function QuotationBuilder({
     }
   }
 
+  // Persist the current form BEFORE navigating so the PI page fetches exactly
+  // what's on screen (it reads the saved quotation from the DB).
+  async function goToPi() {
+    setSaving(true);
+    try {
+      await saveQuotation(id, { offerNo, quoteDate, project, customer, subject }, lines, notes, piMeta);
+      router.push(`/quotation/${id}/pi` as Route);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <>
       {/* ───────────── EDITOR (screen only) ───────────── */}
@@ -134,8 +146,8 @@ export function QuotationBuilder({
             <button type="button" onClick={() => window.print()} className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[13.5px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5">
               <Printer size={16} /> Print Quotation
             </button>
-            <button type="button" onClick={() => router.push(`/quotation/${id}/pi` as Route)} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/8 px-4 text-[13.5px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5" title="Go to Proforma Invoice">
-              <ReceiptText size={16} /> Go to PI
+            <button type="button" onClick={goToPi} disabled={saving} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/8 px-4 text-[13.5px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5 disabled:opacity-60" title="Save & go to Proforma Invoice">
+              {saving ? <Loader2 size={15} className="animate-spin" /> : <ReceiptText size={16} />} Go to PI
             </button>
             <button type="button" onClick={save} disabled={saving} className="inline-flex h-10 items-center gap-2 rounded-xl px-5 text-[14px] font-extrabold text-white shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-60" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)", boxShadow: "0 12px 26px -10px rgba(1,128,207,0.6)" }}>
               {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} strokeWidth={2.4} />} Save
