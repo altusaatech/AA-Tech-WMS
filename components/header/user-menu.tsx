@@ -118,8 +118,8 @@ export function UserMenu({
         <DropdownMenu.Content
           align="end"
           sideOffset={10}
-          collisionPadding={12}
-          className="z-[100] min-w-[240px] rounded-xl border border-[#E2E8F0] bg-white shadow-2xl p-1.5 text-sm max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto"
+          collisionPadding={16}
+          className="z-[100] min-w-[264px] max-w-[320px] rounded-xl border border-[#E2E8F0] bg-white shadow-2xl p-1.5 text-sm max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto"
           style={{
             transformOrigin: "var(--radix-dropdown-menu-content-transform-origin)",
             animation: "userMenuIn 180ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -162,10 +162,10 @@ export function UserMenu({
                 )}
               </span>
               <div className="min-w-0">
-                <div className="font-semibold text-[#0F172A] truncate">
+                <div className="font-semibold text-[#0F172A] leading-snug break-words">
                   {name}
                 </div>
-                <div className="text-[13px] text-[#64748B] truncate">{email}</div>
+                <div className="text-[13px] text-[#64748B] break-all">{email}</div>
               </div>
             </div>
             <div className="mt-2.5">
