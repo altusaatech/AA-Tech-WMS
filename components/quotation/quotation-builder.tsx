@@ -162,7 +162,7 @@ export function QuotationBuilder({
         {/* action bar */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <button type="button" onClick={() => router.push("/quotation" as Route)} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-600 shadow-sm transition-colors hover:bg-slate-50">
-            <ArrowLeft size={15} strokeWidth={2.6} /> All quotations
+            <ArrowLeft size={15} strokeWidth={2.6} /> All specifications
           </button>
           <div className="flex items-center gap-2.5">
             <button type="button" onClick={printFull} className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[13.5px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5">

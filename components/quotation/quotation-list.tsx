@@ -46,8 +46,8 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
 
       <PageHero
         eyebrow="Sales"
-        title="Quotations"
-        subtitle="Build door quotations from the Product & Hardware masters — printable in your format."
+        title="Working Specification"
+        subtitle="Build door specifications from the Product & Hardware masters — printable in your format."
         Icon={Receipt}
         actions={
           <button
@@ -68,8 +68,8 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
             <span className="inline-flex size-14 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)" }}>
               <Receipt size={26} strokeWidth={2.1} />
             </span>
-            <p className="mt-4 text-[16px] font-bold text-slate-700">No quotations yet</p>
-            <p className="mt-1 text-[13.5px] text-slate-500">Click “New Quotation” to build your first door quote.</p>
+            <p className="mt-4 text-[16px] font-bold text-slate-700">No working specifications yet</p>
+            <p className="mt-1 text-[13.5px] text-slate-500">Click “Working Specification” to build your first one.</p>
           </div>
         ) : (
           <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-card premium-card">

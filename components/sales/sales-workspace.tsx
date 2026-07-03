@@ -406,8 +406,8 @@ function QuotationLinkCard() {
             <Receipt size={24} strokeWidth={2.3} />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[17px] font-black tracking-[-0.01em] text-slate-800">Quotation</h3>
-            <p className="mt-0.5 line-clamp-1 text-[12px] text-slate-500">Build & print door quotations from the masters</p>
+            <h3 className="text-[17px] font-black tracking-[-0.01em] text-slate-800">Working Specification</h3>
+            <p className="mt-0.5 line-clamp-1 text-[12px] text-slate-500">Build & print door specifications from the masters</p>
           </div>
         </div>
 
@@ -431,7 +431,7 @@ function QuotationLinkCard() {
             className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
             style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}aa` }}
           >
-            <Receipt size={16} strokeWidth={2.4} /> Open Quotations
+            <Receipt size={16} strokeWidth={2.4} /> Open Working Specification
             <ArrowRight size={14} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-0.5" />
           </span>
         </div>
