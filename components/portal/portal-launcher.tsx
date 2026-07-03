@@ -18,11 +18,6 @@ import {
 } from "lucide-react";
 import { LoginMosaic } from "@/components/auth/login-mosaic";
 
-interface ModuleLink {
-  label: string;
-  href: Route;
-}
-
 interface WorkspaceDef {
   key: string;
   title: string;
@@ -32,15 +27,13 @@ interface WorkspaceDef {
   logo?: string;
   from: string;
   to: string;
-  /** Single-destination card (WMS, Admin). */
-  href?: Route;
-  /** Grouped card — shows one chip per module (Masters, Employees). */
-  modules?: ModuleLink[];
+  /** Where "Enter workspace" goes (a page, or a workspace hub with options). */
+  href: Route;
   adminOnly?: boolean;
 }
 
-// Grouped workspace cards — AA Tech palette (blue / green / deep-blue), plus a
-// neutral slate for the access-gated Admin card. No red.
+// Every card is "Enter workspace". WMS/Pre Production go straight to their app
+// area; Admin/Employees open a workspace hub (/portal/…) listing their options.
 const WORKSPACES: WorkspaceDef[] = [
   {
     key: "wms",
@@ -66,30 +59,22 @@ const WORKSPACES: WorkspaceDef[] = [
     key: "admin",
     title: "Admin",
     desc: "Control room, master data & departments.",
+    href: "/portal/admin" as Route,
     icon: ShieldCheck,
     logo: "/portal/admin.png",
     from: "#3b4859",
     to: "#232d3b",
     adminOnly: true,
-    modules: [
-      { label: "Admin", href: "/admin" as Route },
-      { label: "Masters", href: "/masters" as Route },
-    ],
   },
   {
     key: "employees",
     title: "Employees",
     desc: "Attendance, leave, salary & the team roster.",
+    href: "/portal/employees" as Route,
     icon: Users,
     logo: "/portal/employees.png",
     from: "#0069b3",
     to: "#024a7d",
-    modules: [
-      { label: "Attendance", href: "/attendance" as Route },
-      { label: "Leave", href: "/attendance/leave" as Route },
-      { label: "Salary", href: "/salary" as Route },
-      { label: "Reimbursement", href: "/reimbursement" as Route },
-    ],
   },
 ];
 
@@ -219,7 +204,6 @@ export function PortalLauncher({
 
 function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
   const Icon = ws.icon;
-  const grouped = !locked && !!ws.modules?.length;
 
   const inner = (
     <div
@@ -253,18 +237,6 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
             <span className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-black/20 px-3.5 text-[13px] font-bold text-white/80 ring-1 ring-white/15">
               <Lock size={13} strokeWidth={2.5} /> No access
             </span>
-          ) : grouped ? (
-            ws.modules!.map((m) => (
-              <Link
-                key={m.label}
-                href={m.href}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-white px-3.5 text-[13px] font-extrabold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-                style={{ color: ws.to }}
-              >
-                {m.label}
-                <ArrowRight size={14} strokeWidth={2.7} />
-              </Link>
-            ))
           ) : (
             <span className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-white px-4 text-[13.5px] font-extrabold shadow-sm transition-transform group-hover:translate-x-0.5" style={{ color: ws.to }}>
               Enter workspace
@@ -276,12 +248,11 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
     </div>
   );
 
-  // Grouped cards have several destinations, so the card itself isn't a link —
-  // each module chip links on its own. Single-destination cards wrap in a Link.
-  if (locked || grouped) return inner;
+  // Access-gated card (Admin for non-admins) isn't clickable; all others link.
+  if (locked) return inner;
 
   return (
-    <Link href={ws.href!} className="block transition-transform duration-200 hover:-translate-y-1">
+    <Link href={ws.href} className="block transition-transform duration-200 hover:-translate-y-1">
       {inner}
     </Link>
   );
