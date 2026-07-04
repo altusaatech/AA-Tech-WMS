@@ -2,7 +2,6 @@ import { MainNavServer } from "./main-nav-server";
 import { MobileMenuServer } from "./mobile-menu-server";
 import { HeaderStatusBar } from "./header-clock";
 import { UserMenuServer } from "@/components/header/user-menu-server";
-import { NewTaskTrigger } from "@/components/header/new-task-trigger";
 import { AdminPill } from "@/components/header/admin-pill";
 import { GlobalSearch } from "@/components/header/global-search";
 import { getCurrentEmployee } from "@/lib/auth/current";
@@ -129,7 +128,6 @@ export async function DashboardHeader({
 
           <div className="flex items-center gap-2.5 2xl:gap-3 shrink-0 max-xl:ml-auto max-md:gap-1.5">
             <GlobalSearch />
-            <NewTaskTrigger />
             {isAdmin && (
               <span className="max-2xl:hidden">
                 <AdminPill />
