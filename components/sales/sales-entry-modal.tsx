@@ -80,7 +80,7 @@ export function SalesEntryModal({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[200] bg-slate-900/45 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0" />
         <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-[201] flex max-h-[92vh] w-[min(980px,95vw)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl border border-white/60 bg-white/95 shadow-[0_40px_120px_-20px_rgba(0,40,80,0.5)] backdrop-blur-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-bottom-2"
+          className="fixed left-1/2 top-1/2 z-[201] flex max-h-[92vh] w-[min(980px,95vw)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl border border-white/70 bg-white shadow-[0_40px_120px_-20px_rgba(0,40,80,0.55)] ring-1 ring-slate-900/10 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-bottom-2"
           aria-describedby={undefined}
         >
           {open && (
@@ -235,14 +235,21 @@ function FormBody({
               <Icon size={22} strokeWidth={2.2} />
             </span>
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/75">{row ? "Edit entry" : "New entry"}</div>
-              <Dialog.Title className="mt-0.5 text-[19px] font-black tracking-[-0.01em] text-white">{title}</Dialog.Title>
+              <div className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-white/80">{row ? "Edit entry" : "New entry"}</div>
+              <Dialog.Title
+                className="mt-1 text-white"
+                style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 23, letterSpacing: "-0.02em", lineHeight: 1.04 }}
+              >
+                {title}
+              </Dialog.Title>
             </div>
           </div>
           <Dialog.Close className="rounded-xl p-2 text-white/80 transition-colors hover:bg-white/20 hover:text-white" aria-label="Close">
             <X size={18} />
           </Dialog.Close>
         </div>
+        {/* AA Tech brand accent */}
+        <span aria-hidden className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: "linear-gradient(90deg, #63b81e, #0180cf 55%, #0069b3)" }} />
       </header>
 
       {/* ── fields ── */}
