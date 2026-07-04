@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   Download,
   Upload,
+  FileSpreadsheet,
   ChevronLeft,
   ChevronRight,
   X,
@@ -134,6 +135,18 @@ export function SalesDataGrid({
     XLSX.writeFile(wb, `${(title ?? kind).replace(/\s+/g, "-")}-${stamp}.xlsx`);
   }
 
+  // Blank Excel template with exactly the columns the importer expects, so
+  // users can fill it and bulk-upload. Headers = writable column labels.
+  async function downloadTemplate() {
+    const XLSX = await import("xlsx");
+    const headers = columns.filter((c) => !c.readOnly).map((c) => c.label);
+    const ws = XLSX.utils.aoa_to_sheet([headers]);
+    ws["!cols"] = headers.map((h) => ({ wch: Math.min(40, Math.max(12, h.length + 4)) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    XLSX.writeFile(wb, `${(title ?? kind).replace(/\s+/g, "-")}-template.xlsx`);
+  }
+
   async function onImportFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (e.target) e.target.value = "";
@@ -229,12 +242,20 @@ export function SalesDataGrid({
           <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={onImportFile} className="hidden" />
           <button
             type="button"
+            onClick={downloadTemplate}
+            className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-[13px] font-bold text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-50"
+            title="Download a blank Excel template with the correct columns"
+          >
+            <FileSpreadsheet size={15} /> Template
+          </button>
+          <button
+            type="button"
             onClick={() => fileRef.current?.click()}
             disabled={importing}
             className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/10 px-3.5 text-[13px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#0180cf]/15 disabled:opacity-50 disabled:hover:translate-y-0"
-            title="Import from Excel"
+            title="Bulk upload — import rows from an Excel/CSV file"
           >
-            {importing ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />} Import
+            {importing ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />} Bulk Upload
           </button>
           <button
             type="button"
