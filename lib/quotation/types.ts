@@ -176,7 +176,7 @@ export const DEFAULT_PI_META: PiMeta = {
 
 /** Company / seller details on the Proforma Invoice (edit here if they change). */
 export const COMPANY = {
-  name: "ANANT AVINYA TECHNOLOGIES LLP.",
+  name: "ANANT AVINYA TECHNOLOGIES",
   address: ["A-299, S Central Road, MIDC Industrial Area,", "Near Antony Motors, Mahape,", "Navi Mumbai 400701, India"],
   email: "sales@aatech.co.in",
   web: "www.aatech.co.in",

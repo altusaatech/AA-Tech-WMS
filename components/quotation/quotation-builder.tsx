@@ -432,8 +432,7 @@ function QuotationPrint({
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img src="/logo-mark.png?v=3" alt="" style={{ height: 44, width: "auto" }} />
           <div>
-            <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-0.02em", color: "#0a0a0a" }}>Anant Avinya Technologies</div>
-            <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: "0.22em", color: "#63b81e" }}>SMART WAREHOUSE MANAGEMENT SYSTEM</div>
+            <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.02em", color: "#0a0a0a" }}>Anant Avinya Technologies</div>
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
