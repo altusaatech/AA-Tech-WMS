@@ -246,7 +246,9 @@ function FormBody({
       </header>
 
       {/* ── fields ── */}
-      <div className="grid grid-cols-1 gap-x-5 gap-y-4 overflow-y-auto bg-gradient-to-b from-[#f7fbff] to-white px-6 py-6 md:grid-cols-2">
+      {/* items-end so the inputs in each 2-col row line up even when one field's
+          label wraps to two lines and its neighbour's stays on one. */}
+      <div className="grid grid-cols-1 items-end gap-x-5 gap-y-4 overflow-y-auto bg-gradient-to-b from-[#f7fbff] to-white px-6 py-6 md:grid-cols-2">
         {editable.map((c) => (
           <Field
             key={c.key}
@@ -377,8 +379,8 @@ function Field({
 
   return (
     <label htmlFor={id} className="flex flex-col gap-1.5">
-      <span className="flex items-center gap-1 text-[12px] font-bold text-slate-600">
-        {col.label}
+      <span className="flex items-start gap-1 text-[12px] font-bold leading-tight text-slate-600" title={col.label}>
+        <span className="line-clamp-2">{col.label}</span>
         {col.required && <span style={{ color: "#ef4444" }}>*</span>}
       </span>
 
