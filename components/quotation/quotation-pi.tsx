@@ -120,7 +120,6 @@ export function QuotationPi({
             <L label="Terms of Delivery"><input className={inp} value={piMeta.termsDelivery} onChange={(e) => setPi("termsDelivery", e.target.value)} /></L>
             <L label="Mode of Shipping"><input className={inp} value={piMeta.modeShipping} onChange={(e) => setPi("modeShipping", e.target.value)} /></L>
             <L label="Terms of Payment"><input className={inp} value={piMeta.termsPayment} onChange={(e) => setPi("termsPayment", e.target.value)} /></L>
-            <L label="Freight"><input className={inp} value={piMeta.freightNote} onChange={(e) => setPi("freightNote", e.target.value)} placeholder="Extra to your a/c" /></L>
           </div>
         </div>
 
@@ -320,7 +319,6 @@ function PiPrint({
                   <tr><td className={c} colSpan={2}><b>Subtotal</b></td><td className={c} style={{ textAlign: "right", fontWeight: 700 }}>{num(totals.subtotal)}</td></tr>
                   <tr><td className={c} colSpan={2}>CGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.cgst)}</td></tr>
                   <tr><td className={c} colSpan={2}>SGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.sgst)}</td></tr>
-                  <tr><td className={c} colSpan={2}>Freight</td><td className={c} style={{ textAlign: "right", fontSize: 7.5 }}>{piMeta.freightNote}</td></tr>
                   <tr style={{ background: "linear-gradient(90deg,#0069b3,#63b81e)" }}><td className={c} colSpan={2} style={{ color: "#fff", fontWeight: 800 }}>Grand Total</td><td className={c} style={{ textAlign: "right", color: "#fff", fontWeight: 800 }}>{num(totals.grandTotal)}</td></tr>
                 </tbody>
               </table>
