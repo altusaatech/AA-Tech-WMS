@@ -523,7 +523,7 @@ function QuotationPrint({
                 <td className={td}>{inr(c.basicSupply)}</td>
                 <td className={td}>{inr(c.hardwareTotal)}</td>
                 <td className={td}>{inr(c.doorHw)}</td>
-                <td className={td} style={{ fontWeight: 800 }}>{inr(c.totalSupply + c.installTotal)}</td>
+                <td className={td} style={{ fontWeight: 800, whiteSpace: "nowrap" }}>{inr(c.totalSupply + c.installTotal)}</td>
               </tr>
             );
           })}
@@ -532,33 +532,33 @@ function QuotationPrint({
         <tfoot>
           <tr style={{ background: "#f6faf0" }}>
             <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Door Total (Qty × Unit Price)</td>
-            <td className={td} style={{ fontWeight: 700 }}>{inr(totals.doorSupply)}</td>
+            <td className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{inr(totals.doorSupply)}</td>
           </tr>
           <tr style={{ background: "#f6faf0" }}>
             <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Hardware Total</td>
-            <td className={td} style={{ fontWeight: 700 }}>{inr(totals.hardwareSupply)}</td>
+            <td className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{inr(totals.hardwareSupply)}</td>
           </tr>
           {totals.subtotalInstall > 0 && (
             <tr style={{ background: "#f6faf0" }}>
               <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Installation Total</td>
-              <td className={td} style={{ fontWeight: 700 }}>{inr(totals.subtotalInstall)}</td>
+              <td className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{inr(totals.subtotalInstall)}</td>
             </tr>
           )}
           <tr style={{ background: "#eef6fc" }}>
             <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Sub Total</td>
-            <td className={td} style={{ fontWeight: 800 }}>{inr(totals.subtotal)}</td>
+            <td className={td} style={{ fontWeight: 800, whiteSpace: "nowrap" }}>{inr(totals.subtotal)}</td>
           </tr>
           <tr>
             <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right" }}>CGST @ 9%</td>
-            <td className={td}>{inr2(totals.cgst)}</td>
+            <td className={td} style={{ whiteSpace: "nowrap" }}>{inr2(totals.cgst)}</td>
           </tr>
           <tr>
             <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right" }}>SGST @ 9%</td>
-            <td className={td}>{inr2(totals.sgst)}</td>
+            <td className={td} style={{ whiteSpace: "nowrap" }}>{inr2(totals.sgst)}</td>
           </tr>
           <tr style={{ background: "linear-gradient(90deg, #0069b3, #63b81e)" }}>
-            <td className="border border-[#0a5a93] px-1 py-1.5 text-white" colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 800, fontSize: 9.5 }}>GRAND TOTAL (incl GST)</td>
-            <td className="border border-[#0a5a93] px-1 py-1.5 text-center text-white" style={{ fontWeight: 800, fontSize: 9.5 }}>{inr2(totals.grandTotal)}</td>
+            <td className="border border-[#0a5a93] px-1 py-1.5 text-white" colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 800, fontSize: 9.5, whiteSpace: "nowrap" }}>GRAND TOTAL (incl GST)</td>
+            <td className="border border-[#0a5a93] px-1.5 py-1.5 text-center text-white" style={{ fontWeight: 800, fontSize: 9.5, whiteSpace: "nowrap" }}>{inr2(totals.grandTotal)}</td>
           </tr>
         </tfoot>
         )}
