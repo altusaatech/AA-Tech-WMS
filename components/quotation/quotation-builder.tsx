@@ -214,23 +214,9 @@ export function QuotationBuilder({
           <Plus size={17} strokeWidth={2.8} /> Add Door
         </button>
 
-        {/* totals + notes */}
-        <div className="mt-6 grid grid-cols-[1fr_360px] gap-5 max-lg:grid-cols-1">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h3 className="mb-3 text-[12px] font-black uppercase tracking-[0.1em] text-slate-400">Notes &amp; Terms</h3>
-            <div className="space-y-2">
-              {notes.map((nt, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <span className="mt-2 text-[12px] font-bold text-slate-400">{i + 1}.</span>
-                  <textarea rows={1} className="min-h-9 flex-1 resize-y rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[13px] text-slate-700 outline-none focus:border-[#0180cf]" value={nt} onChange={(e) => setNotes((p) => p.map((x, j) => (j === i ? e.target.value : x)))} />
-                  <button type="button" onClick={() => setNotes((p) => p.filter((_, j) => j !== i))} className="mt-1 rounded-lg p-1.5 text-slate-300 hover:bg-red-50 hover:text-red-600"><Trash2 size={14} /></button>
-                </div>
-              ))}
-              <button type="button" onClick={() => setNotes((p) => [...p, ""])} className="inline-flex h-8 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-[12.5px] font-bold text-slate-500 hover:bg-slate-50"><Plus size={13} /> Add term</button>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm h-fit">
+        {/* totals */}
+        <div className="mt-6 flex justify-end">
+          <div className="w-[360px] max-lg:w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm h-fit">
             <h3 className="mb-3 text-[12px] font-black uppercase tracking-[0.1em] text-slate-400">Grand Total</h3>
             <Row label="Door Total (Qty × Unit Price)" value={inr(totals.doorSupply)} />
             <Row label="Hardware Total" value={inr(totals.hardwareSupply)} />
@@ -435,25 +421,10 @@ function QuotationPrint({
 }) {
   const th = "border border-[#0a5a93] px-0.5 py-1 text-center font-bold text-white";
   const td = "border border-slate-300 px-0.5 py-0.5 text-center align-middle break-words";
-  const tc = "border border-slate-400 px-2 py-1";
-  // One column per distinct hardware across all doors (matches the sheet).
-  const hwCols: { name: string; rate: number }[] = [];
-  const hwSeen = new Set<string>();
-  for (const d of lines) {
-    for (const h of d.hardware) {
-      const nm = (h.name || "").trim();
-      if (nm && !hwSeen.has(nm)) {
-        hwSeen.add(nm);
-        hwCols.push({ name: nm, rate: Number(h.rate) || 0 });
-      }
-    }
-  }
-  const hwQty = (d: DoorLine, name: string): number => {
-    const h = d.hardware.find((x) => (x.name || "").trim() === name);
-    return h ? Number(h.qty) || 0 : 0;
-  };
-  const totalQty = lines.reduce((s, d) => s + (Number(d.qty) || 0), 0);
-  const SPEC_COLS = 15; // Sl.No … Total Qty
+  // Columns left of the final TOTAL ₹ value column (for the footer colSpans):
+  // SR CODE TYPE FRAME SHUTTER INSUL FINISH CONFIG W H AREA QTY (12)
+  // + HARDWARE (1) + RATE/m² BASIC HW DOOR+HW (4) = 17
+  const FOOT_SPAN = 17;
   return (
     <div className={`${active ? "q-print q-print-landscape print:block" : ""} hidden bg-white text-slate-900`} style={{ fontSize: 8 }}>
       {/* ── AA Tech branded header ── */}
@@ -475,116 +446,109 @@ function QuotationPrint({
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, background: "linear-gradient(90deg, #eef6fc, #eef7e6)", border: "1px solid #d7e7f3", borderRadius: 4, padding: "4px 10px", marginTop: 6, fontSize: 9 }}>
         <span><b style={{ color: "#0069b3" }}>Offer No:</b> {header.offerNo || "—"}</span>
         <span><b style={{ color: "#0069b3" }}>Date:</b> {header.quoteDate || "—"}</span>
-        <span><b style={{ color: "#0069b3" }}>Offer by:</b> Anant Avinya Technologies LLP, Navi Mumbai</span>
-      </div>
-      <div style={{ marginTop: 4, fontSize: 9.5, fontWeight: 700, color: "#0a0a0a" }}>
-        Project : {header.project || "—"}{header.customer ? `   ·   Customer : ${header.customer}` : ""}
+        <span><b style={{ color: "#0069b3" }}>Customer:</b> {header.customer || "—"}</span>
+        <span><b style={{ color: "#0069b3" }}>Project:</b> {header.project || "—"}</span>
       </div>
 
-      {/* door table — one column per hardware, like the source sheet */}
-      <table className="mt-2 w-full border-collapse" style={{ fontSize: 6 }}>
+      {/* door table */}
+      <table className="mt-2 w-full border-collapse" style={{ fontSize: 6, tableLayout: "fixed" }}>
+        <colgroup>
+          {["3%", "4%", "9%", "8%", "6%", "5%", "5%", "5%", "3.5%", "3.5%", "4%", "3%", "10%", "5%", "6%", "5.5%", "6%", "6.5%"].map((w, i) => (
+            <col key={i} style={{ width: w }} />
+          ))}
+        </colgroup>
         <thead>
           <tr style={{ background: "linear-gradient(180deg, #0180cf, #0069b3)" }}>
-            {["Sl. No", "Door Code", "Type of Door", "Frame Profile", "Frame Material", "Shutter Material", "Insulation", "Orientation", "Finish", "Type", "Frame Width", "Frame Height", "Area sq.mtr", "Total Area", "Total Qty"].map((h) => (
-              <th key={h} className={`${th} th-vert`}>{h}</th>
-            ))}
-            {hwCols.map((h, i) => (
-              <th key={i} className={`${th} th-vert`} style={{ minWidth: 15 }}>{h.name}</th>
-            ))}
-            {["Basic Rate of Hardware", "Rate p/sq.mtr", "Basic Supply price", "Door price + Hardware price", "Total amount of supply"].map((h) => (
-              <th key={h} className={`${th} th-vert`}>{h}</th>
-            ))}
-          </tr>
-          {/* per-hardware rate row */}
-          <tr style={{ background: "#eef6fc" }}>
-            <td className={td} colSpan={SPEC_COLS} style={{ textAlign: "right", fontWeight: 700 }}>Rate ₹ (Each) →</td>
-            {hwCols.map((h, i) => (
-              <td key={i} className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{h.rate ? inr(h.rate) : ""}</td>
-            ))}
-            <td className={td} colSpan={5} />
+            <th className={`${th} th-vert`}>SR</th>
+            <th className={`${th} th-vert`}>CODE</th>
+            <th className={`${th} th-vert`}>TYPE</th>
+            <th className={`${th} th-vert`}>FRAME</th>
+            <th className={`${th} th-vert`}>SHUTTER</th>
+            <th className={`${th} th-vert`}>INSUL</th>
+            <th className={`${th} th-vert`}>FINISH</th>
+            <th className={`${th} th-vert`}>CONFIG</th>
+            <th className={`${th} th-vert`}>W</th>
+            <th className={`${th} th-vert`}>H</th>
+            <th className={`${th} th-vert`}>AREA</th>
+            <th className={`${th} th-vert`}>QTY</th>
+            <th className={th}>HARDWARE</th>
+            <th className={`${th} th-vert`}>RATE/m²</th>
+            <th className={`${th} th-vert`}>BASIC ₹</th>
+            <th className={`${th} th-vert`}>HW ₹</th>
+            <th className={`${th} th-vert`}>DOOR+HW</th>
+            <th className={`${th} th-vert`}>TOTAL ₹</th>
           </tr>
         </thead>
         <tbody>
           {lines.map((d, i) => {
             const c = computeDoor(d);
-            const totalArea = c.area * (Number(d.qty) || 0);
             return (
               <tr key={d.id}>
                 <td className={td}>{i + 1}</td>
                 <td className={td}>{d.doorCode}</td>
                 <td className={td} style={{ textAlign: "left" }}>{d.doorType}</td>
-                <td className={td}>{d.frameProfile}</td>
-                <td className={td}>{d.frameMaterial}</td>
+                <td className={td}>{[d.frameProfile, d.frameMaterial].filter(Boolean).join(" / ")}</td>
                 <td className={td}>{d.shutterMaterial}</td>
                 <td className={td}>{d.insulation}</td>
-                <td className={td}>{d.orientation}</td>
                 <td className={td}>{d.finish}</td>
                 <td className={td}>{d.doorConfig}</td>
                 <td className={td}>{d.width || ""}</td>
                 <td className={td}>{d.height || ""}</td>
-                <td className={td}>{c.area ? c.area.toFixed(2) : ""}</td>
-                <td className={td}>{totalArea ? totalArea.toFixed(2) : ""}</td>
+                <td className={td}>{c.area ? c.area.toFixed(3) : ""}</td>
                 <td className={td}>{d.qty || ""}</td>
-                {hwCols.map((h, hi) => {
-                  const q = hwQty(d, h.name);
-                  return <td key={hi} className={td}>{q || ""}</td>;
-                })}
-                <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(c.hardwareTotal)}</td>
-                <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(d.ratePerSqm)}</td>
-                <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(c.basicSupply)}</td>
-                <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(c.doorHw)}</td>
-                <td className={td} style={{ fontWeight: 800, whiteSpace: "nowrap" }}>{inr(c.totalSupply)}</td>
+                <td className={td} style={{ textAlign: "left", lineHeight: 1.35 }}>
+                  {(() => {
+                    const items = d.hardware.filter((h) => (Number(h.qty) || 0) > 0);
+                    if (!items.length) return "-";
+                    return items.map((h, hi) => (
+                      <div key={hi}>{HW_ABBR[h.name] ?? h.name} ×{h.qty}</div>
+                    ));
+                  })()}
+                </td>
+                <td className={td}>{inr(d.ratePerSqm)}</td>
+                <td className={td}>{inr(c.basicSupply)}</td>
+                <td className={td}>{inr(c.hardwareTotal)}</td>
+                <td className={td}>{inr(c.doorHw)}</td>
+                <td className={td} style={{ fontWeight: 800, whiteSpace: "nowrap" }}>{inr(c.totalSupply + c.installTotal)}</td>
               </tr>
             );
           })}
-          {/* total qty row */}
-          <tr style={{ background: "#f6faf0", fontWeight: 700 }}>
-            <td className={td} colSpan={14} style={{ textAlign: "right" }}>TOTAL</td>
-            <td className={td}>{totalQty}</td>
-            {hwCols.map((_, i) => <td key={i} className={td} />)}
-            <td className={td} colSpan={4} />
-            <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(totals.subtotalSupply)}</td>
-          </tr>
         </tbody>
+        {!hideTotals && (
+        <tfoot>
+          <tr style={{ background: "#f6faf0" }}>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Door Total (Qty × Unit Price)</td>
+            <td className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{inr(totals.doorSupply)}</td>
+          </tr>
+          <tr style={{ background: "#f6faf0" }}>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Hardware Total</td>
+            <td className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{inr(totals.hardwareSupply)}</td>
+          </tr>
+          {totals.subtotalInstall > 0 && (
+            <tr style={{ background: "#f6faf0" }}>
+              <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Installation Total</td>
+              <td className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{inr(totals.subtotalInstall)}</td>
+            </tr>
+          )}
+          <tr style={{ background: "#eef6fc" }}>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 700 }}>Sub Total</td>
+            <td className={td} style={{ fontWeight: 800, whiteSpace: "nowrap" }}>{inr(totals.subtotal)}</td>
+          </tr>
+          <tr>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right" }}>CGST @ 9%</td>
+            <td className={td} style={{ whiteSpace: "nowrap" }}>{inr2(totals.cgst)}</td>
+          </tr>
+          <tr>
+            <td className={td} colSpan={FOOT_SPAN} style={{ textAlign: "right" }}>SGST @ 9%</td>
+            <td className={td} style={{ whiteSpace: "nowrap" }}>{inr2(totals.sgst)}</td>
+          </tr>
+          <tr style={{ background: "linear-gradient(90deg, #0069b3, #63b81e)" }}>
+            <td className="border border-[#0a5a93] px-1 py-1.5 text-white" colSpan={FOOT_SPAN} style={{ textAlign: "right", fontWeight: 800, fontSize: 9.5, whiteSpace: "nowrap" }}>GRAND TOTAL (incl GST)</td>
+            <td className="border border-[#0a5a93] px-1.5 py-1.5 text-center text-white" style={{ fontWeight: 800, fontSize: 9.5, whiteSpace: "nowrap" }}>{inr2(totals.grandTotal)}</td>
+          </tr>
+        </tfoot>
+        )}
       </table>
-
-      {/* totals block (right) */}
-      {!hideTotals && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-          <table style={{ borderCollapse: "collapse", fontSize: 9 }}>
-            <tbody>
-              <tr style={{ background: "#fff2b3" }}>
-                <td className={tc} style={{ fontWeight: 700 }}>Sub Total</td>
-                <td className={tc} style={{ textAlign: "right", fontWeight: 700, whiteSpace: "nowrap", minWidth: 90 }}>{inr(totals.subtotal)}</td>
-              </tr>
-              <tr>
-                <td className={tc}>CGST @ 9.00%</td>
-                <td className={tc} style={{ textAlign: "right", whiteSpace: "nowrap" }}>{inr(totals.cgst)}</td>
-              </tr>
-              <tr>
-                <td className={tc}>SGST @ 9.00%</td>
-                <td className={tc} style={{ textAlign: "right", whiteSpace: "nowrap" }}>{inr(totals.sgst)}</td>
-              </tr>
-              <tr style={{ background: "#dff5c8" }}>
-                <td className={tc} style={{ fontWeight: 700 }}>Total</td>
-                <td className={tc} style={{ textAlign: "right", fontWeight: 700, whiteSpace: "nowrap" }}>{inr(totals.grandTotal)}</td>
-              </tr>
-              <tr style={{ background: "linear-gradient(90deg,#0069b3,#63b81e)" }}>
-                <td className={tc} style={{ fontWeight: 800, color: "#fff" }}>TOTAL PROJECT COST</td>
-                <td className={tc} style={{ textAlign: "right", fontWeight: 800, whiteSpace: "nowrap", color: "#fff" }}>{inr(totals.grandTotal)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* notes */}
-      <div className="mt-3" style={{ fontSize: 8 }}>
-        <div style={{ fontWeight: 800, color: "#0069b3", borderBottom: "1.5px solid #63b81e", display: "inline-block", paddingBottom: 1, marginBottom: 2 }}>NOTES &amp; TERMS</div>
-        {notes.filter((n) => n.trim()).map((nt, i) => (
-          <div key={i} style={{ lineHeight: 1.5 }}>{i + 1}. {nt}</div>
-        ))}
-      </div>
 
       {/* signatures */}
       <div className="mt-8 flex justify-between" style={{ fontSize: 9 }}>
