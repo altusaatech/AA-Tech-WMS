@@ -131,7 +131,8 @@ export function QuotationPi({
               <tr className="text-left text-[11px] font-extrabold uppercase tracking-[0.04em] text-white" style={{ background: "linear-gradient(180deg, #0069b3, #00598f)" }}>
                 <th className="px-3 py-2.5">#</th>
                 <th className="px-3 py-2.5">Door Code</th>
-                <th className="px-3 py-2.5">Dimensions (W×H)</th>
+                <th className="px-3 py-2.5 text-right">Width (mm)</th>
+                <th className="px-3 py-2.5 text-right">Height (mm)</th>
                 <th className="px-3 py-2.5">Description</th>
                 <th className="px-3 py-2.5 text-right">Qty</th>
                 <th className="px-3 py-2.5 text-right">Rate ₹</th>
@@ -142,7 +143,7 @@ export function QuotationPi({
             <tbody>
               {lines.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-[13.5px] text-slate-400">
+                  <td colSpan={9} className="px-4 py-10 text-center text-[13.5px] text-slate-400">
                     No doors in this quotation. Add doors in the quotation first.
                   </td>
                 </tr>
@@ -153,7 +154,8 @@ export function QuotationPi({
                     <tr key={d.id} className={i % 2 ? "bg-[#f5fafe]" : "bg-white"}>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-center font-bold text-slate-400">{i + 1}</td>
                       <td className="border-b border-[#e7eff6] px-2 py-1.5"><input className={`${inp} h-8 w-24`} value={d.doorCode} onChange={(e) => patchDoor(d.id, { doorCode: e.target.value })} /></td>
-                      <td className="border-b border-[#e7eff6] px-3 py-1.5 tabular-nums text-slate-700">{d.width && d.height ? `${d.width} × ${d.height} mm` : "—"}</td>
+                      <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right tabular-nums text-slate-700">{d.width || "—"}</td>
+                      <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right tabular-nums text-slate-700">{d.height || "—"}</td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-slate-700">{d.doorType || "—"}</td>
                       <td className="border-b border-[#e7eff6] px-2 py-1.5"><input type="number" className={`${inp} h-8 w-16 text-right`} value={d.qty || ""} onChange={(e) => patchDoor(d.id, { qty: Number(e.target.value) })} /></td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right font-semibold tabular-nums text-slate-700">{inr(p.rate)}</td>
@@ -266,26 +268,27 @@ function PiPrint({
       {/* line items */}
       <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
         <colgroup>
-          {["4%", "9%", "12%", "26%", "9%", "6%", "7%", "9%", "9%", "9%"].map((w, i) => (
+          {["4%", "9%", "7%", "7%", "24%", "9%", "6%", "7%", "9%", "9%", "9%"].map((w, i) => (
             <col key={i} style={{ width: w }} />
           ))}
         </colgroup>
         <thead>
           <tr style={{ background: "linear-gradient(180deg,#0180cf,#0069b3)", color: "#fff" }}>
-            {["Sr No", "Door Code", "Dimensions (W×H mm)", "Description", "HSN Code", "UOM", "Qty Nos", "Rate ₹", "Install ₹", "Amount ₹"].map((h) => (
+            {["Sr No", "Door Code", "Width (mm)", "Height (mm)", "Description", "HSN Code", "UOM", "Qty Nos", "Rate ₹", "Install ₹", "Amount ₹"].map((h) => (
               <th key={h} className={c} style={{ textAlign: "center", fontWeight: 700, wordBreak: "break-word" }}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          <tr><td className={c} colSpan={10} style={{ fontWeight: 700, textAlign: "center", background: "#f1f7fc" }}>SUPPLY &amp; INSTALLATION OF CLEAN ROOM DOORS WITH HARDWARE</td></tr>
+          <tr><td className={c} colSpan={11} style={{ fontWeight: 700, textAlign: "center", background: "#f1f7fc" }}>SUPPLY &amp; INSTALLATION OF CLEAN ROOM DOORS WITH HARDWARE</td></tr>
           {lines.map((d, i) => {
             const p = computePiLine(d);
             return (
               <tr key={d.id}>
                 <td className={c} style={{ textAlign: "center" }}>{i + 1}</td>
                 <td className={c}>{d.doorCode}</td>
-                <td className={c} style={{ textAlign: "center" }}>{d.width && d.height ? `${d.width} × ${d.height}` : ""}</td>
+                <td className={c} style={{ textAlign: "center" }}>{d.width || ""}</td>
+                <td className={c} style={{ textAlign: "center" }}>{d.height || ""}</td>
                 <td className={c}>{d.doorType}</td>
                 <td className={c} style={{ textAlign: "center" }}>{piMeta.hsnCode}</td>
                 <td className={c} style={{ textAlign: "center" }}>Nos</td>
