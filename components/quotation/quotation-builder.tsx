@@ -422,24 +422,55 @@ function QuotationPrint({
   const th = "border border-[#0a5a93] px-0.5 py-1 text-center font-bold text-white";
   const td = "border border-slate-300 px-0.5 py-0.5 text-center align-middle break-words";
   const tc = "border border-slate-400 px-2 py-1";
-  // One column per distinct hardware across all doors (matches the source sheet).
-  const hwCols: { name: string; rate: number }[] = [];
-  const hwSeen = new Set<string>();
+  // Hardware columns — only the items actually used (qty > 0 in some door).
+  const hwMap = new Map<string, { name: string; rate: number; used: boolean }>();
   for (const d of lines) {
     for (const h of d.hardware) {
       const nm = (h.name || "").trim();
-      if (nm && !hwSeen.has(nm)) {
-        hwSeen.add(nm);
-        hwCols.push({ name: nm, rate: Number(h.rate) || 0 });
+      if (!nm) continue;
+      const q = Number(h.qty) || 0;
+      const r = Number(h.rate) || 0;
+      const ex = hwMap.get(nm);
+      if (!ex) hwMap.set(nm, { name: nm, rate: r, used: q > 0 });
+      else {
+        if (q > 0) ex.used = true;
+        if (!ex.rate && r) ex.rate = r;
       }
     }
   }
+  const hwCols = Array.from(hwMap.values()).filter((v) => v.used);
   const hwQty = (d: DoorLine, name: string): number => {
     const h = d.hardware.find((x) => (x.name || "").trim() === name);
     return h ? Number(h.qty) || 0 : 0;
   };
   const totalQty = lines.reduce((s, d) => s + (Number(d.qty) || 0), 0);
-  const SPEC_COLS = 15; // Sl.No … Total Qty
+  type Cmp = ReturnType<typeof computeDoor>;
+  // Spec columns — drop any that are blank across every door (keep computed ones).
+  const SPEC_ALL: { label: string; get: (d: DoorLine, c: Cmp, i: number) => React.ReactNode; left?: boolean; always?: boolean; has?: (d: DoorLine) => boolean }[] = [
+    { label: "Sl. No", get: (_d, _c, i) => i + 1, always: true },
+    { label: "Door Code", get: (d) => d.doorCode, has: (d) => !!(d.doorCode || "").trim() },
+    { label: "Type of Door", get: (d) => d.doorType, left: true, has: (d) => !!(d.doorType || "").trim() },
+    { label: "Frame Profile", get: (d) => d.frameProfile, has: (d) => !!(d.frameProfile || "").trim() },
+    { label: "Frame Material", get: (d) => d.frameMaterial, has: (d) => !!(d.frameMaterial || "").trim() },
+    { label: "Shutter Material", get: (d) => d.shutterMaterial, has: (d) => !!(d.shutterMaterial || "").trim() },
+    { label: "Insulation", get: (d) => d.insulation, has: (d) => !!(d.insulation || "").trim() },
+    { label: "Orientation", get: (d) => d.orientation, has: (d) => !!(d.orientation || "").trim() },
+    { label: "Finish", get: (d) => d.finish, has: (d) => !!(d.finish || "").trim() },
+    { label: "Type", get: (d) => d.doorConfig, has: (d) => !!(d.doorConfig || "").trim() },
+    { label: "Frame Width", get: (d) => d.width || "", has: (d) => !!d.width },
+    { label: "Frame Height", get: (d) => d.height || "", has: (d) => !!d.height },
+    { label: "Area sq.mtr", get: (_d, c) => (c.area ? c.area.toFixed(2) : ""), always: true },
+    { label: "Total Area", get: (d, c) => { const t = c.area * (Number(d.qty) || 0); return t ? t.toFixed(2) : ""; }, always: true },
+    { label: "Total Qty", get: (d) => d.qty || "", always: true },
+  ];
+  const specCols = SPEC_ALL.filter((s) => s.always || (s.has ? lines.some((d) => s.has!(d)) : true));
+  const RIGHT_ALL: { label: string; get: (d: DoorLine, c: Cmp) => React.ReactNode }[] = [
+    { label: "Basic Rate of Hardware", get: (_d, c) => inr(c.hardwareTotal) },
+    { label: "Rate p/sq.mtr", get: (d) => inr(d.ratePerSqm) },
+    { label: "Basic Supply price", get: (_d, c) => inr(c.basicSupply) },
+    { label: "Door price + Hardware price", get: (_d, c) => inr(c.doorHw) },
+    { label: "Total amount of supply", get: (_d, c) => inr(c.totalSupply) },
+  ];
   return (
     <div className={`${active ? "q-print q-print-landscape print:block" : ""} hidden bg-white text-slate-900`} style={{ fontSize: 8 }}>
       {/* ── AA Tech branded header ── */}
@@ -464,68 +495,53 @@ function QuotationPrint({
         <span><b style={{ color: "#0069b3" }}>Project:</b> {header.project || "—"}</span>
       </div>
 
-      {/* door table — one column per hardware, horizontal wrapping headers */}
+      {/* door table — a column per used hardware, vertical headers, no empties */}
       <table className="mt-2 w-full border-collapse" style={{ fontSize: 6 }}>
         <thead>
           <tr style={{ background: "linear-gradient(180deg, #0180cf, #0069b3)" }}>
-            {["Sl. No", "Door Code", "Type of Door", "Frame Profile", "Frame Material", "Shutter Material", "Insulation", "Orientation", "Finish", "Type", "Frame Width", "Frame Height", "Area sq.mtr", "Total Area", "Total Qty"].map((h) => (
-              <th key={h} className={th} style={{ verticalAlign: "bottom", lineHeight: 1.05 }}>{h}</th>
+            {specCols.map((s) => (
+              <th key={s.label} className={`${th} th-vert`}>{s.label}</th>
             ))}
             {hwCols.map((h, i) => (
-              <th key={i} className={th} style={{ verticalAlign: "bottom", lineHeight: 1.05, minWidth: 18 }}>{h.name}</th>
+              <th key={i} className={`${th} th-vert`} style={{ minWidth: 14 }}>{h.name}</th>
             ))}
-            {["Basic Rate of Hardware", "Rate p/sq.mtr", "Basic Supply price", "Door price + Hardware price", "Total amount of supply"].map((h) => (
-              <th key={h} className={th} style={{ verticalAlign: "bottom", lineHeight: 1.05 }}>{h}</th>
+            {RIGHT_ALL.map((r) => (
+              <th key={r.label} className={`${th} th-vert`}>{r.label}</th>
             ))}
           </tr>
           {/* per-hardware rate row */}
           <tr style={{ background: "#eef6fc" }}>
-            <td className={td} colSpan={SPEC_COLS} style={{ textAlign: "right", fontWeight: 700 }}>Rate ₹ (Each) →</td>
+            <td className={td} colSpan={specCols.length} style={{ textAlign: "right", fontWeight: 700 }}>Rate ₹ (Each) →</td>
             {hwCols.map((h, i) => (
               <td key={i} className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{h.rate ? inr(h.rate) : ""}</td>
             ))}
-            <td className={td} colSpan={5} />
+            <td className={td} colSpan={RIGHT_ALL.length} />
           </tr>
         </thead>
         <tbody>
           {lines.map((d, i) => {
             const c = computeDoor(d);
-            const totalArea = c.area * (Number(d.qty) || 0);
             return (
               <tr key={d.id}>
-                <td className={td}>{i + 1}</td>
-                <td className={td}>{d.doorCode}</td>
-                <td className={td} style={{ textAlign: "left" }}>{d.doorType}</td>
-                <td className={td}>{d.frameProfile}</td>
-                <td className={td}>{d.frameMaterial}</td>
-                <td className={td}>{d.shutterMaterial}</td>
-                <td className={td}>{d.insulation}</td>
-                <td className={td}>{d.orientation}</td>
-                <td className={td}>{d.finish}</td>
-                <td className={td}>{d.doorConfig}</td>
-                <td className={td}>{d.width || ""}</td>
-                <td className={td}>{d.height || ""}</td>
-                <td className={td}>{c.area ? c.area.toFixed(2) : ""}</td>
-                <td className={td}>{totalArea ? totalArea.toFixed(2) : ""}</td>
-                <td className={td}>{d.qty || ""}</td>
+                {specCols.map((s) => (
+                  <td key={s.label} className={td} style={s.left ? { textAlign: "left" } : undefined}>{s.get(d, c, i)}</td>
+                ))}
                 {hwCols.map((h, hi) => {
                   const q = hwQty(d, h.name);
                   return <td key={hi} className={td}>{q || ""}</td>;
                 })}
-                <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(c.hardwareTotal)}</td>
-                <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(d.ratePerSqm)}</td>
-                <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(c.basicSupply)}</td>
-                <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(c.doorHw)}</td>
-                <td className={td} style={{ fontWeight: 800, whiteSpace: "nowrap" }}>{inr(c.totalSupply)}</td>
+                {RIGHT_ALL.map((r) => (
+                  <td key={r.label} className={td} style={{ whiteSpace: "nowrap" }}>{r.get(d, c)}</td>
+                ))}
               </tr>
             );
           })}
           {/* total qty row */}
           <tr style={{ background: "#f6faf0", fontWeight: 700 }}>
-            <td className={td} colSpan={14} style={{ textAlign: "right" }}>TOTAL</td>
+            <td className={td} colSpan={specCols.length - 1} style={{ textAlign: "right" }}>TOTAL</td>
             <td className={td}>{totalQty}</td>
             {hwCols.map((_, i) => <td key={i} className={td} />)}
-            <td className={td} colSpan={4} />
+            <td className={td} colSpan={RIGHT_ALL.length - 1} />
             <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(totals.subtotalSupply)}</td>
           </tr>
         </tbody>
