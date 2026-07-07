@@ -184,12 +184,18 @@ export function SalesDataGrid({
       if (!ws) throw new Error("empty sheet");
       const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
 
-      const mapped = json.map((r) => {
+      const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+      const mapped: Record<string, string | boolean | null>[] = [];
+      let skipped = 0;
+      for (const r of json) {
+        // Case/spacing-insensitive header lookup so slightly-different headers still match.
+        const byNorm = new Map<string, unknown>();
+        for (const [k, v] of Object.entries(r)) byNorm.set(norm(k), v);
         const out: Record<string, string | boolean | null> = {};
         for (const c of columns) {
           if (c.readOnly) continue;
-          const raw = r[c.label];
-          if (raw === undefined || raw === null || raw === "") continue;
+          const raw = r[c.label] ?? byNorm.get(norm(c.label));
+          if (raw === undefined || raw === null || String(raw).trim() === "") continue;
           if (c.type === "bool") {
             out[c.key] = ["yes", "true", "1", "y"].includes(String(raw).toLowerCase().trim());
           } else if (c.type === "date" && raw instanceof Date) {
@@ -198,12 +204,19 @@ export function SalesDataGrid({
             out[c.key] = String(raw).trim();
           }
         }
-        return out;
-      });
+        // Never insert a row that mapped to nothing.
+        if (Object.keys(out).length > 0) mapped.push(out);
+        else skipped++;
+      }
+
+      if (!mapped.length) {
+        setBanner({ kind: "err", text: `No matching data in “${sheetName}”. The sheet's column headers must match this register — download the Template to see the exact headers.` });
+        return;
+      }
 
       const inserted = await importSalesRows(kind, mapped);
       if (inserted.length) onImported(inserted);
-      setBanner({ kind: "ok", text: `Imported ${inserted.length} row${inserted.length === 1 ? "" : "s"} from “${sheetName}”.` });
+      setBanner({ kind: "ok", text: `Imported ${inserted.length} row${inserted.length === 1 ? "" : "s"} from “${sheetName}”${skipped ? ` · skipped ${skipped} empty` : ""}.` });
     } catch {
       setBanner({ kind: "err", text: "Import failed. Check that the sheet's column headers match this register's columns." });
     } finally {
