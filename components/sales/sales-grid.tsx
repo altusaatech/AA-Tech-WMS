@@ -62,6 +62,9 @@ export function SalesDataGrid({
   const [importing, setImporting] = React.useState(false);
   const [banner, setBanner] = React.useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const fileRef = React.useRef<HTMLInputElement>(null);
+  // Multi-sheet workbooks: hold the parsed book and offer a sheet picker.
+  const wbRef = React.useRef<import("xlsx").WorkBook | null>(null);
+  const [sheetPicker, setSheetPicker] = React.useState<string[] | null>(null);
 
   const view = React.useMemo(() => {
     let r = rows;
@@ -151,15 +154,34 @@ export function SalesDataGrid({
     const file = e.target.files?.[0];
     if (e.target) e.target.value = "";
     if (!file) return;
-    setImporting(true);
     setBanner(null);
     try {
       const XLSX = await import("xlsx");
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array", cellDates: true });
-      const sheetName = wb.SheetNames[0];
-      const ws = sheetName ? wb.Sheets[sheetName] : undefined;
-      if (!ws) throw new Error("empty workbook");
+      if (!wb.SheetNames.length) throw new Error("empty workbook");
+      wbRef.current = wb;
+      // Multiple sheets → let the user choose which one maps to this register.
+      if (wb.SheetNames.length > 1) {
+        setSheetPicker(wb.SheetNames);
+        return;
+      }
+      await importSheet(wb.SheetNames[0]!);
+    } catch {
+      setBanner({ kind: "err", text: "Could not read the file. Make sure it's a valid Excel/CSV file." });
+    }
+  }
+
+  async function importSheet(sheetName: string) {
+    const wb = wbRef.current;
+    if (!wb) return;
+    setSheetPicker(null);
+    setImporting(true);
+    setBanner(null);
+    try {
+      const XLSX = await import("xlsx");
+      const ws = wb.Sheets[sheetName];
+      if (!ws) throw new Error("empty sheet");
       const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
 
       const mapped = json.map((r) => {
@@ -181,11 +203,12 @@ export function SalesDataGrid({
 
       const inserted = await importSalesRows(kind, mapped);
       if (inserted.length) onImported(inserted);
-      setBanner({ kind: "ok", text: `Imported ${inserted.length} row${inserted.length === 1 ? "" : "s"} successfully.` });
+      setBanner({ kind: "ok", text: `Imported ${inserted.length} row${inserted.length === 1 ? "" : "s"} from “${sheetName}”.` });
     } catch {
-      setBanner({ kind: "err", text: "Import failed. Check that the file's column headers match this register's columns." });
+      setBanner({ kind: "err", text: "Import failed. Check that the sheet's column headers match this register's columns." });
     } finally {
       setImporting(false);
+      wbRef.current = null;
     }
   }
 
@@ -452,6 +475,46 @@ export function SalesDataGrid({
           </div>
         )}
       </div>
+
+      {/* ── sheet picker (multi-sheet workbooks) ── */}
+      {sheetPicker && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-sm"
+          onClick={() => setSheetPicker(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="inline-flex size-9 items-center justify-center rounded-xl text-white shadow" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
+                <FileSpreadsheet size={17} strokeWidth={2.3} />
+              </span>
+              <div>
+                <h3 className="text-[15px] font-black text-slate-800">Choose a sheet</h3>
+                <p className="text-[12px] text-slate-500">Import into {title ?? kind}</p>
+              </div>
+            </div>
+            <p className="mt-3 text-[12.5px] text-slate-500">Your file has multiple sheets — pick the one to bulk upload:</p>
+            <div className="mt-2 max-h-[46vh] space-y-1.5 overflow-y-auto">
+              {sheetPicker.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => importSheet(name)}
+                  className="flex w-full items-center gap-2 rounded-lg border border-slate-200 px-3 py-2.5 text-left text-[13.5px] font-bold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-[#0180cf] hover:bg-[#0180cf]/5"
+                >
+                  <FileSpreadsheet size={14} className="shrink-0 text-[#0069b3]" />
+                  <span className="truncate">{name}</span>
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={() => setSheetPicker(null)} className="mt-3 text-[12.5px] font-bold text-slate-400 hover:text-slate-600">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
