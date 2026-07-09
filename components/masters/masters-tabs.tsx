@@ -107,7 +107,7 @@ export function MastersTabs({
       const next = i >= 0 ? list.map((r) => (r.id === saved.id ? saved : r)) : [...list, saved];
       return { ...prev, [active]: next };
     });
-    fireToast({ message: "Changes Saved", type: "success" });
+    // Success/error feedback is fired centrally by the entry modal.
     if (opts.close) setModalOpen(false);
   }
   function onDeleted(id: string) {

@@ -28,6 +28,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { saveSalesRow, type SaleKind, type SalesRow } from "@/app/(app)/sales/actions";
+import { fireToast } from "@/lib/toast";
 import type { SalesColDef } from "@/lib/sales/columns";
 
 type FieldVal = string | boolean;
@@ -195,9 +196,16 @@ function FormBody({
       const saved = await saveSalesRow(kind, row?.id ?? null, payload);
       setPhase("success");
       await new Promise((r) => setTimeout(r, 850));
+      // Confirm the save centrally so every register/master gets feedback —
+      // Save & New clears the form, so this is the only "it saved" signal.
+      fireToast({
+        message: row ? "Changes saved" : close ? "Entry saved" : "Entry saved — form cleared for the next one",
+        type: "success",
+      });
       onSaved(saved, { close });
     } catch {
       setPhase("form");
+      fireToast({ message: "Could not save — please check your connection and try again.", type: "error" });
     }
   }
 
