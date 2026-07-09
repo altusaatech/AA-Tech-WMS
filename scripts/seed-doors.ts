@@ -41,6 +41,9 @@ async function main() {
     // First occurrence of a code wins (skip duplicate rows).
     if (seen.has(code.toLowerCase())) continue;
     seen.add(code.toLowerCase());
+    // Only the green "code → spec" columns belong to the door master. The
+    // yellow columns (orientation/finish/shade/shade-finish/width/height/qty)
+    // are option lists chosen per door at quotation time, not master data.
     rows.push({
       doorCode: code,
       doorType: str(r[2]),
@@ -52,13 +55,6 @@ async function main() {
       insulation: str(r[8]),
       ratePerSqm: num(r[9]),
       installPerSqm: num(r[10]),
-      orientation: str(r[11]),
-      finish: str(r[12]),
-      shade: str(r[13]),
-      shadeFinish: str(r[14]),
-      width: num(r[15]),
-      height: num(r[16]),
-      qty: num(r[17]),
     });
   }
 

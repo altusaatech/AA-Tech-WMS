@@ -224,6 +224,12 @@ export const DOOR_SHADE_FINISHES = ["SEMIGLOSSY", "MATT", "TEXTURE", "STRUCTURE"
 export const DOOR_WIDTHS = ["750", "800", "850", "900", "950", "1000", "1050", "1100", "1150", "1200", "1300", "1400", "1500", "1600", "1800", "2000", "2100", "2200", "2400", "2700", "3000"];
 export const DOOR_HEIGHTS = ["1800", "1900", "2000", "2100", "2200", "2250", "2400", "2450", "2500", "2700", "3000"];
 
+/**
+ * The Door master holds only the green "code → spec" columns. The yellow
+ * columns from the sheet (Orientation, Finish, Shade, Shade Finish, Width,
+ * Height, Qty) are NOT per-door attributes — they are option lists chosen per
+ * door at quotation time, surfaced as the dropdowns above.
+ */
 export const DOOR_COLUMNS: SalesColDef[] = [
   { key: "doorCode", label: "Door Code", type: "text", required: true, width: 120 },
   { key: "doorType", label: "Door Type", type: "text", width: 170 },
@@ -235,13 +241,6 @@ export const DOOR_COLUMNS: SalesColDef[] = [
   { key: "insulation", label: "Insulation", type: "text", width: 120 },
   { key: "ratePerSqm", label: "Rate/Sqmt", type: "number", width: 110 },
   { key: "installPerSqm", label: "Installation/Sqmt", type: "number", width: 130 },
-  { key: "orientation", label: "Orientation", type: "select", options: DOOR_ORIENTATIONS, allowCustom: true, width: 110 },
-  { key: "finish", label: "Finish", type: "select", options: DOOR_FINISHES, allowCustom: true, width: 150 },
-  { key: "shade", label: "Shade", type: "select", options: DOOR_SHADES, allowCustom: true, width: 170 },
-  { key: "shadeFinish", label: "Shade Finish", type: "select", options: DOOR_SHADE_FINISHES, allowCustom: true, width: 130 },
-  { key: "width", label: "Width mm", type: "select", options: DOOR_WIDTHS, allowCustom: true, width: 110 },
-  { key: "height", label: "Height mm", type: "select", options: DOOR_HEIGHTS, allowCustom: true, width: 110 },
-  { key: "qty", label: "Qty in Nos", type: "number", width: 90 },
 ];
 
 export const QUOTE_KEYS = QUOTE_COLUMNS.map((c) => c.key);

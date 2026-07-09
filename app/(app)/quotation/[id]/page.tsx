@@ -52,7 +52,9 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
   }
 
   // Door master — one entry per code. Typing/selecting a code in the builder
-  // auto-fills every parameter (type, config, frame, shutter, rates, size…).
+  // auto-fills the code→spec parameters (type, config, frame, shutter,
+  // insulation, rates). The yellow fields (orientation, finish, shade, size…)
+  // are picked per door from dropdowns, not stored in the master.
   const num = (v: unknown) => Number(v) || 0;
   const doorOptions = doors
     .filter((d) => (d.doorCode ?? "").trim())
@@ -65,13 +67,8 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
       shutterType: d.shutterType ?? "",
       shutterMaterial: d.shutterMaterial ?? "",
       insulation: d.insulation ?? "",
-      orientation: d.orientation ?? "",
-      finish: d.finish ?? "",
       ratePerSqm: num(d.ratePerSqm),
       installPerSqm: num(d.installPerSqm),
-      width: num(d.width),
-      height: num(d.height),
-      qty: num(d.qty),
     }))
     .sort((a, b) => a.code.localeCompare(b.code));
 

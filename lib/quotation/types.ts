@@ -18,6 +18,8 @@ export interface DoorLine {
   insulation: string;
   orientation: string;
   finish: string;
+  shade: string;
+  shadeFinish: string;
   doorConfig: string;
   width: number; // mm
   height: number; // mm
@@ -89,6 +91,8 @@ export function newDoor(): DoorLine {
     insulation: "",
     orientation: "",
     finish: "",
+    shade: "",
+    shadeFinish: "",
     doorConfig: "Single",
     width: 0,
     height: 0,

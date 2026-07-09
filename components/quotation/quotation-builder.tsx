@@ -6,7 +6,7 @@ import type { Route } from "next";
 import { ArrowLeft, Save, Printer, Plus, Trash2, Loader2, DoorOpen, FileText, ReceiptText } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
-import { DOOR_ORIENTATIONS, DOOR_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS } from "@/lib/sales/columns";
+import { DOOR_ORIENTATIONS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS } from "@/lib/sales/columns";
 import {
   newDoor,
   newHardware,
@@ -42,13 +42,8 @@ interface DoorOption {
   shutterType: string;
   shutterMaterial: string;
   insulation: string;
-  orientation: string;
-  finish: string;
   ratePerSqm: number;
   installPerSqm: number;
-  width: number;
-  height: number;
-  qty: number;
 }
 
 const HW_ABBR: Record<string, string> = {
@@ -146,11 +141,6 @@ export function QuotationBuilder({
       shutterType: m.shutterType,
       shutterMaterial: m.shutterMaterial,
       insulation: m.insulation,
-      ...(m.orientation ? { orientation: m.orientation } : {}),
-      finish: m.finish,
-      ...(m.width ? { width: m.width } : {}),
-      ...(m.height ? { height: m.height } : {}),
-      ...(m.qty ? { qty: m.qty } : {}),
       ratePerSqm: m.ratePerSqm,
       installPerSqm: m.installPerSqm,
     });
@@ -409,6 +399,20 @@ function DoorCard({
               {DOOR_FINISHES.map((o) => <option key={o} value={o}>{o}</option>)}
             </select>
           </L>
+          <L label="Shade">
+            <select className={`${inp} cursor-pointer`} value={door.shade || ""} onChange={(e) => onPatch({ shade: e.target.value })}>
+              <option value="">Select…</option>
+              {!DOOR_SHADES.includes(door.shade || "") && door.shade && <option value={door.shade}>{door.shade}</option>}
+              {DOOR_SHADES.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </L>
+          <L label="Shade Finish">
+            <select className={`${inp} cursor-pointer`} value={door.shadeFinish || ""} onChange={(e) => onPatch({ shadeFinish: e.target.value })}>
+              <option value="">Select…</option>
+              {!DOOR_SHADE_FINISHES.includes(door.shadeFinish || "") && door.shadeFinish && <option value={door.shadeFinish}>{door.shadeFinish}</option>}
+              {DOOR_SHADE_FINISHES.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </L>
           <L label="Width (mm)">
             <input type="number" list={`w-${door.id}`} className={`${inp} text-right`} value={door.width || ""} onChange={(e) => onPatch({ width: Number(e.target.value) })} />
             <datalist id={`w-${door.id}`}>{DOOR_WIDTHS.map((w) => <option key={w} value={w} />)}</datalist>
@@ -544,6 +548,8 @@ function QuotationPrint({
     { label: "Insulation", get: (d) => d.insulation, has: (d) => !!(d.insulation || "").trim() },
     { label: "Orientation", get: (d) => d.orientation, has: (d) => !!(d.orientation || "").trim() },
     { label: "Finish", get: (d) => d.finish, has: (d) => !!(d.finish || "").trim() },
+    { label: "Shade", get: (d) => d.shade, has: (d) => !!(d.shade || "").trim() },
+    { label: "Shade Finish", get: (d) => d.shadeFinish, has: (d) => !!(d.shadeFinish || "").trim() },
     { label: "Type", get: (d) => d.doorConfig, has: (d) => !!(d.doorConfig || "").trim() },
     { label: "Frame Width", get: (d) => d.width || "", has: (d) => !!d.width },
     { label: "Frame Height", get: (d) => d.height || "", has: (d) => !!d.height },
