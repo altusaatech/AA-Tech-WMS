@@ -212,6 +212,18 @@ export const PI_COLUMNS: SalesColDef[] = [
 ];
 
 // ── Door Kit master (PARAMETER DOORS sheet) ────────────────────
+/**
+ * Dropdown option lists for the door "yellow" (List) columns from
+ * PARAMETER DOORS.xlsx. Exported so the quotation builder reuses the exact
+ * same choices. `allowCustom` on each column still lets users type a new value.
+ */
+export const DOOR_ORIENTATIONS = ["RH", "LH"];
+export const DOOR_FINISHES = ["POWDERCOATED", "PU PAINTED", "PRIME PAINTED", "ENAMEL PAINTED"];
+export const DOOR_SHADES = ["RAL7035 LT GREY", "RAL9001 WHITE", "RAL7032 SIEMENS GREY", "EPOXY GREY PRIMER"];
+export const DOOR_SHADE_FINISHES = ["SEMIGLOSSY", "MATT", "TEXTURE", "STRUCTURE"];
+export const DOOR_WIDTHS = ["750", "800", "850", "900", "950", "1000", "1050", "1100", "1150", "1200", "1300", "1400", "1500", "1600", "1800", "2000", "2100", "2200", "2400", "2700", "3000"];
+export const DOOR_HEIGHTS = ["1800", "1900", "2000", "2100", "2200", "2250", "2400", "2450", "2500", "2700", "3000"];
+
 export const DOOR_COLUMNS: SalesColDef[] = [
   { key: "doorCode", label: "Door Code", type: "text", required: true, width: 120 },
   { key: "doorType", label: "Door Type", type: "text", width: 170 },
@@ -223,12 +235,12 @@ export const DOOR_COLUMNS: SalesColDef[] = [
   { key: "insulation", label: "Insulation", type: "text", width: 120 },
   { key: "ratePerSqm", label: "Rate/Sqmt", type: "number", width: 110 },
   { key: "installPerSqm", label: "Installation/Sqmt", type: "number", width: 130 },
-  { key: "orientation", label: "Orientation", type: "text", width: 110 },
-  { key: "finish", label: "Finish", type: "text", width: 130 },
-  { key: "shade", label: "Shade", type: "text", width: 140 },
-  { key: "shadeFinish", label: "Shade Finish", type: "text", width: 120 },
-  { key: "width", label: "Width mm", type: "number", width: 100 },
-  { key: "height", label: "Height mm", type: "number", width: 100 },
+  { key: "orientation", label: "Orientation", type: "select", options: DOOR_ORIENTATIONS, allowCustom: true, width: 110 },
+  { key: "finish", label: "Finish", type: "select", options: DOOR_FINISHES, allowCustom: true, width: 150 },
+  { key: "shade", label: "Shade", type: "select", options: DOOR_SHADES, allowCustom: true, width: 170 },
+  { key: "shadeFinish", label: "Shade Finish", type: "select", options: DOOR_SHADE_FINISHES, allowCustom: true, width: 130 },
+  { key: "width", label: "Width mm", type: "select", options: DOOR_WIDTHS, allowCustom: true, width: 110 },
+  { key: "height", label: "Height mm", type: "select", options: DOOR_HEIGHTS, allowCustom: true, width: 110 },
   { key: "qty", label: "Qty in Nos", type: "number", width: 90 },
 ];
 

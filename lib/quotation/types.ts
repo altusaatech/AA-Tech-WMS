@@ -87,7 +87,7 @@ export function newDoor(): DoorLine {
     shutterType: "",
     shutterMaterial: "",
     insulation: "",
-    orientation: "Push Side",
+    orientation: "",
     finish: "",
     doorConfig: "Single",
     width: 0,

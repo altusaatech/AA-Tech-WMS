@@ -6,6 +6,7 @@ import type { Route } from "next";
 import { ArrowLeft, Save, Printer, Plus, Trash2, Loader2, DoorOpen, FileText, ReceiptText } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
+import { DOOR_ORIENTATIONS, DOOR_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS } from "@/lib/sales/columns";
 import {
   newDoor,
   newHardware,
@@ -394,10 +395,28 @@ function DoorCard({
           <L label="Shutter Type"><input className={inp} value={door.shutterType || ""} onChange={(e) => onPatch({ shutterType: e.target.value })} placeholder="45 mm thick Flush" /></L>
           <L label="Shutter Material"><input className={inp} value={door.shutterMaterial} onChange={(e) => onPatch({ shutterMaterial: e.target.value })} placeholder="GI 0.8mm" /></L>
           <L label="Insulation"><input className={inp} value={door.insulation} onChange={(e) => onPatch({ insulation: e.target.value })} placeholder="Honeycomb" /></L>
-          <L label="Orientation"><input className={inp} value={door.orientation} onChange={(e) => onPatch({ orientation: e.target.value })} /></L>
-          <L label="Finish"><input className={inp} value={door.finish} onChange={(e) => onPatch({ finish: e.target.value })} placeholder="RAL 5002" /></L>
-          <L label="Width (mm)"><input type="number" className={`${inp} text-right`} value={door.width || ""} onChange={(e) => onPatch({ width: Number(e.target.value) })} /></L>
-          <L label="Height (mm)"><input type="number" className={`${inp} text-right`} value={door.height || ""} onChange={(e) => onPatch({ height: Number(e.target.value) })} /></L>
+          <L label="Orientation">
+            <select className={`${inp} cursor-pointer`} value={door.orientation} onChange={(e) => onPatch({ orientation: e.target.value })}>
+              <option value="">Select…</option>
+              {!DOOR_ORIENTATIONS.includes(door.orientation) && door.orientation && <option value={door.orientation}>{door.orientation}</option>}
+              {DOOR_ORIENTATIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </L>
+          <L label="Finish">
+            <select className={`${inp} cursor-pointer`} value={door.finish} onChange={(e) => onPatch({ finish: e.target.value })}>
+              <option value="">Select…</option>
+              {!DOOR_FINISHES.includes(door.finish) && door.finish && <option value={door.finish}>{door.finish}</option>}
+              {DOOR_FINISHES.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </L>
+          <L label="Width (mm)">
+            <input type="number" list={`w-${door.id}`} className={`${inp} text-right`} value={door.width || ""} onChange={(e) => onPatch({ width: Number(e.target.value) })} />
+            <datalist id={`w-${door.id}`}>{DOOR_WIDTHS.map((w) => <option key={w} value={w} />)}</datalist>
+          </L>
+          <L label="Height (mm)">
+            <input type="number" list={`h-${door.id}`} className={`${inp} text-right`} value={door.height || ""} onChange={(e) => onPatch({ height: Number(e.target.value) })} />
+            <datalist id={`h-${door.id}`}>{DOOR_HEIGHTS.map((h) => <option key={h} value={h} />)}</datalist>
+          </L>
           <L label="Qty"><input type="number" className={`${inp} text-right`} value={door.qty || ""} onChange={(e) => onPatch({ qty: Number(e.target.value) })} /></L>
           <L label="Rate ₹/sq.m"><input type="number" className={`${inp} text-right`} value={door.ratePerSqm || ""} onChange={(e) => onPatch({ ratePerSqm: Number(e.target.value) })} /></L>
           <L label="Install ₹/sq.m"><input type="number" className={`${inp} text-right`} value={door.installPerSqm || ""} onChange={(e) => onPatch({ installPerSqm: Number(e.target.value) })} /></L>
