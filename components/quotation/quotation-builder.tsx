@@ -358,17 +358,7 @@ function DoorCard({
       <div className="p-4">
         <div className="grid grid-cols-6 gap-2.5 max-xl:grid-cols-4 max-md:grid-cols-2">
           <L label="Door Code (auto-fills all)">
-            <input
-              className={inp}
-              list={`doorcodes-${door.id}`}
-              value={door.doorCode}
-              onChange={(e) => onSetCode(e.target.value)}
-              placeholder="CD-1-SG"
-              autoComplete="off"
-            />
-            <datalist id={`doorcodes-${door.id}`}>
-              {doorOptions.map((o) => <option key={o.code} value={o.code}>{o.doorType}</option>)}
-            </datalist>
+            <DoorCodePicker value={door.doorCode} options={doorOptions} onSet={onSetCode} />
           </L>
           <L label="Door Type (Product)">
             <select className={`${inp} cursor-pointer`} value={door.doorType} onChange={(e) => onPickProduct(e.target.value)}>
@@ -479,6 +469,69 @@ function DoorCard({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Door-code combobox: pick a code from the master (fills the whole door) or
+ *  type a custom one. Selecting an option always fires the auto-fill. */
+function DoorCodePicker({
+  value,
+  options,
+  onSet,
+}: {
+  value: string;
+  options: DoorOption[];
+  onSet: (code: string) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  const q = value.trim().toLowerCase();
+  const filtered = q
+    ? options.filter((o) => o.code.toLowerCase().includes(q) || o.doorType.toLowerCase().includes(q))
+    : options;
+
+  return (
+    <div className="relative" ref={ref}>
+      <input
+        className={inp}
+        value={value}
+        onChange={(e) => {
+          onSet(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        placeholder="CD-1-SG"
+        autoComplete="off"
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute left-0 top-full z-30 mt-1 max-h-56 w-[220px] max-w-[90vw] overflow-auto rounded-xl border border-slate-200 bg-white p-1 shadow-[0_20px_50px_-20px_rgba(0,40,80,0.4)]">
+          {filtered.map((o) => (
+            <button
+              key={o.code}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onSet(o.code);
+                setOpen(false);
+              }}
+              className="flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-[#0180cf]/8"
+            >
+              <span className="text-[12.5px] font-black text-slate-700">{o.code}</span>
+              <span className="truncate text-[11px] font-semibold text-slate-400">{o.doorType}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
