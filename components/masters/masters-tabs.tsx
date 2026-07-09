@@ -4,15 +4,15 @@ import * as React from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { Database, Package, Wrench, Plus, RefreshCw, Receipt, Factory, ArrowRight, type LucideIcon } from "lucide-react";
+import { Database, Package, Wrench, Plus, RefreshCw, Receipt, Factory, ArrowRight, DoorOpen, type LucideIcon } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { PageHero } from "@/components/layout/page-hero";
 import { SalesDataGrid } from "@/components/sales/sales-grid";
 import { SalesEntryModal } from "@/components/sales/sales-entry-modal";
-import { PRODUCT_COLUMNS, HARDWARE_COLUMNS, type SalesColDef } from "@/lib/sales/columns";
+import { PRODUCT_COLUMNS, HARDWARE_COLUMNS, DOOR_COLUMNS, type SalesColDef } from "@/lib/sales/columns";
 import type { SaleKind, SalesRow } from "@/app/(app)/sales/actions";
 
-type MasterKind = "product" | "hardware";
+type MasterKind = "product" | "hardware" | "door";
 
 interface TabDef {
   key: MasterKind;
@@ -50,25 +50,39 @@ const TABS: TabDef[] = [
     columns: HARDWARE_COLUMNS,
     primaryKey: "model",
   },
+  {
+    key: "door",
+    label: "Door",
+    addLabel: "Door",
+    desc: "Door kit master — enter a code, the quotation auto-fills its parameters",
+    icon: DoorOpen,
+    from: "#0069b3",
+    to: "#0180cf",
+    columns: DOOR_COLUMNS,
+    primaryKey: "doorCode",
+  },
 ];
 
 export function MastersTabs({
   productRows,
   hardwareRows,
+  doorRows,
 }: {
   productRows: SalesRow[];
   hardwareRows: SalesRow[];
+  doorRows: SalesRow[];
 }) {
   const router = useRouter();
   const [active, setActive] = React.useState<MasterKind>("product");
   const [rowsByKind, setRowsByKind] = React.useState<Record<MasterKind, SalesRow[]>>({
     product: productRows,
     hardware: hardwareRows,
+    door: doorRows,
   });
   // Re-sync when the server sends fresh data (e.g. after Refresh).
   React.useEffect(() => {
-    setRowsByKind({ product: productRows, hardware: hardwareRows });
-  }, [productRows, hardwareRows]);
+    setRowsByKind({ product: productRows, hardware: hardwareRows, door: doorRows });
+  }, [productRows, hardwareRows, doorRows]);
 
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalRow, setModalRow] = React.useState<SalesRow | null>(null);
@@ -143,6 +157,7 @@ export function MastersTabs({
         stats={[
           { label: "Products", value: rowsByKind.product.length, icon: Package, from: "#0180cf", to: "#0069b3" },
           { label: "Masters", value: rowsByKind.hardware.length, icon: Wrench, from: "#63b81e", to: "#0069b3" },
+          { label: "Doors", value: rowsByKind.door.length, icon: DoorOpen, from: "#0069b3", to: "#0180cf" },
         ]}
       />
 

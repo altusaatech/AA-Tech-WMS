@@ -302,6 +302,34 @@ export const masterHardware = pgTable(
   (t) => [index("master_hardware_type_idx").on(t.hardwareType)],
 );
 
+export const masterDoor = pgTable(
+  "master_door",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    srNo: integer("sr_no").generatedAlwaysAsIdentity(),
+    doorCode: text("door_code"),
+    doorType: text("door_type"),
+    doorConfig: text("door_config"),
+    frameProfile: text("frame_profile"),
+    frameMaterial: text("frame_material"),
+    shutterType: text("shutter_type"),
+    shutterMaterial: text("shutter_material"),
+    insulation: text("insulation"),
+    ratePerSqm: numeric("rate_per_sqm"),
+    installPerSqm: numeric("install_per_sqm"),
+    orientation: text("orientation"),
+    finish: text("finish"),
+    shade: text("shade"),
+    shadeFinish: text("shade_finish"),
+    width: numeric("width"),
+    height: numeric("height"),
+    qty: numeric("qty"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("master_door_code_idx").on(t.doorCode)],
+);
+
 export const quotations = pgTable("quotations", {
   id: uuid("id").primaryKey().defaultRandom(),
   offerNo: text("offer_no"),

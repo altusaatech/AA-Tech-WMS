@@ -32,6 +32,24 @@ interface HardwareOption {
   rate: number;
 }
 
+interface DoorOption {
+  code: string;
+  doorType: string;
+  doorConfig: string;
+  frameProfile: string;
+  frameMaterial: string;
+  shutterType: string;
+  shutterMaterial: string;
+  insulation: string;
+  orientation: string;
+  finish: string;
+  ratePerSqm: number;
+  installPerSqm: number;
+  width: number;
+  height: number;
+  qty: number;
+}
+
 const HW_ABBR: Record<string, string> = {
   "SS Ball Bearing Hinges": "Hinges",
   "Mortise Dead Bolt": "Dead Bolt",
@@ -55,6 +73,7 @@ export function QuotationBuilder({
   productOptions,
   hardwareDefaults,
   hardwareOptions,
+  doorOptions,
 }: {
   id: string;
   initial: QuotationData;
@@ -62,6 +81,7 @@ export function QuotationBuilder({
   productOptions: ProductOption[];
   hardwareDefaults: Record<string, number>;
   hardwareOptions: HardwareOption[];
+  doorOptions: DoorOption[];
 }) {
   const router = useRouter();
   const [offerNo, setOfferNo] = React.useState(initial.offerNo);
@@ -108,6 +128,32 @@ export function QuotationBuilder({
       doorType: type,
       ...(prod ? { ratePerSqm: prod.ratePerSqm || 0, insulation: prod.insulation || "" } : {}),
     });
+  }
+  // Typing/selecting a door code auto-fills every parameter from the door master.
+  function setDoorCode(doorId: string, code: string) {
+    const m = doorOptions.find((o) => o.code.toLowerCase() === code.trim().toLowerCase());
+    if (!m) {
+      patchDoor(doorId, { doorCode: code });
+      return;
+    }
+    patchDoor(doorId, {
+      doorCode: m.code,
+      doorType: m.doorType,
+      doorConfig: m.doorConfig || "Single",
+      frameProfile: m.frameProfile,
+      frameMaterial: m.frameMaterial,
+      shutterType: m.shutterType,
+      shutterMaterial: m.shutterMaterial,
+      insulation: m.insulation,
+      ...(m.orientation ? { orientation: m.orientation } : {}),
+      finish: m.finish,
+      ...(m.width ? { width: m.width } : {}),
+      ...(m.height ? { height: m.height } : {}),
+      ...(m.qty ? { qty: m.qty } : {}),
+      ratePerSqm: m.ratePerSqm,
+      installPerSqm: m.installPerSqm,
+    });
+    fireToast({ message: `Loaded "${m.code}" from door master`, type: "success" });
   }
 
   async function save() {
@@ -200,7 +246,9 @@ export function QuotationBuilder({
               index={i}
               productOptions={productOptions}
               hardwareOptions={hardwareOptions}
+              doorOptions={doorOptions}
               onPickProduct={(t) => pickProduct(d.id, t)}
+              onSetCode={(code) => setDoorCode(d.id, code)}
               onPatch={(p) => patchDoor(d.id, p)}
               onPatchHw={(idx, p) => patchHw(d.id, idx, p)}
               onAddHw={() => addHw(d.id)}
@@ -272,7 +320,9 @@ function DoorCard({
   index,
   productOptions,
   hardwareOptions,
+  doorOptions,
   onPickProduct,
+  onSetCode,
   onPatch,
   onPatchHw,
   onAddHw,
@@ -283,7 +333,9 @@ function DoorCard({
   index: number;
   productOptions: ProductOption[];
   hardwareOptions: HardwareOption[];
+  doorOptions: DoorOption[];
   onPickProduct: (type: string) => void;
+  onSetCode: (code: string) => void;
   onPatch: (p: Partial<DoorLine>) => void;
   onPatchHw: (idx: number, p: Partial<HardwareLine>) => void;
   onAddHw: () => void;
@@ -314,16 +366,32 @@ function DoorCard({
 
       <div className="p-4">
         <div className="grid grid-cols-6 gap-2.5 max-xl:grid-cols-4 max-md:grid-cols-2">
-          <L label="Door Code"><input className={inp} value={door.doorCode} onChange={(e) => onPatch({ doorCode: e.target.value })} placeholder="SD1" /></L>
+          <L label="Door Code (auto-fills all)">
+            <input
+              className={inp}
+              list={`doorcodes-${door.id}`}
+              value={door.doorCode}
+              onChange={(e) => onSetCode(e.target.value)}
+              placeholder="CD-1-SG"
+              autoComplete="off"
+            />
+            <datalist id={`doorcodes-${door.id}`}>
+              {doorOptions.map((o) => <option key={o.code} value={o.code}>{o.doorType}</option>)}
+            </datalist>
+          </L>
           <L label="Door Type (Product)">
             <select className={`${inp} cursor-pointer`} value={door.doorType} onChange={(e) => onPickProduct(e.target.value)}>
               <option value="">Select product…</option>
+              {!productOptions.some((p) => p.type === door.doorType) && door.doorType && (
+                <option value={door.doorType}>{door.doorType}</option>
+              )}
               {productOptions.map((p) => <option key={p.type} value={p.type}>{p.type}</option>)}
             </select>
           </L>
           <L label="Door Config"><input className={inp} value={door.doorConfig} onChange={(e) => onPatch({ doorConfig: e.target.value })} placeholder="Single" /></L>
           <L label="Frame Profile"><input className={inp} value={door.frameProfile} onChange={(e) => onPatch({ frameProfile: e.target.value })} placeholder="100 x 50 SR" /></L>
           <L label="Frame Material"><input className={inp} value={door.frameMaterial} onChange={(e) => onPatch({ frameMaterial: e.target.value })} placeholder="GI 1.2mm" /></L>
+          <L label="Shutter Type"><input className={inp} value={door.shutterType || ""} onChange={(e) => onPatch({ shutterType: e.target.value })} placeholder="45 mm thick Flush" /></L>
           <L label="Shutter Material"><input className={inp} value={door.shutterMaterial} onChange={(e) => onPatch({ shutterMaterial: e.target.value })} placeholder="GI 0.8mm" /></L>
           <L label="Insulation"><input className={inp} value={door.insulation} onChange={(e) => onPatch({ insulation: e.target.value })} placeholder="Honeycomb" /></L>
           <L label="Orientation"><input className={inp} value={door.orientation} onChange={(e) => onPatch({ orientation: e.target.value })} /></L>
@@ -452,6 +520,7 @@ function QuotationPrint({
     { label: "Type of Door", get: (d) => d.doorType, left: true, has: (d) => !!(d.doorType || "").trim() },
     { label: "Frame Profile", get: (d) => d.frameProfile, has: (d) => !!(d.frameProfile || "").trim() },
     { label: "Frame Material", get: (d) => d.frameMaterial, has: (d) => !!(d.frameMaterial || "").trim() },
+    { label: "Shutter Type", get: (d) => d.shutterType, has: (d) => !!(d.shutterType || "").trim() },
     { label: "Shutter Material", get: (d) => d.shutterMaterial, has: (d) => !!(d.shutterMaterial || "").trim() },
     { label: "Insulation", get: (d) => d.insulation, has: (d) => !!(d.insulation || "").trim() },
     { label: "Orientation", get: (d) => d.orientation, has: (d) => !!(d.orientation || "").trim() },

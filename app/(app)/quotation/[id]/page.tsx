@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { quotations, masterProduct, masterHardware } from "@/db/schema";
+import { quotations, masterProduct, masterHardware, masterDoor } from "@/db/schema";
 import { QuotationBuilder } from "@/components/quotation/quotation-builder";
 import { DEFAULT_NOTES, DEFAULT_SUBJECT, DEFAULT_PI_META, type DoorLine, type PiMeta } from "@/lib/quotation/types";
 
@@ -28,9 +28,10 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
   const [q] = await db.select().from(quotations).where(eq(quotations.id, id));
   if (!q) notFound();
 
-  const [products, hardware] = await Promise.all([
+  const [products, hardware, doors] = await Promise.all([
     db.select().from(masterProduct),
     db.select().from(masterHardware),
+    db.select().from(masterDoor),
   ]);
 
   const productOptions = products
@@ -49,6 +50,30 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
     );
     hardwareDefaults[slot] = m ? Number(m.sellingRate) || 0 : 0;
   }
+
+  // Door master — one entry per code. Typing/selecting a code in the builder
+  // auto-fills every parameter (type, config, frame, shutter, rates, size…).
+  const num = (v: unknown) => Number(v) || 0;
+  const doorOptions = doors
+    .filter((d) => (d.doorCode ?? "").trim())
+    .map((d) => ({
+      code: (d.doorCode as string).trim(),
+      doorType: d.doorType ?? "",
+      doorConfig: d.doorConfig ?? "",
+      frameProfile: d.frameProfile ?? "",
+      frameMaterial: d.frameMaterial ?? "",
+      shutterType: d.shutterType ?? "",
+      shutterMaterial: d.shutterMaterial ?? "",
+      insulation: d.insulation ?? "",
+      orientation: d.orientation ?? "",
+      finish: d.finish ?? "",
+      ratePerSqm: num(d.ratePerSqm),
+      installPerSqm: num(d.installPerSqm),
+      width: num(d.width),
+      height: num(d.height),
+      qty: num(d.qty),
+    }))
+    .sort((a, b) => a.code.localeCompare(b.code));
 
   // Full hardware catalogue for the "Hardware Name" dropdown — deduped by name,
   // each carrying its selling rate so picking a name auto-fills the rate.
@@ -77,6 +102,7 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
       productOptions={productOptions}
       hardwareDefaults={hardwareDefaults}
       hardwareOptions={hardwareOptions}
+      doorOptions={doorOptions}
     />
   );
 }

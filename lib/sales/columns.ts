@@ -211,6 +211,27 @@ export const PI_COLUMNS: SalesColDef[] = [
   { key: "remarks", label: "Remarks", type: "text", width: 200 },
 ];
 
+// ── Door Kit master (PARAMETER DOORS sheet) ────────────────────
+export const DOOR_COLUMNS: SalesColDef[] = [
+  { key: "doorCode", label: "Door Code", type: "text", required: true, width: 120 },
+  { key: "doorType", label: "Door Type", type: "text", width: 170 },
+  { key: "doorConfig", label: "Door Config", type: "select", options: ["Single", "Double", "Double Unequal"], allowCustom: true, width: 120 },
+  { key: "frameProfile", label: "Frame Profile", type: "text", width: 130 },
+  { key: "frameMaterial", label: "Frame Material", type: "text", width: 120 },
+  { key: "shutterType", label: "Shutter Type", type: "text", width: 240 },
+  { key: "shutterMaterial", label: "Shutter Material", type: "text", width: 130 },
+  { key: "insulation", label: "Insulation", type: "text", width: 120 },
+  { key: "ratePerSqm", label: "Rate/Sqmt", type: "number", width: 110 },
+  { key: "installPerSqm", label: "Installation/Sqmt", type: "number", width: 130 },
+  { key: "orientation", label: "Orientation", type: "text", width: 110 },
+  { key: "finish", label: "Finish", type: "text", width: 130 },
+  { key: "shade", label: "Shade", type: "text", width: 140 },
+  { key: "shadeFinish", label: "Shade Finish", type: "text", width: 120 },
+  { key: "width", label: "Width mm", type: "number", width: 100 },
+  { key: "height", label: "Height mm", type: "number", width: 100 },
+  { key: "qty", label: "Qty in Nos", type: "number", width: 90 },
+];
+
 export const QUOTE_KEYS = QUOTE_COLUMNS.map((c) => c.key);
 export const BOM_KEYS = BOM_COLUMNS.map((c) => c.key);
 export const SO_KEYS = SO_COLUMNS.map((c) => c.key);
@@ -219,3 +240,4 @@ export const WO_KEYS = WO_COLUMNS.map((c) => c.key);
 export const PI_KEYS = PI_COLUMNS.map((c) => c.key);
 export const PRODUCT_KEYS = PRODUCT_COLUMNS.map((c) => c.key);
 export const HARDWARE_KEYS = HARDWARE_COLUMNS.map((c) => c.key);
+export const DOOR_KEYS = DOOR_COLUMNS.map((c) => c.key);

@@ -13,6 +13,7 @@ export interface DoorLine {
   doorType: string;
   frameProfile: string;
   frameMaterial: string;
+  shutterType: string;
   shutterMaterial: string;
   insulation: string;
   orientation: string;
@@ -83,6 +84,7 @@ export function newDoor(): DoorLine {
     doorType: "",
     frameProfile: "",
     frameMaterial: "",
+    shutterType: "",
     shutterMaterial: "",
     insulation: "",
     orientation: "Push Side",

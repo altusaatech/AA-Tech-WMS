@@ -1,8 +1,8 @@
 import { asc } from "drizzle-orm";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { masterProduct, masterHardware } from "@/db/schema";
-import { PRODUCT_KEYS, HARDWARE_KEYS } from "@/lib/sales/columns";
+import { masterProduct, masterHardware, masterDoor } from "@/db/schema";
+import { PRODUCT_KEYS, HARDWARE_KEYS, DOOR_KEYS } from "@/lib/sales/columns";
 import { MastersTabs } from "@/components/masters/masters-tabs";
 import type { SalesRow } from "@/app/(app)/sales/actions";
 
@@ -16,15 +16,17 @@ function pick(row: Record<string, unknown>, keys: string[]): SalesRow {
 
 export default async function MastersPage() {
   await requireUser();
-  const [products, hardware] = await Promise.all([
+  const [products, hardware, doors] = await Promise.all([
     db.select().from(masterProduct).orderBy(asc(masterProduct.createdAt)),
     db.select().from(masterHardware).orderBy(asc(masterHardware.createdAt)),
+    db.select().from(masterDoor).orderBy(asc(masterDoor.doorCode)),
   ]);
 
   return (
     <MastersTabs
       productRows={products.map((r) => pick(r as Record<string, unknown>, PRODUCT_KEYS))}
       hardwareRows={hardware.map((r) => pick(r as Record<string, unknown>, HARDWARE_KEYS))}
+      doorRows={doors.map((r) => pick(r as Record<string, unknown>, DOOR_KEYS))}
     />
   );
 }
