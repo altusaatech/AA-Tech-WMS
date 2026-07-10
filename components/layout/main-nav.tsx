@@ -8,9 +8,11 @@ interface Props {
   activeTasks: number;
   isAdmin: boolean;
   variant?: "drawer";
+  /** Render only one half of the split nav (used to flank the header wordmark). */
+  side?: "left" | "right";
 }
 
-export function MainNav({ activeTasks, isAdmin, variant }: Props) {
+export function MainNav({ activeTasks, isAdmin, variant, side }: Props) {
   const pathname = usePathname();
 
   function isActive(href: string): boolean {
@@ -51,14 +53,34 @@ export function MainNav({ activeTasks, isAdmin, variant }: Props) {
     );
   }
 
-  // Desktop heading bar: two pills on the left, two on the right.
+  const groupClass = "flex items-center gap-1.5 2xl:gap-2";
+
+  // Half of the split nav — used to flank the header wordmark (2 left, 2 right).
+  if (side === "left") {
+    return (
+      <nav aria-label="Primary" className={groupClass}>
+        {dashboardPill}
+        {myDayPill}
+      </nav>
+    );
+  }
+  if (side === "right") {
+    return (
+      <nav aria-label="Primary" className={groupClass}>
+        {tasksPill}
+        {kanbanPill}
+      </nav>
+    );
+  }
+
+  // Fallback: the full split in one bar.
   return (
     <nav aria-label="Primary" className="flex w-full items-center justify-between gap-2">
-      <div className="flex items-center gap-1 2xl:gap-1.5">
+      <div className={groupClass}>
         {dashboardPill}
         {myDayPill}
       </div>
-      <div className="flex items-center gap-1 2xl:gap-1.5">
+      <div className={groupClass}>
         {tasksPill}
         {kanbanPill}
       </div>

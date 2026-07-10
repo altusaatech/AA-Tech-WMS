@@ -65,6 +65,11 @@ export async function DashboardHeader({
                 <span className="relative mt-1.5 text-[11px] font-black uppercase tracking-[0.24em] text-slate-700 max-md:text-[9px]">AA Tech</span>
               </a>
 
+              {/* LEFT NAV — two pills beside the wordmark */}
+              <div className="shrink-0 max-md:hidden">
+                <MainNavServer side="left" />
+              </div>
+
               {/* CENTER — wordmark + tagline + status pills */}
               <div className="flex min-w-0 flex-1 flex-col items-center text-center">
                 <h1
@@ -91,8 +96,13 @@ export async function DashboardHeader({
                 </div>
               </div>
 
+              {/* RIGHT NAV — two pills beside the wordmark */}
+              <div className="shrink-0 max-md:hidden">
+                <MainNavServer side="right" />
+              </div>
+
               {/* RIGHT — powered by Altus Corp (no chip) */}
-              <div className="flex shrink-0 flex-col items-center gap-1.5 max-lg:hidden" aria-label="Powered by Altus Corp">
+              <div className="flex shrink-0 flex-col items-center gap-1.5 max-xl:hidden" aria-label="Powered by Altus Corp">
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Powered by</span>
                 <img
                   src="/altus-corp-logo.png?v=2"
@@ -120,13 +130,9 @@ export async function DashboardHeader({
         <div className="relative w-full h-[62px] px-6 max-md:h-[58px] max-md:px-4 flex items-center gap-4 2xl:gap-6 max-md:gap-3">
           <MobileMenuServer isAdmin={isAdmin} />
 
-          <div className="flex-1 min-w-0 max-md:hidden">
-            <div className="flex w-full">
-              <MainNavServer />
-            </div>
-          </div>
+          <div className="flex-1" />
 
-          <div className="flex items-center gap-2.5 2xl:gap-3 shrink-0 max-xl:ml-auto max-md:gap-1.5">
+          <div className="flex items-center gap-2.5 2xl:gap-3 shrink-0 max-md:gap-1.5">
             <GlobalSearch />
             {isAdmin && (
               <span className="max-2xl:hidden">
