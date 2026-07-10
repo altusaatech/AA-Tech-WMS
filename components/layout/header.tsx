@@ -120,8 +120,8 @@ export async function DashboardHeader({
         <div className="relative w-full h-[62px] px-6 max-md:h-[58px] max-md:px-4 flex items-center gap-4 2xl:gap-6 max-md:gap-3">
           <MobileMenuServer isAdmin={isAdmin} />
 
-          <div className="flex-1 min-w-0 overflow-x-auto nav-scroll max-md:hidden">
-            <div className="flex w-max mx-auto">
+          <div className="flex-1 min-w-0 max-md:hidden">
+            <div className="flex w-full">
               <MainNavServer />
             </div>
           </div>

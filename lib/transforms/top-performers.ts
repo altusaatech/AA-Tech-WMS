@@ -53,11 +53,10 @@ export function computeTopPerformers(
     .filter((x): x is TopPerformer => x !== null)
     .sort((a, b) => b.doneCount - a.doneCount);
 
-  // Competition ranking — ties share the better rank (5, 5, 7 …).
+  // Sequential ranking — each person gets a distinct place (1st, 2nd, 3rd, 4th
+  // …) by position, even when they've completed the same number of tasks.
   for (let i = 0; i < ranked.length; i++) {
-    const prev = ranked[i - 1];
-    ranked[i]!.rank =
-      prev && prev.doneCount === ranked[i]!.doneCount ? prev.rank : i + 1;
+    ranked[i]!.rank = i + 1;
   }
 
   return ranked.slice(0, limit);
