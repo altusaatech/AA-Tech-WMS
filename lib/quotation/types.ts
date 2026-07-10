@@ -99,7 +99,8 @@ export function newDoor(): DoorLine {
     qty: 1,
     ratePerSqm: 0,
     installPerSqm: 0,
-    hardware: HARDWARE_SLOTS.map((name) => ({ name, qty: 0, rate: 0 })),
+    // Hardware is added per door from the hardware master in the builder.
+    hardware: [],
   };
 }
 

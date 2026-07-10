@@ -8,19 +8,6 @@ import { DEFAULT_NOTES, DEFAULT_SUBJECT, DEFAULT_PI_META, type DoorLine, type Pi
 
 export const dynamic = "force-dynamic";
 
-const SLOT_KEYWORDS: Record<string, string[]> = {
-  "SS Ball Bearing Hinges": ["hinge"],
-  "Mortise Dead Bolt": ["dead bolt", "deadbolt", "mortise"],
-  "Door Closer": ["closer"],
-  "SS 'D' Handle": ["handle"],
-  "Concealed Tower Bolt": ["tower bolt"],
-  "Double Glazed Vision Panel": ["vision", "glazed", "glass"],
-  "SS 304 Kick Plate": ["kick"],
-  "SS 304 Push Plate": ["push"],
-  "Concealed Drop Seal": ["drop seal"],
-  "EPDM Gasket": ["gasket", "door seal"],
-};
-
 export default async function QuotationBuilderPage({ params }: { params: Promise<{ id: string }> }) {
   await requireUser();
   const { id } = await params;
@@ -43,14 +30,6 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
       uom: p.uom ?? "",
     }));
 
-  const hardwareDefaults: Record<string, number> = {};
-  for (const [slot, kws] of Object.entries(SLOT_KEYWORDS)) {
-    const m = hardware.find((h) =>
-      kws.some((k) => (h.hardwareType ?? "").toLowerCase().includes(k) || (h.description ?? "").toLowerCase().includes(k)),
-    );
-    hardwareDefaults[slot] = m ? Number(m.sellingRate) || 0 : 0;
-  }
-
   // Door master — one entry per code. Typing/selecting a code in the builder
   // auto-fills the code→spec parameters (type, config, frame, shutter,
   // insulation, rates). The yellow fields (orientation, finish, shade, size…)
@@ -72,12 +51,18 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
     }))
     .sort((a, b) => a.code.localeCompare(b.code));
 
-  // Full hardware catalogue for the "Hardware Name" dropdown — deduped by name,
+  // Working-spec hardware picker — every item from the hardware master,
+  // labelled with make/model so variants (e.g. the two Hinges) stay distinct,
   // each carrying its selling rate so picking a name auto-fills the rate.
+  const hwLabel = (h: (typeof hardware)[number]) => {
+    const base = (h.hardwareType || h.description || "").trim();
+    const extra = [h.make, h.model].map((x) => (x ?? "").trim()).filter(Boolean).join(" ");
+    return extra ? `${base} (${extra})` : base;
+  };
   const hardwareOptions = Array.from(
     new Map(
       hardware
-        .map((h) => ({ name: (h.hardwareType || h.description || "").trim(), rate: Number(h.sellingRate) || 0 }))
+        .map((h) => ({ name: hwLabel(h), rate: Number(h.sellingRate) || 0 }))
         .filter((o) => o.name)
         .map((o) => [o.name, o] as const),
     ).values(),
@@ -97,7 +82,6 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
       }}
       initialPiMeta={{ ...DEFAULT_PI_META, ...((q.piMeta ?? {}) as Partial<PiMeta>) }}
       productOptions={productOptions}
-      hardwareDefaults={hardwareDefaults}
       hardwareOptions={hardwareOptions}
       doorOptions={doorOptions}
     />

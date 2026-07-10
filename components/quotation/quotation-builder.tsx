@@ -14,7 +14,6 @@ import {
   computeTotals,
   inr,
   inr2,
-  HARDWARE_SLOTS,
   type DoorLine,
   type HardwareLine,
   type QuotationData,
@@ -46,19 +45,6 @@ interface DoorOption {
   installPerSqm: number;
 }
 
-const HW_ABBR: Record<string, string> = {
-  "SS Ball Bearing Hinges": "Hinges",
-  "Mortise Dead Bolt": "Dead Bolt",
-  "Door Closer": "Closer",
-  "SS 'D' Handle": "D-Handle",
-  "Concealed Tower Bolt": "Tower Bolt",
-  "Double Glazed Vision Panel": "Vision Panel",
-  "SS 304 Kick Plate": "Kick Plate",
-  "SS 304 Push Plate": "Push Plate",
-  "Concealed Drop Seal": "Drop Seal",
-  "EPDM Gasket": "Gasket",
-};
-
 const inp =
   "h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] text-slate-800 outline-none transition-all focus:border-[#0180cf] focus:ring-2 focus:ring-[#0180cf]/15";
 
@@ -67,7 +53,6 @@ export function QuotationBuilder({
   initial,
   initialPiMeta,
   productOptions,
-  hardwareDefaults,
   hardwareOptions,
   doorOptions,
 }: {
@@ -75,7 +60,6 @@ export function QuotationBuilder({
   initial: QuotationData;
   initialPiMeta: PiMeta;
   productOptions: ProductOption[];
-  hardwareDefaults: Record<string, number>;
   hardwareOptions: HardwareOption[];
   doorOptions: DoorOption[];
 }) {
@@ -95,9 +79,9 @@ export function QuotationBuilder({
   const totals = computeTotals(lines);
 
   function addDoor() {
-    const d = newDoor();
-    d.hardware = HARDWARE_SLOTS.map((name) => ({ name, qty: 0, rate: hardwareDefaults[name] ?? 0 }));
-    setLines((p) => [...p, d]);
+    // A new door starts with no hardware — the user adds items from the
+    // hardware master via "Add Item".
+    setLines((p) => [...p, newDoor()]);
   }
   function patchDoor(doorId: string, patch: Partial<DoorLine>) {
     setLines((p) => p.map((d) => (d.id === doorId ? { ...d, ...patch } : d)));
@@ -334,13 +318,8 @@ function DoorCard({
   onRemove: () => void;
 }) {
   const c = computeDoor(door);
-  // Distinct hardware names for the dropdown — the common fixed slots plus
-  // everything in the hardware master.
-  const hwNames = React.useMemo(() => {
-    const set = new Set<string>(HARDWARE_SLOTS as readonly string[]);
-    for (const o of hardwareOptions) set.add(o.name);
-    return Array.from(set);
-  }, [hardwareOptions]);
+  // Hardware names for the dropdown come straight from the hardware master.
+  const hwNames = React.useMemo(() => hardwareOptions.map((o) => o.name), [hardwareOptions]);
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-[#f3f9fe] to-white px-4 py-2.5">
