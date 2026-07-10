@@ -309,6 +309,7 @@ export const masterHardware = pgTable(
     buyingRate: numeric("buying_rate"),
     sellingRate: numeric("selling_rate"),
     image: text("image"),
+    quantity: numeric("quantity"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

@@ -179,6 +179,7 @@ export const HARDWARE_COLUMNS: SalesColDef[] = [
   { key: "buyingRate", label: "Buying Rate", type: "number", width: 120 },
   { key: "sellingRate", label: "Selling Rate", type: "number", width: 120 },
   { key: "image", label: "Image", type: "url", width: 120 },
+  { key: "quantity", label: "Quantity", type: "number", width: 100 },
 ];
 
 // ── PI (Proforma Invoice) ──────────────────────────────────────
