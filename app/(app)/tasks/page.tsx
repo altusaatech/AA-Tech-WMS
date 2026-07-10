@@ -82,27 +82,32 @@ export default async function TasksPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <DashboardHeader generatedAt={new Date()} />
-      <FilterBar
-        employees={employeeOptions}
-        subjects={subjects}
-        statusOptions={statusOptions}
-        clients={clients}
-        me={{ id: me.id, isAdmin: me.isAdmin }}
-        assigneeMode={filters.assigneeMode}
-        taskCount={rows.length}
-        initial={{
-          start:  isoDay(filters.startDate),
-          end:    isoDay(filters.endDate),
-          emp:    filters.doerIds,
-          view:   "doer",
-          dept:   filters.departments,
-          prio:   filters.priorities,
-          subj:   filters.subjects,
-          // Reflect the Archived pseudo-chip back into the picker when active.
-          status: filters.archived ? [...filters.statuses, "archived"] : filters.statuses,
-          client: filters.clients,
-        }}
+      <DashboardHeader
+        generatedAt={new Date()}
+        filters={
+          <FilterBar
+            embedded
+            employees={employeeOptions}
+            subjects={subjects}
+            statusOptions={statusOptions}
+            clients={clients}
+            me={{ id: me.id, isAdmin: me.isAdmin }}
+            assigneeMode={filters.assigneeMode}
+            taskCount={rows.length}
+            initial={{
+              start:  isoDay(filters.startDate),
+              end:    isoDay(filters.endDate),
+              emp:    filters.doerIds,
+              view:   "doer",
+              dept:   filters.departments,
+              prio:   filters.priorities,
+              subj:   filters.subjects,
+              // Reflect the Archived pseudo-chip back into the picker when active.
+              status: filters.archived ? [...filters.statuses, "archived"] : filters.statuses,
+              client: filters.clients,
+            }}
+          />
+        }
       />
       <TaskListPage
         title="Tasks"

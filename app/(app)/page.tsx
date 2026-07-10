@@ -104,22 +104,25 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <DashboardHeader generatedAt={data.generatedAt} />
-      <div className={mobileToday ? "max-md:hidden" : undefined}>
-        <FilterBar
-          employees={employeeOptions}
-          subjects={subjects}
-          initial={{
-            start: isoDay(filters.startDate ?? new Date()),
-            end:   isoDay(filters.endDate   ?? new Date()),
-            emp:   filters.employeeIds,
-            view:  filters.view,
-            dept:  filters.departments,
-            prio:  filters.priorities,
-            subj:  filters.subjects,
-          }}
-        />
-      </div>
+      <DashboardHeader
+        generatedAt={data.generatedAt}
+        filters={
+          <FilterBar
+            embedded
+            employees={employeeOptions}
+            subjects={subjects}
+            initial={{
+              start: isoDay(filters.startDate ?? new Date()),
+              end:   isoDay(filters.endDate   ?? new Date()),
+              emp:   filters.employeeIds,
+              view:  filters.view,
+              dept:  filters.departments,
+              prio:  filters.priorities,
+              subj:  filters.subjects,
+            }}
+          />
+        }
+      />
       <main>
         {isEmpty ? (
           <WelcomeHero />

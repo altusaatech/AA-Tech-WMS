@@ -80,25 +80,30 @@ export default async function KanbanPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <DashboardHeader generatedAt={new Date()} />
-      <FilterBar
-        employees={employeeOptions}
-        subjects={subjects}
-        statusOptions={statusOptions}
-        clients={clients}
-        me={{ id: me.id, isAdmin: me.isAdmin }}
-        assigneeMode={filters.assigneeMode}
-        initial={{
-          start:  isoDay(filters.startDate),
-          end:    isoDay(filters.endDate),
-          emp:    filters.doerIds,
-          view:   "doer",
-          dept:   filters.departments,
-          prio:   filters.priorities,
-          subj:   filters.subjects,
-          status: filters.statuses,
-          client: filters.clients,
-        }}
+      <DashboardHeader
+        generatedAt={new Date()}
+        filters={
+          <FilterBar
+            embedded
+            employees={employeeOptions}
+            subjects={subjects}
+            statusOptions={statusOptions}
+            clients={clients}
+            me={{ id: me.id, isAdmin: me.isAdmin }}
+            assigneeMode={filters.assigneeMode}
+            initial={{
+              start:  isoDay(filters.startDate),
+              end:    isoDay(filters.endDate),
+              emp:    filters.doerIds,
+              view:   "doer",
+              dept:   filters.departments,
+              prio:   filters.priorities,
+              subj:   filters.subjects,
+              status: filters.statuses,
+              client: filters.clients,
+            }}
+          />
+        }
       />
       <main className="w-full px-6 max-md:px-4 pt-6 pb-10">
         {/* Light canvas (sir's changes #1) — full-bleed (no centred max-width

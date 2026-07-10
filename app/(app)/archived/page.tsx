@@ -52,21 +52,26 @@ export default async function ArchivedPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <DashboardHeader generatedAt={new Date()} />
-      <FilterBar
-        employees={employeeOptions}
-        subjects={subjects}
-        me={{ id: me.id, isAdmin: me.isAdmin }}
-        assigneeMode={filters.assigneeMode}
-        initial={{
-          start: isoDay(filters.startDate),
-          end:   isoDay(filters.endDate),
-          emp:   filters.doerIds,
-          view:  "doer",
-          dept:  filters.departments,
-          prio:  filters.priorities,
-          subj:  filters.subjects,
-        }}
+      <DashboardHeader
+        generatedAt={new Date()}
+        filters={
+          <FilterBar
+            embedded
+            employees={employeeOptions}
+            subjects={subjects}
+            me={{ id: me.id, isAdmin: me.isAdmin }}
+            assigneeMode={filters.assigneeMode}
+            initial={{
+              start: isoDay(filters.startDate),
+              end:   isoDay(filters.endDate),
+              emp:   filters.doerIds,
+              view:  "doer",
+              dept:  filters.departments,
+              prio:  filters.priorities,
+              subj:  filters.subjects,
+            }}
+          />
+        }
       />
       <TaskListPage
         title="Archived"

@@ -82,25 +82,30 @@ export default async function AgendaPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <DashboardHeader generatedAt={new Date()} />
-      <FilterBar
-        employees={employeeOptions}
-        subjects={subjects}
-        statusOptions={statusOptions}
-        clients={clients}
-        me={{ id: me.id, isAdmin: me.isAdmin }}
-        assigneeMode={filters.assigneeMode}
-        initial={{
-          start:  isoDay(filters.startDate),
-          end:    isoDay(filters.endDate),
-          emp:    filters.doerIds,
-          view:   "doer",
-          dept:   filters.departments,
-          prio:   filters.priorities,
-          subj:   filters.subjects,
-          status: filters.statuses,
-          client: filters.clients,
-        }}
+      <DashboardHeader
+        generatedAt={new Date()}
+        filters={
+          <FilterBar
+            embedded
+            employees={employeeOptions}
+            subjects={subjects}
+            statusOptions={statusOptions}
+            clients={clients}
+            me={{ id: me.id, isAdmin: me.isAdmin }}
+            assigneeMode={filters.assigneeMode}
+            initial={{
+              start:  isoDay(filters.startDate),
+              end:    isoDay(filters.endDate),
+              emp:    filters.doerIds,
+              view:   "doer",
+              dept:   filters.departments,
+              prio:   filters.priorities,
+              subj:   filters.subjects,
+              status: filters.statuses,
+              client: filters.clients,
+            }}
+          />
+        }
       />
       <MyDayWorkspace
         firstName={me.name.split(" ")[0] ?? me.name}

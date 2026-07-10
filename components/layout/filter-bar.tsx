@@ -58,6 +58,8 @@ interface Props {
   assigneeMode?: AssigneeMode;
   /** Number of tasks matching the current filters (shown in the summary row). */
   taskCount?: number;
+  /** Render inline (no own sticky bar) so it can live inside the header strip. */
+  embedded?: boolean;
 }
 
 const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -82,6 +84,7 @@ export function FilterBar({
   me,
   assigneeMode: initialAssigneeMode = "all",
   taskCount,
+  embedded = false,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -208,16 +211,8 @@ export function FilterBar({
   if (view !== "doer")
     activePills.push({ key: "view", label: "Initiator view", color: TINT.view, remove: () => setView("doer") });
 
-  return (
-    <div
-      className="sticky top-[64px] max-md:top-[60px] z-40 border-b border-hairline"
-      style={{
-        backgroundColor: "rgba(250, 251, 252, 0.82)",
-        backdropFilter: "blur(20px) saturate(150%)",
-        WebkitBackdropFilter: "blur(20px) saturate(150%)",
-      }}
-    >
-      <div className="mx-auto max-w-[1600px] px-12 py-3 max-md:px-4 flex flex-col gap-2.5">
+  const inner = (
+      <div className={embedded ? "flex w-full min-w-0 flex-col gap-2" : "mx-auto max-w-[1600px] px-12 py-3 max-md:px-4 flex flex-col gap-2.5"}>
         {/* Row 1 — filter pill-cards */}
         <div className="flex items-center gap-2.5 flex-wrap">
           {/* Date range */}
@@ -422,6 +417,20 @@ export function FilterBar({
           </div>
         </div>
       </div>
+  );
+
+  if (embedded) return inner;
+
+  return (
+    <div
+      className="sticky top-[64px] max-md:top-[60px] z-40 border-b border-hairline"
+      style={{
+        backgroundColor: "rgba(250, 251, 252, 0.82)",
+        backdropFilter: "blur(20px) saturate(150%)",
+        WebkitBackdropFilter: "blur(20px) saturate(150%)",
+      }}
+    >
+      {inner}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { MainNavServer } from "./main-nav-server";
 import { MobileMenuServer } from "./mobile-menu-server";
 import { HeaderStatusBar } from "./header-clock";
@@ -22,7 +23,8 @@ import { getCurrentEmployee } from "@/lib/auth/current";
  */
 export async function DashboardHeader({
   generatedAt: _generatedAt,
-}: { generatedAt: Date }) {
+  filters,
+}: { generatedAt: Date; filters?: ReactNode }) {
   const me = await getCurrentEmployee();
   const isAdmin = me?.isAdmin ?? false;
   const moduleCount = 6 + (isAdmin ? 1 : 0); // primary nav modules in reach
@@ -127,12 +129,13 @@ export async function DashboardHeader({
           borderBottom: "1px solid var(--color-hairline)",
         }}
       >
-        <div className="relative w-full h-[62px] px-6 max-md:h-[58px] max-md:px-4 flex items-center gap-4 2xl:gap-6 max-md:gap-3">
+        <div className="relative w-full min-h-[62px] px-6 py-2.5 max-md:min-h-[58px] max-md:px-4 flex items-center gap-4 2xl:gap-6 max-md:gap-3">
           <MobileMenuServer isAdmin={isAdmin} />
 
-          <div className="flex-1" />
+          {/* Filters live here — beside the search — when a page provides them. */}
+          <div className="min-w-0 flex-1 max-md:hidden">{filters}</div>
 
-          <div className="flex items-center gap-2.5 2xl:gap-3 shrink-0 max-md:gap-1.5">
+          <div className="flex items-center gap-2.5 2xl:gap-3 shrink-0 max-md:ml-auto max-md:gap-1.5">
             <GlobalSearch />
             {isAdmin && (
               <span className="max-2xl:hidden">
