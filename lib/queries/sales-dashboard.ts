@@ -105,6 +105,7 @@ export interface SalesDashboardData {
   dispatch: { onTime: number; delayed: number; pending: number };
   recent: RecentQuote[];
   totals: { quotes: number; won: number; so: number; ga: number; wo: number; pi: number };
+  partialError: boolean;
   generatedAt: string;
 }
 
@@ -146,13 +147,59 @@ export async function loadSalesDashboard(filters: SalesDashboardFilters): Promis
   const { start, end } = filters;
   const prev = previousWindow(start, end);
 
+  // Per-query degradation: a single slow/failed table shouldn't blank the whole
+  // dashboard (and hit the app error boundary). Only a total failure throws.
+  let failures = 0;
+  const safe = async <T,>(p: Promise<T[]>): Promise<T[]> => {
+    try {
+      return await p;
+    } catch {
+      failures += 1;
+      return [];
+    }
+  };
+
+  // Lean column projections — we only pull what the aggregations use.
   const [quotes, so, ga, wo, pi] = await Promise.all([
-    db.select().from(salesQuotes),
-    db.select().from(salesSo),
-    db.select().from(salesGa),
-    db.select().from(salesWo),
-    db.select().from(salesPi),
+    safe(
+      db
+        .select({
+          id: salesQuotes.id,
+          createdAt: salesQuotes.createdAt,
+          enquiryNo: salesQuotes.enquiryNo,
+          companyName: salesQuotes.companyName,
+          product: salesQuotes.product,
+          description: salesQuotes.description,
+          basicAmount: salesQuotes.basicAmount,
+          quoteStatus: salesQuotes.quoteStatus,
+          poNo: salesQuotes.poNo,
+          poAmount: salesQuotes.poAmount,
+          poDate: salesQuotes.poDate,
+        })
+        .from(salesQuotes),
+    ),
+    safe(
+      db
+        .select({
+          soDate: salesSo.soDate,
+          amountWoGst: salesSo.amountWoGst,
+          actualDispatchDate: salesSo.actualDispatchDate,
+          noOfDaysDelay: salesSo.noOfDaysDelay,
+        })
+        .from(salesSo),
+    ),
+    safe(db.select({ gaSubmissionDate: salesGa.gaSubmissionDate, soDate: salesGa.soDate }).from(salesGa)),
+    safe(db.select({ workOrderDate: salesWo.workOrderDate, bomDate: salesWo.bomDate }).from(salesWo)),
+    safe(
+      db
+        .select({ piDate: salesPi.piDate, totalAmount: salesPi.totalAmount, basicAmount: salesPi.basicAmount })
+        .from(salesPi),
+    ),
   ]);
+
+  // Everything failed → let the caller's error boundary offer a retry.
+  if (failures === 5) throw new Error("sales dashboard: all queries failed");
+  const partialError = failures > 0;
 
   // ── quotes-centric metrics ──
   const quoteCreated = (q: (typeof quotes)[number]) => toDayStr(q.createdAt);
@@ -297,6 +344,7 @@ export async function loadSalesDashboard(filters: SalesDashboardFilters): Promis
     dispatch: { onTime, delayed, pending },
     recent,
     totals: { quotes: quotes.length, won: quotes.filter((q) => isWon(q.poNo, q.poAmount)).length, so: so.length, ga: ga.length, wo: wo.length, pi: pi.length },
+    partialError,
     generatedAt: new Date().toISOString(),
   };
 }

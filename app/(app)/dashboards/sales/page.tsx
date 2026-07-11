@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Route } from "next";
-import { ArrowLeft, TrendingUp } from "lucide-react";
+import { ArrowLeft, TrendingUp, AlertTriangle } from "lucide-react";
 import { requireUser } from "@/lib/auth/current";
 import { loadSalesDashboard, defaultSalesRange, type SalesDashboardFilters } from "@/lib/queries/sales-dashboard";
 import { SalesFilters } from "@/components/dashboards/sales/sales-filters";
@@ -68,6 +68,12 @@ export default async function SalesDashboardPage({
         </div>
         <SalesFilters start={filters.start} end={filters.end} />
       </div>
+
+      {data.partialError && (
+        <div className="mt-4 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] font-semibold text-amber-800">
+          <AlertTriangle size={15} strokeWidth={2.4} /> Some live data was slow to load — a few figures may be incomplete. Refresh to retry.
+        </div>
+      )}
 
       {/* KPI row */}
       <div className="mt-6">
