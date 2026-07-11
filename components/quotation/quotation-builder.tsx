@@ -458,9 +458,11 @@ function DoorCard({
                       // Pick the make when the type has exactly one (or none); with
                       // several makes, clear it so the user chooses in the Make box.
                       const make = nextMakes.length === 1 ? (nextMakes[0] ?? "") : "";
-                      // Fetch make/qty/rate from the master only once a single row is
-                      // pinned down (a make, or a type with no makes at all).
-                      const opt = make || nextMakes.length === 0 ? resolveHw(name, make) : undefined;
+                      // Always fetch the selling rate + quantity from the master as
+                      // soon as a hardware type is picked — resolveHw(name, "")
+                      // resolves the first matching row, so the rate is never blank.
+                      // Choosing a specific make below refines it to that make's row.
+                      const opt = resolveHw(name, make);
                       onPatchHw(idx, {
                         name,
                         make,
