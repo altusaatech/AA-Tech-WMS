@@ -457,7 +457,7 @@ function DoorCard({
                       const nextMakes = makesByName.get(name) ?? [];
                       // Pick the make when the type has exactly one (or none); with
                       // several makes, clear it so the user chooses in the Make box.
-                      const make = nextMakes.length === 1 ? nextMakes[0] : "";
+                      const make = nextMakes.length === 1 ? (nextMakes[0] ?? "") : "";
                       // Fetch make/qty/rate from the master only once a single row is
                       // pinned down (a make, or a type with no makes at all).
                       const opt = make || nextMakes.length === 0 ? resolveHw(name, make) : undefined;
