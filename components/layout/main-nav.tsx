@@ -26,6 +26,9 @@ export function MainNav({ activeTasks, isAdmin, variant, side }: Props) {
   const myDayPill = (
     <MainNavPill href={"/tasks/agenda" as Route} label="My Day" Icon={CalendarDays} active={isActive("/tasks/agenda")} variant={variant} />
   );
+  const dashboardsPill = (
+    <MainNavPill href={"/dashboards" as Route} label="Dashboards" Icon={Compass} active={isActive("/dashboards")} variant={variant} />
+  );
   const tasksPill = (
     <MainNavPill
       href={"/tasks" as Route}
@@ -47,6 +50,7 @@ export function MainNav({ activeTasks, isAdmin, variant, side }: Props) {
       <nav aria-label="Primary" className="flex flex-col gap-1.5 w-full">
         {dashboardPill}
         {myDayPill}
+        {dashboardsPill}
         {tasksPill}
         {kanbanPill}
       </nav>
@@ -61,6 +65,7 @@ export function MainNav({ activeTasks, isAdmin, variant, side }: Props) {
       <nav aria-label="Primary" className={groupClass}>
         {dashboardPill}
         {myDayPill}
+        {dashboardsPill}
       </nav>
     );
   }
@@ -79,6 +84,7 @@ export function MainNav({ activeTasks, isAdmin, variant, side }: Props) {
       <div className={groupClass}>
         {dashboardPill}
         {myDayPill}
+        {dashboardsPill}
       </div>
       <div className={groupClass}>
         {tasksPill}
