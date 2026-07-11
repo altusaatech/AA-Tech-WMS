@@ -29,6 +29,8 @@ interface ProductOption {
 
 interface HardwareOption {
   name: string;
+  make: string;
+  model: string;
   rate: number;
 }
 
@@ -318,8 +320,29 @@ function DoorCard({
   onRemove: () => void;
 }) {
   const c = computeDoor(door);
-  // Hardware names for the dropdown come straight from the hardware master.
-  const hwNames = React.useMemo(() => hardwareOptions.map((o) => o.name), [hardwareOptions]);
+  // Hardware names for the dropdown come straight from the hardware master —
+  // distinct names, with the makes available for each name kept separately so
+  // the Make dropdown can cascade off the chosen name.
+  const hwNames = React.useMemo(
+    () => Array.from(new Set(hardwareOptions.map((o) => o.name))).sort((a, b) => a.localeCompare(b)),
+    [hardwareOptions],
+  );
+  const makesByName = React.useMemo(() => {
+    const m = new Map<string, string[]>();
+    for (const o of hardwareOptions) {
+      if (!o.make) continue;
+      const arr = m.get(o.name) ?? [];
+      if (!arr.includes(o.make)) arr.push(o.make);
+      m.set(o.name, arr);
+    }
+    for (const arr of m.values()) arr.sort((a, b) => a.localeCompare(b));
+    return m;
+  }, [hardwareOptions]);
+  const resolveHw = React.useCallback(
+    (name: string, make: string) =>
+      hardwareOptions.find((o) => o.name === name && (make ? o.make === make : true)),
+    [hardwareOptions],
+  );
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-[#f3f9fe] to-white px-4 py-2.5">
@@ -407,7 +430,7 @@ function DoorCard({
         {/* hardware grid */}
         <div className="mt-4">
           <div className="mb-1.5 flex items-center justify-between gap-2">
-            <div className="text-[11px] font-black uppercase tracking-[0.08em] text-slate-400">Hardware (name × qty × rate)</div>
+            <div className="text-[11px] font-black uppercase tracking-[0.08em] text-slate-400">Hardware (name × make × qty × rate)</div>
             <button type="button" onClick={onAddHw} className="inline-flex h-7 items-center gap-1 rounded-lg border border-[#0180cf]/40 bg-[#0180cf]/5 px-2.5 text-[12px] font-bold text-[#0069b3] transition-colors hover:bg-[#0180cf]/10">
               <Plus size={13} strokeWidth={2.8} /> Add Item
             </button>
@@ -419,16 +442,28 @@ function DoorCard({
             {door.hardware.map((h, idx) => {
               const amt = (Number(h.qty) || 0) * (Number(h.rate) || 0);
               const known = hwNames.includes(h.name);
+              const makes = makesByName.get(h.name) ?? [];
+              const makeKnown = !h.make || makes.includes(h.make);
+              const qty = Number(h.qty) || 0;
               return (
-                <div key={idx} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/60 px-2.5 py-1.5">
+                <div key={idx} className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50/60 px-2 py-1.5">
                   <select
-                    className="h-8 min-w-0 flex-1 cursor-pointer rounded-md border border-slate-200 bg-white px-1.5 text-[12.5px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
+                    className="h-8 min-w-0 flex-1 cursor-pointer rounded-md border border-slate-200 bg-white px-1.5 text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
                     value={h.name}
                     title={h.name}
                     onChange={(e) => {
                       const name = e.target.value;
-                      const opt = hardwareOptions.find((o) => o.name === name);
-                      onPatchHw(idx, { name, ...(opt && opt.rate ? { rate: opt.rate } : {}) });
+                      const nextMakes = makesByName.get(name) ?? [];
+                      // One make → auto-fill it (and its rate); several → clear the
+                      // make so the user picks, filling the rate on that choice.
+                      const make = nextMakes.length === 1 ? nextMakes[0] : "";
+                      const opt = resolveHw(name, make);
+                      onPatchHw(idx, {
+                        name,
+                        make,
+                        model: opt?.model ?? "",
+                        ...(opt && opt.rate ? { rate: opt.rate } : {}),
+                      });
                     }}
                   >
                     <option value="">Select hardware…</option>
@@ -437,10 +472,37 @@ function DoorCard({
                       <option key={nm} value={nm}>{nm}</option>
                     ))}
                   </select>
-                  <input type="number" className="h-8 w-14 shrink-0 rounded-md border border-slate-200 bg-white px-2 text-right text-[12.5px] outline-none focus:border-[#0180cf]" value={h.qty || ""} onChange={(e) => onPatchHw(idx, { qty: Number(e.target.value) })} placeholder="qty" />
+                  <select
+                    className="h-8 w-[92px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-300"
+                    value={h.make ?? ""}
+                    title={h.make ?? ""}
+                    disabled={!h.name}
+                    onChange={(e) => {
+                      const make = e.target.value;
+                      const opt = resolveHw(h.name, make);
+                      onPatchHw(idx, { make, model: opt?.model ?? "", ...(opt && opt.rate ? { rate: opt.rate } : {}) });
+                    }}
+                  >
+                    <option value="">Make…</option>
+                    {!makeKnown && h.make && <option value={h.make}>{h.make}</option>}
+                    {makes.map((mk) => (
+                      <option key={mk} value={mk}>{mk}</option>
+                    ))}
+                  </select>
+                  <select
+                    className="h-8 w-[54px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-right text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
+                    value={qty || ""}
+                    onChange={(e) => onPatchHw(idx, { qty: Number(e.target.value) })}
+                  >
+                    <option value="">qty</option>
+                    {qty > 50 && <option value={qty}>{qty}</option>}
+                    {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
                   <span className="text-[12px] text-slate-300">×</span>
-                  <input type="number" className="h-8 w-20 shrink-0 rounded-md border border-slate-200 bg-white px-2 text-right text-[12.5px] outline-none focus:border-[#0180cf]" value={h.rate || ""} onChange={(e) => onPatchHw(idx, { rate: Number(e.target.value) })} placeholder="rate" />
-                  <span className="w-[70px] shrink-0 text-right text-[12.5px] font-black tabular-nums text-slate-700">{inr(amt)}</span>
+                  <input type="number" className="h-8 w-16 shrink-0 rounded-md border border-slate-200 bg-white px-1.5 text-right text-[12px] outline-none focus:border-[#0180cf]" value={h.rate || ""} onChange={(e) => onPatchHw(idx, { rate: Number(e.target.value) })} placeholder="rate" />
+                  <span className="w-[58px] shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{inr(amt)}</span>
                   <button type="button" onClick={() => onRemoveHw(idx)} className="shrink-0 rounded-md p-1 text-slate-300 hover:bg-red-50 hover:text-red-600" title="Remove item"><Trash2 size={13} /></button>
                 </div>
               );
@@ -545,16 +607,20 @@ function QuotationPrint({
   const th = "border border-[#0a5a93] px-0.5 py-1 text-center font-bold text-white";
   const td = "border border-slate-300 px-0.5 py-0.5 text-center align-middle break-words";
   const tc = "border border-slate-400 px-2 py-1";
-  // Hardware columns — only the items actually used (qty > 0 in some door).
-  const hwMap = new Map<string, { name: string; rate: number; used: boolean }>();
+  // Hardware columns — one per used (name + make) pair, since the same name can
+  // come in several makes. Only items actually used (qty > 0 in some door).
+  const hwKey = (name: string, make: string) => `${name}|${make}`;
+  const hwMap = new Map<string, { name: string; make: string; rate: number; used: boolean }>();
   for (const d of lines) {
     for (const h of d.hardware) {
       const nm = (h.name || "").trim();
       if (!nm) continue;
+      const mk = (h.make || "").trim();
+      const key = hwKey(nm, mk);
       const q = Number(h.qty) || 0;
       const r = Number(h.rate) || 0;
-      const ex = hwMap.get(nm);
-      if (!ex) hwMap.set(nm, { name: nm, rate: r, used: q > 0 });
+      const ex = hwMap.get(key);
+      if (!ex) hwMap.set(key, { name: nm, make: mk, rate: r, used: q > 0 });
       else {
         if (q > 0) ex.used = true;
         if (!ex.rate && r) ex.rate = r;
@@ -562,8 +628,8 @@ function QuotationPrint({
     }
   }
   const hwCols = Array.from(hwMap.values()).filter((v) => v.used);
-  const hwQty = (d: DoorLine, name: string): number => {
-    const h = d.hardware.find((x) => (x.name || "").trim() === name);
+  const hwQty = (d: DoorLine, name: string, make: string): number => {
+    const h = d.hardware.find((x) => (x.name || "").trim() === name && (x.make || "").trim() === make);
     return h ? Number(h.qty) || 0 : 0;
   };
   const totalQty = lines.reduce((s, d) => s + (Number(d.qty) || 0), 0);
@@ -629,7 +695,7 @@ function QuotationPrint({
               <th key={s.label} className={`${th} th-vert`}>{s.label}</th>
             ))}
             {hwCols.map((h, i) => (
-              <th key={i} className={`${th} th-vert`} style={{ minWidth: 14 }}>{h.name}</th>
+              <th key={i} className={`${th} th-vert`} style={{ minWidth: 14 }}>{h.make ? `${h.name} (${h.make})` : h.name}</th>
             ))}
             {RIGHT_ALL.map((r) => (
               <th key={r.label} className={`${th} th-vert`}>{r.label}</th>
@@ -653,7 +719,7 @@ function QuotationPrint({
                   <td key={s.label} className={td} style={s.left ? { textAlign: "left" } : undefined}>{s.get(d, c, i)}</td>
                 ))}
                 {hwCols.map((h, hi) => {
-                  const q = hwQty(d, h.name);
+                  const q = hwQty(d, h.name, h.make);
                   return <td key={hi} className={td}>{q || ""}</td>;
                 })}
                 {RIGHT_ALL.map((r) => (

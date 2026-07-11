@@ -51,22 +51,23 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
     }))
     .sort((a, b) => a.code.localeCompare(b.code));
 
-  // Working-spec hardware picker — every item from the hardware master,
-  // labelled with make/model so variants (e.g. the two Hinges) stay distinct,
-  // each carrying its selling rate so picking a name auto-fills the rate.
-  const hwLabel = (h: (typeof hardware)[number]) => {
-    const base = (h.hardwareType || h.description || "").trim();
-    const extra = [h.make, h.model].map((x) => (x ?? "").trim()).filter(Boolean).join(" ");
-    return extra ? `${base} (${extra})` : base;
-  };
+  // Working-spec hardware picker — every item from the hardware master. Name,
+  // make and model are kept as separate fields (make/model are now their own
+  // dropdowns in the builder) and each carries its selling rate so picking a
+  // name+make auto-fills the rate. Deduped on the name+make+model triple.
   const hardwareOptions = Array.from(
     new Map(
       hardware
-        .map((h) => ({ name: hwLabel(h), rate: Number(h.sellingRate) || 0 }))
+        .map((h) => ({
+          name: (h.hardwareType || h.description || "").trim(),
+          make: (h.make ?? "").trim(),
+          model: (h.model ?? "").trim(),
+          rate: Number(h.sellingRate) || 0,
+        }))
         .filter((o) => o.name)
-        .map((o) => [o.name, o] as const),
+        .map((o) => [`${o.name}|${o.make}|${o.model}`, o] as const),
     ).values(),
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  ).sort((a, b) => a.name.localeCompare(b.name) || a.make.localeCompare(b.make) || a.model.localeCompare(b.model));
 
   return (
     <QuotationBuilder

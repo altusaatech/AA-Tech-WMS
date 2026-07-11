@@ -3,6 +3,8 @@
 
 export interface HardwareLine {
   name: string;
+  make?: string; // brand/make from the hardware master (e.g. Kich, Dorset)
+  model?: string; // model/spec from the hardware master
   qty: number;
   rate: number; // ₹ per unit
 }
@@ -74,7 +76,7 @@ export const DEFAULT_SUBJECT = "Supply of Clean Room Doors";
 
 /** A blank hardware item — used by the builder's "Add Item" action. */
 export function newHardware(name = "", rate = 0): HardwareLine {
-  return { name, qty: 0, rate };
+  return { name, make: "", model: "", qty: 0, rate };
 }
 
 let _id = 0;
