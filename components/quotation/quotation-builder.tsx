@@ -32,6 +32,7 @@ interface HardwareOption {
   make: string;
   model: string;
   rate: number;
+  qty: number; // default quantity fetched from the hardware master
 }
 
 interface DoorOption {
@@ -430,7 +431,7 @@ function DoorCard({
         {/* hardware grid */}
         <div className="mt-4">
           <div className="mb-1.5 flex items-center justify-between gap-2">
-            <div className="text-[11px] font-black uppercase tracking-[0.08em] text-slate-400">Hardware (name × make × qty × rate)</div>
+            <div className="text-[11px] font-black uppercase tracking-[0.08em] text-slate-400">Hardware (type × make × qty × rate)</div>
             <button type="button" onClick={onAddHw} className="inline-flex h-7 items-center gap-1 rounded-lg border border-[#0180cf]/40 bg-[#0180cf]/5 px-2.5 text-[12px] font-bold text-[#0069b3] transition-colors hover:bg-[#0180cf]/10">
               <Plus size={13} strokeWidth={2.8} /> Add Item
             </button>
@@ -454,15 +455,18 @@ function DoorCard({
                     onChange={(e) => {
                       const name = e.target.value;
                       const nextMakes = makesByName.get(name) ?? [];
-                      // One make → auto-fill it (and its rate); several → clear the
-                      // make so the user picks, filling the rate on that choice.
+                      // Pick the make when the type has exactly one (or none); with
+                      // several makes, clear it so the user chooses in the Make box.
                       const make = nextMakes.length === 1 ? nextMakes[0] : "";
-                      const opt = resolveHw(name, make);
+                      // Fetch make/qty/rate from the master only once a single row is
+                      // pinned down (a make, or a type with no makes at all).
+                      const opt = make || nextMakes.length === 0 ? resolveHw(name, make) : undefined;
                       onPatchHw(idx, {
                         name,
                         make,
                         model: opt?.model ?? "",
                         ...(opt && opt.rate ? { rate: opt.rate } : {}),
+                        ...(opt && opt.qty ? { qty: opt.qty } : {}),
                       });
                     }}
                   >
@@ -480,7 +484,12 @@ function DoorCard({
                     onChange={(e) => {
                       const make = e.target.value;
                       const opt = resolveHw(h.name, make);
-                      onPatchHw(idx, { make, model: opt?.model ?? "", ...(opt && opt.rate ? { rate: opt.rate } : {}) });
+                      onPatchHw(idx, {
+                        make,
+                        model: opt?.model ?? "",
+                        ...(opt && opt.rate ? { rate: opt.rate } : {}),
+                        ...(opt && opt.qty ? { qty: opt.qty } : {}),
+                      });
                     }}
                   >
                     <option value="">Make…</option>

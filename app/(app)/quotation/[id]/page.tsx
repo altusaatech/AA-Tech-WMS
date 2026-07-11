@@ -51,10 +51,10 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
     }))
     .sort((a, b) => a.code.localeCompare(b.code));
 
-  // Working-spec hardware picker — every item from the hardware master. Name,
-  // make and model are kept as separate fields (make/model are now their own
-  // dropdowns in the builder) and each carries its selling rate so picking a
-  // name+make auto-fills the rate. Deduped on the name+make+model triple.
+  // Working-spec hardware picker — every item from the hardware master. Hardware
+  // type (name), make and model are separate fields; each option also carries
+  // the master's selling rate and quantity so picking a type+make auto-fills the
+  // make, quantity and rate in the builder. Deduped on the name+make+model triple.
   const hardwareOptions = Array.from(
     new Map(
       hardware
@@ -63,6 +63,7 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
           make: (h.make ?? "").trim(),
           model: (h.model ?? "").trim(),
           rate: Number(h.sellingRate) || 0,
+          qty: Number(h.quantity) || 0,
         }))
         .filter((o) => o.name)
         .map((o) => [`${o.name}|${o.make}|${o.model}`, o] as const),
