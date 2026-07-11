@@ -79,8 +79,8 @@ export function QuotationBuilder({
   const totals = computeTotals(lines);
 
   function addDoor() {
-    // A new door starts with no hardware — the user adds items from the
-    // hardware master via "Add Item".
+    // A new door starts with 8 blank hardware slots (see newDoor); more can be
+    // added from the hardware master via "Add Item".
     setLines((p) => [...p, newDoor()]);
   }
   function patchDoor(doorId: string, patch: Partial<DoorLine>) {

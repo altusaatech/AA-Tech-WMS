@@ -99,8 +99,9 @@ export function newDoor(): DoorLine {
     qty: 1,
     ratePerSqm: 0,
     installPerSqm: 0,
-    // Hardware is added per door from the hardware master in the builder.
-    hardware: [],
+    // A new door starts with 8 blank hardware slots (4 rows × 2 columns) so
+    // the user can fill them in directly; extras come via "Add Item".
+    hardware: Array.from({ length: 8 }, () => newHardware()),
   };
 }
 
