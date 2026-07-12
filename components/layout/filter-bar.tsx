@@ -344,11 +344,12 @@ export function FilterBar({
               <Popover.Trigger asChild>
                 <button
                   type="button"
-                  className="inline-flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-[14px] font-semibold border border-hairline bg-surface-card text-ink-strong hover:border-hairline-strong transition-colors"
+                  aria-label="Saved views"
+                  title="Saved views"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-hairline bg-surface-card text-ink-strong hover:border-hairline-strong transition-colors"
                   style={{ boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)" }}
                 >
-                  <Bookmark size={15} strokeWidth={2} className="text-ink-subtle" />
-                  Saved views
+                  <Bookmark size={16} strokeWidth={2} className="text-ink-subtle" />
                 </button>
               </Popover.Trigger>
               <Popover.Portal>

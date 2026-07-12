@@ -8,9 +8,11 @@ interface Props {
   activeTasks: number;
   isAdmin: boolean;
   variant?: "drawer";
+  /** Render only one half of the nav (used to flank the header status bar). */
+  side?: "left" | "right";
 }
 
-export function MainNav({ activeTasks, isAdmin, variant }: Props) {
+export function MainNav({ activeTasks, isAdmin, variant, side }: Props) {
   const pathname = usePathname();
 
   function isActive(href: string): boolean {
@@ -51,7 +53,27 @@ export function MainNav({ activeTasks, isAdmin, variant }: Props) {
     );
   }
 
-  // Desktop: all pills on a single centered line (below the header wordmark).
+  const groupClass = "flex items-center gap-1.5 2xl:gap-2";
+
+  // Flank the status bar: Dashboard/My Day on the left, Tasks/Kanban on the right.
+  if (side === "left") {
+    return (
+      <nav aria-label="Primary" className={groupClass}>
+        {dashboardPill}
+        {myDayPill}
+      </nav>
+    );
+  }
+  if (side === "right") {
+    return (
+      <nav aria-label="Primary" className={groupClass}>
+        {tasksPill}
+        {kanbanPill}
+      </nav>
+    );
+  }
+
+  // Fallback: all pills on a single centered line.
   return (
     <nav aria-label="Primary" className="flex items-center justify-center gap-1.5 2xl:gap-2">
       {dashboardPill}

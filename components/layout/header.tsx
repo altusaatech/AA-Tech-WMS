@@ -63,10 +63,9 @@ export async function DashboardHeader({
                 <a
                   href="/"
                   aria-label="A A Tech home"
-                  className="group relative flex shrink-0 flex-col items-center justify-center transition-transform hover:scale-[1.05]"
+                  className="group relative flex shrink-0 items-center justify-center transition-transform hover:scale-[1.05]"
                 >
                   <img src="/logo-mark.png?v=3" alt="A A Tech" className="relative h-16 w-auto max-md:h-12" style={{ display: "block", filter: "drop-shadow(0 6px 14px rgba(1,128,207,0.3))" }} />
-                  <span className="relative mt-1.5 text-[11px] font-black uppercase tracking-[0.24em] text-slate-700 max-md:text-[9px]">AA Tech</span>
                 </a>
 
                 {/* CENTER — wordmark + tagline + status pills */}
@@ -90,8 +89,15 @@ export async function DashboardHeader({
                   >
                     Anant Avinya Technologies
                   </h1>
-                  <div className="mt-3.5 max-md:mt-2.5">
+                  {/* status pills flanked by the nav: Dashboard/My Day · date·time·online · Tasks/Kanban */}
+                  <div className="mt-3.5 flex items-center justify-center gap-3 2xl:gap-4 max-md:mt-2.5">
+                    <div className="shrink-0 max-md:hidden">
+                      <MainNavServer side="left" />
+                    </div>
                     <HeaderStatusBar moduleCount={moduleCount} />
+                    <div className="shrink-0 max-md:hidden">
+                      <MainNavServer side="right" />
+                    </div>
                   </div>
                 </div>
 
@@ -105,11 +111,6 @@ export async function DashboardHeader({
                     style={{ display: "block", filter: "drop-shadow(0 6px 14px rgba(0,0,0,0.18))" }}
                   />
                 </div>
-              </div>
-
-              {/* NAV — all pills on a single line below the wordmark */}
-              <div className="mt-4 flex justify-center max-md:hidden">
-                <MainNavServer />
               </div>
             </div>
           </div>
