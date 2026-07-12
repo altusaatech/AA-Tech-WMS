@@ -3,7 +3,7 @@ import { count } from "drizzle-orm";
 import { Compass, TrendingUp, Factory, CalendarCheck, IndianRupee, FileSpreadsheet } from "lucide-react";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { salesQuotes, salesWo } from "@/db/schema";
+import { salesQuotes, salesWo, employees } from "@/db/schema";
 import type { LucideIcon } from "lucide-react";
 import { HubCard } from "@/components/dashboards/hub-card";
 
@@ -14,16 +14,20 @@ export default async function DashboardsHubPage() {
 
   let quoteCount = 0;
   let woCount = 0;
+  let headcount = 0;
   try {
-    const [quoteRows, woRows] = await Promise.all([
+    const [quoteRows, woRows, empRows] = await Promise.all([
       db.select({ n: count() }).from(salesQuotes),
       db.select({ n: count() }).from(salesWo),
+      db.select({ n: count() }).from(employees),
     ]);
     quoteCount = Number(quoteRows[0]?.n ?? 0);
     woCount = Number(woRows[0]?.n ?? 0);
+    headcount = Number(empRows[0]?.n ?? 0);
   } catch {
     quoteCount = 0;
     woCount = 0;
+    headcount = 0;
   }
 
   return (
@@ -79,7 +83,7 @@ export default async function DashboardsHubPage() {
         </div>
         <div className="relative mt-7 grid gap-3" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
           <HubStat label="Quotes" value={quoteCount} Icon={FileSpreadsheet} from="#0180cf" to="#0069b3" />
-          <HubStat label="Dashboards" value={2} Icon={Compass} from="#63b81e" to="#3f7a14" />
+          <HubStat label="Dashboards" value={3} Icon={Compass} from="#63b81e" to="#3f7a14" />
         </div>
       </header>
 
@@ -118,8 +122,10 @@ export default async function DashboardsHubPage() {
           to="#a855f7"
           soft="linear-gradient(135deg, #f3eefc, #faf7ff)"
           ring="rgba(124,58,237,0.18)"
-          cta="Coming soon"
-          disabled
+          count={headcount}
+          sub={headcount === 1 ? "team member" : "team members"}
+          cta="Open dashboard"
+          href={"/dashboards/attendance" as Route}
         />
         <HubCard
           title="Salary & Incentives"
