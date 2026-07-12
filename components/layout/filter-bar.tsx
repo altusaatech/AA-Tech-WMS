@@ -214,7 +214,7 @@ export function FilterBar({
   const inner = (
       <div className={embedded ? "flex w-full min-w-0 flex-col gap-2" : "mx-auto max-w-[1600px] px-12 py-3 max-md:px-4 flex flex-col gap-2.5"}>
         {/* Row 1 — filter pill-cards */}
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className={`flex items-center gap-2.5 ${embedded ? "min-w-0 flex-nowrap overflow-x-auto pb-0.5 [&>*]:shrink-0" : "flex-wrap"}`}>
           {/* Date range */}
           <Popover.Root>
             <Popover.Trigger asChild>
@@ -365,8 +365,11 @@ export function FilterBar({
           </div>
         </div>
 
-        {/* Row 2 — active filter chips + result count */}
-        <div className="flex items-center gap-2.5 flex-wrap min-h-[28px]">
+        {/* Row 2 — active filter chips + result count. In the embedded header
+            strip it only appears once there's something to show, so the filters
+            + search sit on a single line. */}
+        {(!embedded || activePills.length > 0 || isPending || typeof taskCount === "number") && (
+        <div className={`flex items-center gap-2.5 flex-wrap ${embedded ? "" : "min-h-[28px]"}`}>
           {activePills.map((p) => (
             <span
               key={p.key}
@@ -416,6 +419,7 @@ export function FilterBar({
             )}
           </div>
         </div>
+        )}
       </div>
   );
 
