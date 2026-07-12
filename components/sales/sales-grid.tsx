@@ -25,6 +25,34 @@ import type { SalesColDef } from "@/lib/sales/columns";
 
 const PAGE_SIZES = [10, 25, 50, 100];
 
+// Visual range picker — how much of the sheet to render for selection.
+const MAX_PREVIEW_ROWS = 300;
+const MAX_PREVIEW_COLS = 40;
+
+function normRange(r1: number, c1: number, r2: number, c2: number) {
+  return { r1: Math.min(r1, r2), c1: Math.min(c1, c2), r2: Math.max(r1, r2), c2: Math.max(c1, c2) };
+}
+/** 0 → A, 1 → B, … 26 → AA (Excel column letters). */
+function colLetter(i: number): string {
+  let s = "";
+  let n = i;
+  do {
+    s = String.fromCharCode(65 + (n % 26)) + s;
+    n = Math.floor(n / 26) - 1;
+  } while (n >= 0);
+  return s;
+}
+function cellToValue(col: SalesColDef, raw: string): string | boolean | null {
+  const s = raw.trim();
+  if (s === "") return null;
+  if (col.type === "bool") return ["yes", "true", "1", "y"].includes(s.toLowerCase());
+  if (col.type === "date") {
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? s : d.toISOString().slice(0, 10);
+  }
+  return s;
+}
+
 /**
  * "Register" — a modern Excel-style data table: gradient sticky header, grid
  * lines, zebra rows, click-to-sort, global search, per-column filters,
@@ -65,6 +93,11 @@ export function SalesDataGrid({
   // Multi-sheet workbooks: hold the parsed book and offer a sheet picker.
   const wbRef = React.useRef<import("xlsx").WorkBook | null>(null);
   const [sheetPicker, setSheetPicker] = React.useState<string[] | null>(null);
+  // Visual range picker — show the sheet as a grid and let the user drag-select
+  // the block to import (top row of the selection = column headers).
+  const [rangeGrid, setRangeGrid] = React.useState<{ name: string; cells: string[][]; truncated: boolean } | null>(null);
+  const [sel, setSel] = React.useState<{ r1: number; c1: number; r2: number; c2: number } | null>(null);
+  const [anchor, setAnchor] = React.useState<{ r: number; c: number } | null>(null);
 
   const view = React.useMemo(() => {
     let r = rows;
@@ -166,62 +199,99 @@ export function SalesDataGrid({
         setSheetPicker(wb.SheetNames);
         return;
       }
-      await importSheet(wb.SheetNames[0]!);
+      await openRange(wb.SheetNames[0]!);
     } catch {
       setBanner({ kind: "err", text: "Could not read the file. Make sure it's a valid Excel/CSV file." });
     }
   }
 
-  async function importSheet(sheetName: string) {
+  // Load a sheet into the visual range picker (capped for smooth rendering).
+  async function openRange(sheetName: string) {
     const wb = wbRef.current;
     if (!wb) return;
     setSheetPicker(null);
-    setImporting(true);
     setBanner(null);
     try {
       const XLSX = await import("xlsx");
       const ws = wb.Sheets[sheetName];
       if (!ws) throw new Error("empty sheet");
-      const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
+      const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: "", raw: false, blankrows: true });
+      const capped = aoa.slice(0, MAX_PREVIEW_ROWS);
+      const maxCols = Math.min(MAX_PREVIEW_COLS, capped.reduce((m, r) => Math.max(m, (r as unknown[]).length), 1));
+      const cells = capped.map((r) => {
+        const row = (r as unknown[]).slice(0, maxCols).map((v) => String(v ?? ""));
+        while (row.length < maxCols) row.push("");
+        return row;
+      });
+      setSel(null);
+      setAnchor(null);
+      setRangeGrid({ name: sheetName, cells, truncated: aoa.length > MAX_PREVIEW_ROWS });
+    } catch {
+      setBanner({ kind: "err", text: "Could not read that sheet." });
+    }
+  }
 
+  function onCellDown(r: number, c: number) {
+    setAnchor({ r, c });
+    setSel({ r1: r, c1: c, r2: r, c2: c });
+  }
+  function onCellEnter(r: number, c: number) {
+    if (anchor) setSel(normRange(anchor.r, anchor.c, r, c));
+  }
+  function endSelect() {
+    setAnchor(null);
+  }
+
+  // Import the selected block: its top row is the header row, mapped to columns.
+  async function importRange() {
+    if (!rangeGrid || !sel) return;
+    if (sel.r2 - sel.r1 < 1) {
+      setBanner({ kind: "err", text: "Select the header row plus at least one data row." });
+      return;
+    }
+    setImporting(true);
+    setBanner(null);
+    try {
+      const { cells } = rangeGrid;
       const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+      const headerCols: (SalesColDef | null)[] = [];
+      for (let c = sel.c1; c <= sel.c2; c++) {
+        const h = norm(String(cells[sel.r1]?.[c] ?? ""));
+        headerCols.push(columns.find((col) => !col.readOnly && norm(col.label) === h) ?? null);
+      }
+      const matched = headerCols.filter(Boolean).length;
       const mapped: Record<string, string | boolean | null>[] = [];
       let skipped = 0;
-      for (const r of json) {
-        // Case/spacing-insensitive header lookup so slightly-different headers still match.
-        const byNorm = new Map<string, unknown>();
-        for (const [k, v] of Object.entries(r)) byNorm.set(norm(k), v);
+      for (let r = sel.r1 + 1; r <= sel.r2; r++) {
         const out: Record<string, string | boolean | null> = {};
-        for (const c of columns) {
-          if (c.readOnly) continue;
-          const raw = r[c.label] ?? byNorm.get(norm(c.label));
-          if (raw === undefined || raw === null || String(raw).trim() === "") continue;
-          if (c.type === "bool") {
-            out[c.key] = ["yes", "true", "1", "y"].includes(String(raw).toLowerCase().trim());
-          } else if (c.type === "date" && raw instanceof Date) {
-            out[c.key] = raw.toISOString().slice(0, 10);
-          } else {
-            out[c.key] = String(raw).trim();
-          }
-        }
-        // Never insert a row that mapped to nothing.
+        headerCols.forEach((col, i) => {
+          if (!col) return;
+          const raw = String(cells[r]?.[sel.c1 + i] ?? "").trim();
+          if (raw === "") return;
+          out[col.key] = cellToValue(col, raw);
+        });
         if (Object.keys(out).length > 0) mapped.push(out);
         else skipped++;
       }
-
-      if (!mapped.length) {
-        setBanner({ kind: "err", text: `No matching data in “${sheetName}”. The sheet's column headers must match this register — download the Template to see the exact headers.` });
+      if (!matched) {
+        setBanner({ kind: "err", text: "No column headers in the top row of your selection matched this register. Include the header row and check the names (Template shows the exact ones)." });
         return;
       }
-
+      if (!mapped.length) {
+        setBanner({ kind: "err", text: "The selected rows are empty." });
+        return;
+      }
       const inserted = await importSalesRows(kind, mapped);
       if (inserted.length) onImported(inserted);
-      setBanner({ kind: "ok", text: `Imported ${inserted.length} row${inserted.length === 1 ? "" : "s"} from “${sheetName}”${skipped ? ` · skipped ${skipped} empty` : ""}.` });
+      setBanner({ kind: "ok", text: `Imported ${inserted.length} row${inserted.length === 1 ? "" : "s"} from “${rangeGrid.name}” · ${matched} column${matched === 1 ? "" : "s"} matched${skipped ? ` · ${skipped} empty skipped` : ""}.` });
+      setRangeGrid(null);
+      setSel(null);
+      setAnchor(null);
+      wbRef.current = null;
     } catch {
-      setBanner({ kind: "err", text: "Import failed. Check that the sheet's column headers match this register's columns." });
+      setBanner({ kind: "err", text: "Import failed. Please try again." });
     } finally {
       setImporting(false);
-      wbRef.current = null;
     }
   }
 
@@ -514,7 +584,7 @@ export function SalesDataGrid({
                 <button
                   key={name}
                   type="button"
-                  onClick={() => importSheet(name)}
+                  onClick={() => openRange(name)}
                   className="flex w-full items-center gap-2 rounded-lg border border-slate-200 px-3 py-2.5 text-left text-[13.5px] font-bold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-[#0180cf] hover:bg-[#0180cf]/5"
                 >
                   <FileSpreadsheet size={14} className="shrink-0 text-[#0069b3]" />
@@ -525,6 +595,105 @@ export function SalesDataGrid({
             <button type="button" onClick={() => setSheetPicker(null)} className="mt-3 text-[12.5px] font-bold text-slate-400 hover:text-slate-600">
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── visual range picker ── */}
+      {rangeGrid && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="flex max-h-[92vh] w-[min(1100px,96vw)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            {/* header */}
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3.5">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex size-9 items-center justify-center rounded-xl text-white shadow" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
+                  <FileSpreadsheet size={17} strokeWidth={2.3} />
+                </span>
+                <div>
+                  <h3 className="text-[15px] font-black text-slate-800">Select the range to import</h3>
+                  <p className="text-[12px] text-slate-500">
+                    Sheet “{rangeGrid.name}” → {title ?? kind} · click the <b>top-left</b> cell (the header row), drag to the <b>bottom-right</b>
+                  </p>
+                </div>
+              </div>
+              <button type="button" onClick={() => { setRangeGrid(null); setSel(null); setAnchor(null); wbRef.current = null; }} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* grid */}
+            <div className="min-h-0 flex-1 overflow-auto bg-slate-50/60" onMouseUp={endSelect} onMouseLeave={endSelect}>
+              <table className="border-collapse select-none text-[12px]" style={{ tableLayout: "fixed" }}>
+                <thead className="sticky top-0 z-10">
+                  <tr>
+                    <th className="sticky left-0 z-20 h-7 w-10 border border-slate-200 bg-slate-100 text-[11px] font-bold text-slate-400" />
+                    {rangeGrid.cells[0]?.map((_, c) => (
+                      <th key={c} className="h-7 min-w-[110px] border border-slate-200 bg-slate-100 px-2 text-[11px] font-black text-slate-500">{colLetter(c)}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rangeGrid.cells.map((row, r) => (
+                    <tr key={r}>
+                      <td className="sticky left-0 z-10 h-7 w-10 border border-slate-200 bg-slate-100 text-center text-[11px] font-bold text-slate-400">{r + 1}</td>
+                      {row.map((val, c) => {
+                        const inSel = !!sel && r >= sel.r1 && r <= sel.r2 && c >= sel.c1 && c <= sel.c2;
+                        const isHeaderRow = !!sel && inSel && r === sel.r1;
+                        return (
+                          <td
+                            key={c}
+                            onMouseDown={(e) => { e.preventDefault(); onCellDown(r, c); }}
+                            onMouseEnter={() => onCellEnter(r, c)}
+                            title={val}
+                            className={`h-7 max-w-[110px] cursor-cell truncate border px-2 ${
+                              isHeaderRow
+                                ? "border-[#0180cf] bg-[#0180cf] font-bold text-white"
+                                : inSel
+                                ? "border-[#0180cf]/40 bg-[#0180cf]/12 text-slate-800"
+                                : "border-slate-200 bg-white text-slate-600"
+                            }`}
+                          >
+                            {val}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* footer */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-white px-5 py-3">
+              <div className="text-[12.5px] text-slate-500">
+                {sel ? (
+                  <span>
+                    Selected <b className="text-slate-800">{colLetter(sel.c1)}{sel.r1 + 1}:{colLetter(sel.c2)}{sel.r2 + 1}</b>
+                    {" "}· <b className="text-slate-800">{Math.max(0, sel.r2 - sel.r1)}</b> data row{sel.r2 - sel.r1 === 1 ? "" : "s"} × {sel.c2 - sel.c1 + 1} col{sel.c2 - sel.c1 === 0 ? "" : "s"}
+                    <span className="text-slate-400"> · top row = headers</span>
+                  </span>
+                ) : (
+                  <span className="text-slate-400">No selection yet — click and drag over your table.{rangeGrid.truncated ? ` (showing first ${MAX_PREVIEW_ROWS} rows)` : ""}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2.5">
+                {sel && (
+                  <button type="button" onClick={() => { setSel(null); setAnchor(null); }} className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-[13px] font-bold text-slate-600 hover:bg-slate-50">
+                    Reset
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={importRange}
+                  disabled={!sel || sel.r2 - sel.r1 < 1 || importing}
+                  className="inline-flex h-10 items-center gap-2 rounded-xl px-5 text-[14px] font-extrabold text-white shadow-lg transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+                  style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 12px 26px -10px ${to}99` }}
+                >
+                  {importing ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+                  {sel && sel.r2 - sel.r1 >= 1 ? `Import ${sel.r2 - sel.r1} row${sel.r2 - sel.r1 === 1 ? "" : "s"} → save` : "Import & save"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
