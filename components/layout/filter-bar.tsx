@@ -214,7 +214,7 @@ export function FilterBar({
   const inner = (
       <div className={embedded ? "flex w-full min-w-0 flex-col gap-2" : "mx-auto max-w-[1600px] px-12 py-3 max-md:px-4 flex flex-col gap-2.5"}>
         {/* Row 1 — filter pill-cards */}
-        <div className={`flex items-center gap-2.5 ${embedded ? "min-w-0 flex-nowrap overflow-x-auto pb-0.5 [&>*]:shrink-0" : "flex-wrap"}`}>
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Date range */}
           <Popover.Root>
             <Popover.Trigger asChild>

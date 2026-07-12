@@ -260,6 +260,10 @@ html[data-density="compact"] body {
     font-feature-settings: "tnum" 1, "ss01" 1;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* The display-scale zoom (up to 1.35×) can scale full-width layers past the
+       viewport and surface a horizontal scrollbar at the page/viewport level,
+       which body's overflow-x:hidden doesn't reach. Clip it here too. */
+    overflow-x: hidden;
   }
 
   body {
