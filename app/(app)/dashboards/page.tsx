@@ -1,9 +1,9 @@
 import type { Route } from "next";
 import { count } from "drizzle-orm";
-import { Compass, TrendingUp, Wallet, CalendarCheck, IndianRupee, FileSpreadsheet } from "lucide-react";
+import { Compass, TrendingUp, Factory, CalendarCheck, IndianRupee, FileSpreadsheet } from "lucide-react";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { salesQuotes } from "@/db/schema";
+import { salesQuotes, salesWo } from "@/db/schema";
 import type { LucideIcon } from "lucide-react";
 import { HubCard } from "@/components/dashboards/hub-card";
 
@@ -13,11 +13,17 @@ export default async function DashboardsHubPage() {
   await requireUser();
 
   let quoteCount = 0;
+  let woCount = 0;
   try {
-    const quoteRows = await db.select({ n: count() }).from(salesQuotes);
+    const [quoteRows, woRows] = await Promise.all([
+      db.select({ n: count() }).from(salesQuotes),
+      db.select({ n: count() }).from(salesWo),
+    ]);
     quoteCount = Number(quoteRows[0]?.n ?? 0);
+    woCount = Number(woRows[0]?.n ?? 0);
   } catch {
     quoteCount = 0;
+    woCount = 0;
   }
 
   return (
@@ -73,7 +79,7 @@ export default async function DashboardsHubPage() {
         </div>
         <div className="relative mt-7 grid gap-3" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
           <HubStat label="Quotes" value={quoteCount} Icon={FileSpreadsheet} from="#0180cf" to="#0069b3" />
-          <HubStat label="Dashboards" value={1} Icon={Compass} from="#63b81e" to="#3f7a14" />
+          <HubStat label="Dashboards" value={2} Icon={Compass} from="#63b81e" to="#3f7a14" />
         </div>
       </header>
 
@@ -92,15 +98,17 @@ export default async function DashboardsHubPage() {
           href={"/dashboards/sales" as Route}
         />
         <HubCard
-          title="Outstanding / Receivables"
-          desc="Collections & aging — outstanding value, overdue, upcoming installments."
-          Icon={Wallet}
+          title="Production & Delivery"
+          desc="SO → GA → BOM → Work Order → dispatch. Order book, on-time delivery & throughput."
+          Icon={Factory}
           from="#0069b3"
           to="#0180cf"
           soft="linear-gradient(135deg, #e9f1f9, #f4f9fe)"
           ring="rgba(0,105,179,0.20)"
-          cta="Coming soon"
-          disabled
+          count={woCount}
+          sub={woCount === 1 ? "work order" : "work orders"}
+          cta="Open dashboard"
+          href={"/dashboards/production" as Route}
         />
         <HubCard
           title="Attendance / Workforce"
