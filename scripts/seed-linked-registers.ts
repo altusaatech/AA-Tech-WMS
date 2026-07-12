@@ -134,9 +134,9 @@ async function main() {
   }
 
   console.log("Seeding 15 linked rows (Enquiry → PO → SO → GA/BOM → WO)…");
-  // Quote: keep existing rows, just add the 15.
-  await db.insert(salesQuotes).values(quotes);
-  // SO/GA/BOM/WO: near-empty → wipe & reseed exactly 15.
+  // All five registers are wiped & reseeded with exactly the matching 15 so the
+  // whole pipeline lines up. (Quote's old rows were broken by a bad import.)
+  await db.delete(salesQuotes); await db.insert(salesQuotes).values(quotes);
   await db.delete(salesSo); await db.insert(salesSo).values(sos);
   await db.delete(salesGa); await db.insert(salesGa).values(gas);
   await db.delete(salesBom); await db.insert(salesBom).values(boms);
