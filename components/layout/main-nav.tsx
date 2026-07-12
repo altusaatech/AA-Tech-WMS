@@ -8,11 +8,9 @@ interface Props {
   activeTasks: number;
   isAdmin: boolean;
   variant?: "drawer";
-  /** Render only one half of the split nav (used to flank the header wordmark). */
-  side?: "left" | "right";
 }
 
-export function MainNav({ activeTasks, isAdmin, variant, side }: Props) {
+export function MainNav({ activeTasks, isAdmin, variant }: Props) {
   const pathname = usePathname();
 
   function isActive(href: string): boolean {
@@ -25,9 +23,6 @@ export function MainNav({ activeTasks, isAdmin, variant, side }: Props) {
   );
   const myDayPill = (
     <MainNavPill href={"/tasks/agenda" as Route} label="My Day" Icon={CalendarDays} active={isActive("/tasks/agenda")} variant={variant} />
-  );
-  const dashboardsPill = (
-    <MainNavPill href={"/dashboards" as Route} label="Dashboards" Icon={Compass} active={isActive("/dashboards")} variant={variant} />
   );
   const tasksPill = (
     <MainNavPill
@@ -50,46 +45,19 @@ export function MainNav({ activeTasks, isAdmin, variant, side }: Props) {
       <nav aria-label="Primary" className="flex flex-col gap-1.5 w-full">
         {dashboardPill}
         {myDayPill}
-        {dashboardsPill}
         {tasksPill}
         {kanbanPill}
       </nav>
     );
   }
 
-  const groupClass = "flex items-center gap-1.5 2xl:gap-2";
-
-  // Half of the split nav — used to flank the header wordmark (2 left, 2 right).
-  if (side === "left") {
-    return (
-      <nav aria-label="Primary" className={groupClass}>
-        {dashboardPill}
-        {myDayPill}
-        {dashboardsPill}
-      </nav>
-    );
-  }
-  if (side === "right") {
-    return (
-      <nav aria-label="Primary" className={groupClass}>
-        {tasksPill}
-        {kanbanPill}
-      </nav>
-    );
-  }
-
-  // Fallback: the full split in one bar.
+  // Desktop: all pills on a single centered line (below the header wordmark).
   return (
-    <nav aria-label="Primary" className="flex w-full items-center justify-between gap-2">
-      <div className={groupClass}>
-        {dashboardPill}
-        {myDayPill}
-        {dashboardsPill}
-      </div>
-      <div className={groupClass}>
-        {tasksPill}
-        {kanbanPill}
-      </div>
+    <nav aria-label="Primary" className="flex items-center justify-center gap-1.5 2xl:gap-2">
+      {dashboardPill}
+      {myDayPill}
+      {tasksPill}
+      {kanbanPill}
     </nav>
   );
 }

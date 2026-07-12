@@ -2,10 +2,7 @@ import { getNavCounts } from "@/lib/queries/nav-counts";
 import { getCurrentEmployee } from "@/lib/auth/current";
 import { MainNav } from "./main-nav";
 
-export async function MainNavServer({
-  variant,
-  side,
-}: { variant?: "drawer"; side?: "left" | "right" } = {}) {
+export async function MainNavServer({ variant }: { variant?: "drawer" } = {}) {
   const me = await getCurrentEmployee();
   // Only the active-tasks badge lives on the nav now; Inbox / Archived counts
   // moved into the user menu (see UserMenuServer). The task totals come from a
@@ -24,7 +21,6 @@ export async function MainNavServer({
       activeTasks={activeTasks}
       isAdmin={Boolean(me?.isAdmin)}
       variant={variant}
-      side={side}
     />
   );
 }

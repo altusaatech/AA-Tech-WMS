@@ -56,62 +56,60 @@ export async function DashboardHeader({
               <div className="hero-anim absolute right-[-4rem] -bottom-32 h-80 w-80 rounded-full" style={{ background: "radial-gradient(circle, rgba(99,184,30,0.16), transparent 68%)", filter: "blur(34px)", animation: "heroFloat2 22s ease-in-out infinite" }} />
             </div>
 
-            <div className="relative flex items-center justify-between gap-6 px-8 py-5 max-md:px-4 max-md:py-4 max-md:gap-3">
-              {/* LEFT — logo (no tile) */}
-              <a
-                href="/"
-                aria-label="A A Tech home"
-                className="group relative flex shrink-0 flex-col items-center justify-center transition-transform hover:scale-[1.05]"
-              >
-                <img src="/logo-mark.png?v=3" alt="A A Tech" className="relative h-16 w-auto max-md:h-12" style={{ display: "block", filter: "drop-shadow(0 6px 14px rgba(1,128,207,0.3))" }} />
-                <span className="relative mt-1.5 text-[11px] font-black uppercase tracking-[0.24em] text-slate-700 max-md:text-[9px]">AA Tech</span>
-              </a>
-
-              {/* LEFT NAV — two pills beside the wordmark */}
-              <div className="shrink-0 max-md:hidden">
-                <MainNavServer side="left" />
-              </div>
-
-              {/* CENTER — wordmark + tagline + status pills */}
-              <div className="flex min-w-0 flex-1 flex-col items-center text-center">
-                <h1
-                  className="truncate max-w-full"
-                  style={{
-                    fontFamily: "var(--font-display), system-ui, sans-serif",
-                    fontWeight: 900,
-                    fontSize: "clamp(20px, 2.5vw, 33px)",
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.05,
-                    background: "linear-gradient(95deg, #0069b3 0%, #0180cf 42%, #4e9e2e 100%)",
-                    backgroundSize: "200% auto",
-                    WebkitBackgroundClip: "text",
-                    backgroundClip: "text",
-                    color: "transparent",
-                    WebkitTextFillColor: "transparent",
-                    animation: "headerTextShimmer 7s linear infinite",
-                  }}
+            <div className="relative px-8 py-5 max-md:px-4 max-md:py-4">
+              {/* top row: logo · wordmark + pills · Altus */}
+              <div className="flex items-center justify-between gap-6 max-md:gap-3">
+                {/* LEFT — logo (no tile) */}
+                <a
+                  href="/"
+                  aria-label="A A Tech home"
+                  className="group relative flex shrink-0 flex-col items-center justify-center transition-transform hover:scale-[1.05]"
                 >
-                  Anant Avinya Technologies
-                </h1>
-                <div className="mt-3.5 max-md:mt-2.5">
-                  <HeaderStatusBar moduleCount={moduleCount} />
+                  <img src="/logo-mark.png?v=3" alt="A A Tech" className="relative h-16 w-auto max-md:h-12" style={{ display: "block", filter: "drop-shadow(0 6px 14px rgba(1,128,207,0.3))" }} />
+                  <span className="relative mt-1.5 text-[11px] font-black uppercase tracking-[0.24em] text-slate-700 max-md:text-[9px]">AA Tech</span>
+                </a>
+
+                {/* CENTER — wordmark + tagline + status pills */}
+                <div className="flex min-w-0 flex-1 flex-col items-center text-center">
+                  <h1
+                    className="truncate max-w-full"
+                    style={{
+                      fontFamily: "var(--font-display), system-ui, sans-serif",
+                      fontWeight: 900,
+                      fontSize: "clamp(20px, 2.5vw, 33px)",
+                      letterSpacing: "-0.02em",
+                      lineHeight: 1.05,
+                      background: "linear-gradient(95deg, #0069b3 0%, #0180cf 42%, #4e9e2e 100%)",
+                      backgroundSize: "200% auto",
+                      WebkitBackgroundClip: "text",
+                      backgroundClip: "text",
+                      color: "transparent",
+                      WebkitTextFillColor: "transparent",
+                      animation: "headerTextShimmer 7s linear infinite",
+                    }}
+                  >
+                    Anant Avinya Technologies
+                  </h1>
+                  <div className="mt-3.5 max-md:mt-2.5">
+                    <HeaderStatusBar moduleCount={moduleCount} />
+                  </div>
+                </div>
+
+                {/* RIGHT — powered by Altus Corp (no chip) */}
+                <div className="flex shrink-0 flex-col items-center gap-1.5 max-xl:hidden" aria-label="Powered by Altus Corp">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Powered by</span>
+                  <img
+                    src="/altus-corp-logo.png?v=2"
+                    alt="Altus Corp"
+                    className="h-[68px] w-auto max-md:h-14"
+                    style={{ display: "block", filter: "drop-shadow(0 6px 14px rgba(0,0,0,0.18))" }}
+                  />
                 </div>
               </div>
 
-              {/* RIGHT NAV — two pills beside the wordmark */}
-              <div className="shrink-0 max-md:hidden">
-                <MainNavServer side="right" />
-              </div>
-
-              {/* RIGHT — powered by Altus Corp (no chip) */}
-              <div className="flex shrink-0 flex-col items-center gap-1.5 max-xl:hidden" aria-label="Powered by Altus Corp">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Powered by</span>
-                <img
-                  src="/altus-corp-logo.png?v=2"
-                  alt="Altus Corp"
-                  className="h-[68px] w-auto max-md:h-14"
-                  style={{ display: "block", filter: "drop-shadow(0 6px 14px rgba(0,0,0,0.18))" }}
-                />
+              {/* NAV — all pills on a single line below the wordmark */}
+              <div className="mt-4 flex justify-center max-md:hidden">
+                <MainNavServer />
               </div>
             </div>
           </div>

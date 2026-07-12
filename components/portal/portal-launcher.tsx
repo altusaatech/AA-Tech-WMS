@@ -15,6 +15,7 @@ import {
   ArrowRight,
   LogOut,
   Lock,
+  TrendingUp,
   type LucideIcon,
 } from "lucide-react";
 import { LoginMosaic } from "@/components/auth/login-mosaic";
@@ -56,6 +57,15 @@ const WORKSPACES: WorkspaceDef[] = [
     logo: "/portal/masters.png",
     from: "#63b81e",
     to: "#4a9616",
+  },
+  {
+    key: "dashboards",
+    title: "Sales Dashboard",
+    desc: "Sales & quotation pipeline — win rate, order book & trends.",
+    href: "/dashboards" as Route,
+    icon: TrendingUp,
+    from: "#0a7d8a",
+    to: "#076570",
   },
   {
     key: "admin",
