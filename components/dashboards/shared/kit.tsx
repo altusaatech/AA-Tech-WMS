@@ -137,6 +137,92 @@ export function DetailModal({ title, subtitle, Icon, from, to, onClose, children
   );
 }
 
+/** Conversion funnel — each stage a shrinking bar, with stage-to-stage %. */
+export function Funnel({ stages }: { stages: { label: string; value: number }[] }) {
+  const max = Math.max(1, ...stages.map((s) => s.value));
+  return (
+    <div className="space-y-2">
+      {stages.map((s, i) => {
+        const prev = i > 0 ? stages[i - 1]!.value : 0;
+        const conv = i > 0 && prev ? Math.round((s.value / prev) * 100) : null;
+        return (
+          <div key={s.label} className="flex items-center gap-3">
+            <div className="w-28 shrink-0 truncate text-right text-[12px] font-semibold text-slate-600" title={s.label}>{s.label}</div>
+            <div className="relative h-8 flex-1 overflow-hidden rounded-lg bg-slate-100">
+              <div className="flex h-full min-w-[34px] items-center rounded-lg px-2.5 text-[12px] font-black text-white transition-all" style={{ width: `${Math.max(9, (s.value / max) * 100)}%`, background: "linear-gradient(90deg, #63b81e, #0180cf)" }}>{s.value}</div>
+            </div>
+            <div className="w-10 shrink-0 text-[11px] font-bold text-slate-400">{conv != null ? `${conv}%` : ""}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Progress bar with done/total and %. */
+export function ProgressStat({ label, done, total, from = "#63b81e", to = "#0180cf" }: { label: string; done: number; total: number; from?: string; to?: string }) {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between text-[12.5px] font-semibold text-slate-600"><span>{label}</span><span className="tabular-nums font-black text-slate-800">{done}/{total} · {pct}%</span></div>
+      <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${from}, ${to})` }} /></div>
+    </div>
+  );
+}
+
+/** Horizontal workflow timeline with gradient connectors. */
+export function WorkflowTimeline({ stages, icons }: { stages: { label: string; count: number }[]; icons: LucideIcon[] }) {
+  return (
+    <div className="flex items-start justify-between gap-2 max-md:flex-col max-md:gap-4">
+      {stages.map((s, i) => {
+        const Icon = icons[i] ?? icons[0]!;
+        return (
+          <React.Fragment key={s.label}>
+            <div className="flex flex-1 flex-col items-center text-center max-md:w-full max-md:flex-row max-md:gap-3 max-md:text-left">
+              <span className="inline-flex size-11 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)", boxShadow: "0 12px 26px -12px #0069b3" }}><Icon size={20} strokeWidth={2.2} /></span>
+              <div className="max-md:flex max-md:items-baseline max-md:gap-2">
+                <div className="mt-1.5 text-[20px] font-black tabular-nums text-slate-800 max-md:mt-0" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>{s.count}</div>
+                <div className="text-[11px] font-bold text-slate-500">{s.label}</div>
+              </div>
+            </div>
+            {i < stages.length - 1 && <div className="mt-5 flex-1 max-md:hidden"><div className="h-[3px] w-full rounded-full" style={{ background: "linear-gradient(90deg, #63b81e, #0180cf)", opacity: 0.35 }} /></div>}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
+function downloadBlob(content: BlobPart, name: string, type: string) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const a = document.createElement("a");
+  a.href = url; a.download = name; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/** Export the given rows to CSV or Excel. */
+export function ExportButtons({ filename, headers, rows }: { filename: string; headers: string[]; rows: (string | number)[][] }) {
+  function csv() {
+    const esc = (v: string | number) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const content = "﻿" + [headers, ...rows].map((r) => r.map(esc).join(",")).join("\r\n");
+    downloadBlob(content, `${filename}.csv`, "text/csv;charset=utf-8");
+  }
+  async function excel() {
+    const XLSX = await import("xlsx");
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws["!cols"] = headers.map((h) => ({ wch: Math.min(40, Math.max(10, h.length + 4)) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Export");
+    XLSX.writeFile(wb, `${filename}.xlsx`);
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <button type="button" onClick={excel} className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-[#63b81e]/40 bg-[#63b81e]/10 px-3 text-[12.5px] font-bold text-[#3f7a14] transition-all hover:-translate-y-0.5">Excel</button>
+      <button type="button" onClick={csv} className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-[12.5px] font-bold text-slate-600 transition-all hover:-translate-y-0.5 hover:bg-slate-50">CSV</button>
+    </div>
+  );
+}
+
 export function SummaryTile({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5">
