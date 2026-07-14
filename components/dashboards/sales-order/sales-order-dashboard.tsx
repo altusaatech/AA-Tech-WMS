@@ -4,11 +4,11 @@ import * as React from "react";
 import {
   FileCheck2, PencilRuler, CheckCircle2, Clock3, ClipboardList, PackageCheck, Hourglass,
   TrendingUp, Layers, Users, GitBranch, Filter, Search, X, Building2, IndianRupee, CalendarClock,
-  FileText, ClipboardCheck, Workflow, Wrench,
+  FileText, ClipboardCheck, Workflow, Wrench, Rocket, Zap, Star, AlertTriangle, Timer,
 } from "lucide-react";
 import {
   KpiCard, Section, TrendBars, StatusBars, InsightsPanel, DetailModal, ProgressStat,
-  WorkflowTimeline, ExportButtons, inr, compactInr,
+  WorkflowTimeline, ExportButtons, inr, compactInr, Gauge, MetricChip,
 } from "@/components/dashboards/shared/kit";
 
 export interface SoRow {
@@ -146,6 +146,9 @@ export function SalesOrderDashboard({ rows }: { rows: SoRow[] }) {
 
       <InsightsPanel items={insights(k)} />
 
+      {/* ── advanced: Production Readiness & Operations ── */}
+      <ProductionReadiness rows={filtered} />
+
       {/* KPI popup */}
       {active && (
         <DetailModal title={active.title} Icon={active.Icon} from={active.from} to={active.to} onClose={() => setModal(null)}>
@@ -213,4 +216,78 @@ function insights(k: { total: number; gaReq: number; gaDone: number; gaPend: num
   if (k.total) out.push(`${ready} of ${k.total} orders are production-ready (${Math.round((ready / k.total) * 100)}%).`);
   if (out.length === 0) out.push("No sales orders match the current filters.");
   return out;
+}
+
+/* ── advanced: Production Readiness & Operations ── */
+function daysBetween(a: string, b: string): number {
+  try { return Math.round((new Date(b + "T00:00:00Z").getTime() - new Date(a + "T00:00:00Z").getTime()) / 86400000); } catch { return 0; }
+}
+
+function ProductionReadiness({ rows }: { rows: SoRow[] }) {
+  const total = rows.length;
+  const ready = rows.filter((r) => r.bomCompleted).length;
+  const waitingGa = rows.filter((r) => r.gaRequired && !r.gaCompleted).length;
+  const waitingBom = rows.filter((r) => !r.bomCompleted && (r.gaCompleted || !r.gaRequired)).length;
+  const gaReq = rows.filter((r) => r.gaRequired).length;
+  const gaDone = rows.filter((r) => r.gaCompleted).length;
+  const bomSent = rows.filter((r) => r.inBom).length;
+  const bomDone = rows.filter((r) => r.bomCompleted).length;
+  const readiness = total ? Math.round((ready / total) * 100) : 0;
+  const throughput = gaReq + bomSent ? Math.round(((gaDone + bomDone) / (gaReq + bomSent)) * 100) : 0;
+
+  const procs = rows.map((r) => (r.soDate && r.expectedCompletion && r.expectedCompletion !== "—" ? daysBetween(r.soDate, r.expectedCompletion) : 0)).filter((x) => x > 0);
+  const avgProc = procs.length ? Math.round(procs.reduce((s, x) => s + x, 0) / procs.length) : 0;
+
+  const byVal = [...rows].sort((a, b) => b.value - a.value);
+  const topVal = byVal[0]?.value ?? 0;
+  const priority = byVal.filter((r) => !r.bomCompleted).slice(0, 5);
+
+  const breakdown = [
+    { label: "Ready for Production", value: ready },
+    { label: "Waiting for BOM", value: waitingBom },
+    { label: "Waiting for GA", value: waitingGa },
+  ].filter((x) => x.value > 0);
+
+  return (
+    <section className="relative overflow-hidden rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm max-md:p-4">
+      <div className="mb-5 flex items-center gap-3">
+        <span className="inline-flex size-11 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)", boxShadow: "0 12px 26px -12px #0069b3" }}><Rocket size={22} strokeWidth={2.2} /></span>
+        <div>
+          <div className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-slate-400">Advanced</div>
+          <h2 className="text-[19px] font-black tracking-[-0.01em] text-slate-800" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>Production Readiness &amp; Operations</h2>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-4 max-lg:grid-cols-2">
+        <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50/50 p-3"><Gauge pct={readiness} label="Production Ready" sub={`${ready} of ${total}`} /></div>
+        <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50/50 p-3"><Gauge pct={throughput} label="Eng. Throughput" from="#0180cf" to="#0069b3" /></div>
+        <div className="col-span-2 max-lg:col-span-2">
+          <div className="mb-2 text-[12.5px] font-black text-slate-700">Readiness Breakdown</div>
+          {breakdown.length ? <StatusBars data={breakdown} /> : <p className="py-4 text-center text-[13px] text-slate-400">All orders production-ready 🎉</p>}
+          <div className="mt-3 grid grid-cols-3 gap-2.5">
+            <MetricChip icon={Timer} label="Avg Processing" value={`${avgProc}d`} tint="#0a7d8a" />
+            <MetricChip icon={AlertTriangle} label="Pending Orders" value={String(total - ready)} tint="#b45309" />
+            <MetricChip icon={Zap} label="Eng. Efficiency" value={`${throughput}%`} tint="#3f7a14" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <div className="mb-2 flex items-center gap-2 text-[13px] font-black text-slate-700"><Star size={15} className="text-[#0069b3]" /> Priority Orders <span className="text-[11px] font-semibold text-slate-400">(highest value, not yet ready)</span></div>
+        {priority.length === 0 ? <p className="py-4 text-center text-[13px] text-slate-400">No pending priority orders.</p> : (
+          <div className="grid grid-cols-2 gap-2.5 max-md:grid-cols-1">
+            {priority.map((r) => {
+              const high = r.value >= topVal * 0.7;
+              return (
+                <div key={r.ourSoNo} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-2 shadow-sm">
+                  <span className="flex min-w-0 items-center gap-2"><span className="inline-flex rounded-full px-2 py-0.5 text-[10.5px] font-black" style={{ background: high ? "rgba(190,18,60,0.10)" : "rgba(245,158,11,0.12)", color: high ? "#be123c" : "#b45309" }}>{high ? "High" : "Medium"}</span><span className="truncate text-[12.5px] font-bold text-slate-700">{r.ourSoNo}</span><span className="truncate text-[12px] text-slate-400">{r.company}</span></span>
+                  <span className="shrink-0 text-[12.5px] font-black tabular-nums text-slate-700">{inr(r.value)}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  );
 }

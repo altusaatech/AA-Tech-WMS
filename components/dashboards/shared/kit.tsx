@@ -223,6 +223,61 @@ export function ExportButtons({ filename, headers, rows }: { filename: string; h
   );
 }
 
+/** Semicircle gauge with a % readout. */
+export function Gauge({ pct, label, sub, from = "#63b81e", to = "#0180cf" }: { pct: number; label: string; sub?: string; from?: string; to?: string }) {
+  const p = Math.max(0, Math.min(100, pct));
+  const len = Math.PI * 56;
+  const off = len * (1 - p / 100);
+  const id = `gg-${label.replace(/\W/g, "")}-${from.replace(/\W/g, "")}`;
+  return (
+    <div className="flex flex-col items-center">
+      <svg viewBox="0 0 140 80" className="w-full max-w-[190px]">
+        <defs><linearGradient id={id} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor={from} /><stop offset="100%" stopColor={to} /></linearGradient></defs>
+        <path d="M14 72 A56 56 0 0 1 126 72" fill="none" stroke="#eef2f6" strokeWidth="12" strokeLinecap="round" />
+        <path d="M14 72 A56 56 0 0 1 126 72" fill="none" stroke={`url(#${id})`} strokeWidth="12" strokeLinecap="round" strokeDasharray={len} strokeDashoffset={off} style={{ transition: "stroke-dashoffset 1s ease-out" }} />
+      </svg>
+      <div className="-mt-7 text-center">
+        <div className="tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 28, letterSpacing: "-0.02em", lineHeight: 1 }}>{Math.round(p)}%</div>
+        <div className="mt-0.5 text-[11.5px] font-bold text-slate-500">{label}</div>
+        {sub && <div className="text-[11px] text-slate-400">{sub}</div>}
+      </div>
+    </div>
+  );
+}
+
+/** Intensity heatmap grid (e.g. weekday × month). */
+export function Heatmap({ matrix, rowLabels, colLabels }: { matrix: number[][]; rowLabels: string[]; colLabels: string[] }) {
+  const max = Math.max(1, ...matrix.flat());
+  return (
+    <div className="overflow-x-auto">
+      <div className="inline-block min-w-full">
+        <div className="flex pl-14">
+          {colLabels.map((c) => <div key={c} className="w-8 text-center text-[9.5px] font-bold uppercase text-slate-400">{c}</div>)}
+        </div>
+        {matrix.map((row, r) => (
+          <div key={r} className="flex items-center">
+            <div className="w-14 shrink-0 pr-1.5 text-right text-[10.5px] font-semibold text-slate-500">{rowLabels[r]}</div>
+            {row.map((v, c) => {
+              const intensity = v ? 0.16 + 0.64 * (v / max) : 0;
+              return <div key={c} title={`${rowLabels[r]} · ${colLabels[c]}: ${v}`} className="m-0.5 flex size-7 items-center justify-center rounded-md text-[10px] font-black transition-transform hover:scale-110" style={{ background: v ? `rgba(1,128,207,${intensity})` : "#f1f5f9", color: intensity > 0.4 ? "#fff" : "#94a3b8" }}>{v || ""}</div>;
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Compact metric chip for the smart-insight strips. */
+export function MetricChip({ icon: Icon, label, value, tint = "#0069b3" }: { icon: LucideIcon; label: string; value: string; tint?: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.05em] text-slate-400"><Icon size={13} style={{ color: tint }} /> {label}</div>
+      <div className="mt-1 text-[19px] font-black tabular-nums text-slate-800" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>{value}</div>
+    </div>
+  );
+}
+
 export function SummaryTile({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5">

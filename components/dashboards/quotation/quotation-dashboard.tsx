@@ -4,10 +4,11 @@ import * as React from "react";
 import {
   Inbox, Send, RefreshCcw, FileStack, BadgeCheck, Clock3, TrendingUp, Filter, Search, X,
   Building2, Users, GitBranch, ListChecks, MessagesSquare, FileText, ReceiptText, PartyPopper, FileCheck2,
+  Sparkles, Target, AlertTriangle, Rocket, IndianRupee,
 } from "lucide-react";
 import {
   KpiCard, Section, TrendBars, StatusBars, InsightsPanel, DetailModal, Funnel, ProgressStat,
-  WorkflowTimeline, ExportButtons, compactInr,
+  WorkflowTimeline, ExportButtons, compactInr, Gauge, MetricChip,
 } from "@/components/dashboards/shared/kit";
 
 export interface QuoteRow {
@@ -145,6 +146,10 @@ export function QuotationDashboard({ rows }: { rows: QuoteRow[] }) {
 
       <InsightsPanel items={insights(k)} />
 
+      {/* ── advanced: Smart Sales Forecast ── */}
+      <SalesForecast rows={filtered} />
+
+
       {active && (
         <DetailModal title={active.title} Icon={active.Icon} from={active.from} to={active.to} onClose={() => setModal(null)}>
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -193,4 +198,63 @@ function insights(k: { enquiries: number; sent: number; revised: number; piSent:
   if (k.value) out.push(`Total quoted value in view: ${compactInr(k.value)}.`);
   if (out.length === 0) out.push("No quotations match the current filters.");
   return out;
+}
+
+/* ── advanced: Smart Sales Forecast ── */
+function prob(r: QuoteRow): number {
+  if (r.converted) return 100;
+  if (r.piApproved) return 92;
+  if (r.piSent) return 68;
+  if (r.sent) return 42;
+  return 18;
+}
+
+function SalesForecast({ rows }: { rows: QuoteRow[] }) {
+  const open = rows.filter((r) => !r.converted); // pipeline = not yet won
+  const scored = open.map((r) => ({ r, p: prob(r) })).sort((a, b) => b.p * b.r.value - a.p * a.r.value);
+  const expectedSO = Math.round(open.reduce((s, x) => s + prob(x) / 100, 0));
+  const pipeline = open.reduce((s, x) => s + (x.value * prob(x)) / 100, 0);
+  const highProb = open.filter((r) => prob(r) >= 60).length;
+  const atRisk = open.filter((r) => r.sent && prob(r) < 45).length;
+  const avgConf = open.length ? Math.round(open.reduce((s, x) => s + prob(x), 0) / open.length) : 0;
+  const top = scored.slice(0, 6);
+
+  return (
+    <section className="relative overflow-hidden rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm max-md:p-4">
+      <div className="mb-5 flex items-center gap-3">
+        <span className="inline-flex size-11 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)", boxShadow: "0 12px 26px -12px #0069b3" }}><Rocket size={22} strokeWidth={2.2} /></span>
+        <div>
+          <div className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-slate-400">Advanced</div>
+          <h2 className="text-[19px] font-black tracking-[-0.01em] text-slate-800" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>Smart Sales Forecast</h2>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-2">
+        <MetricChip icon={FileCheck2} label="Expected Sales Orders" value={String(expectedSO)} tint="#0069b3" />
+        <MetricChip icon={IndianRupee} label="Estimated Pipeline" value={compactInr(pipeline)} tint="#0a7d8a" />
+        <MetricChip icon={Target} label="High-Probability" value={String(highProb)} tint="#3f7a14" />
+        <MetricChip icon={AlertTriangle} label="At-Risk Quotes" value={String(atRisk)} tint="#b45309" />
+      </div>
+
+      <div className="mt-5 grid grid-cols-3 gap-5 max-lg:grid-cols-1">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
+          <Gauge pct={avgConf} label="Pipeline Confidence" sub={`${open.length} open quotes`} />
+        </div>
+        <div className="col-span-2 max-lg:col-span-1">
+          <div className="mb-2 flex items-center gap-2 text-[13px] font-black text-slate-700"><Sparkles size={15} className="text-[#0069b3]" /> Probability by Quotation <span className="text-[11px] font-semibold text-slate-400">(sample scoring)</span></div>
+          <div className="space-y-2">
+            {top.length === 0 ? <p className="py-6 text-center text-[13px] text-slate-400">No open quotations to forecast.</p> : top.map(({ r, p }) => (
+              <div key={r.enquiryNo} className="flex items-center gap-3">
+                <div className="w-40 shrink-0 truncate text-[12.5px] font-bold text-slate-700" title={r.company}>{r.company || r.enquiryNo}</div>
+                <div className="relative h-6 flex-1 overflow-hidden rounded-lg bg-slate-100">
+                  <div className="flex h-full items-center justify-end rounded-lg px-2 text-[11px] font-black text-white" style={{ width: `${Math.max(14, p)}%`, background: p >= 60 ? "linear-gradient(90deg,#63b81e,#3f7a14)" : p >= 45 ? "linear-gradient(90deg,#0180cf,#0069b3)" : "linear-gradient(90deg,#f59e0b,#b45309)" }}>{p}%</div>
+                </div>
+                <div className="w-16 shrink-0 text-right text-[12px] font-bold tabular-nums text-slate-600">{compactInr(r.value)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

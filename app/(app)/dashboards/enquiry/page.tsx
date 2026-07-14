@@ -33,6 +33,7 @@ export default async function EnquiryDashboardPage() {
       enquiryNo: enquiryNo || "—",
       company: q.companyName ?? "",
       person: q.personName ?? "",
+      product: (q.product ?? "").trim() || "Doors",
       item: q.item ?? q.description ?? "",
       amount: Number(q.basicAmount) || Number(q.poAmount) || 0,
       quoteStatus: status || "Enquiry",
