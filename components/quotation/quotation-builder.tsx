@@ -6,7 +6,7 @@ import type { Route } from "next";
 import { ArrowLeft, Save, Printer, Plus, Trash2, Loader2, DoorOpen, FileText, ReceiptText } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
-import { DOOR_ORIENTATIONS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS } from "@/lib/sales/columns";
+import { DOOR_ORIENTATIONS, DOOR_CONFIGS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS } from "@/lib/sales/columns";
 import {
   newDoor,
   newHardware,
@@ -400,7 +400,13 @@ function DoorCard({
               {productOptions.map((p) => <option key={p.type} value={p.type}>{p.type}</option>)}
             </select>
           </L>
-          <L label="Door Config"><input className={inp} value={door.doorConfig} onChange={(e) => onPatch({ doorConfig: e.target.value })} placeholder="Single" /></L>
+          <L label="Door Config">
+            <select className={`${inp} cursor-pointer`} value={door.doorConfig} onChange={(e) => onPatch({ doorConfig: e.target.value })}>
+              <option value="">Select…</option>
+              {!DOOR_CONFIGS.includes(door.doorConfig) && door.doorConfig && <option value={door.doorConfig}>{door.doorConfig}</option>}
+              {DOOR_CONFIGS.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </L>
           <L label="Frame Profile"><input className={inp} value={door.frameProfile} onChange={(e) => onPatch({ frameProfile: e.target.value })} placeholder="100 x 50 SR" /></L>
           <L label="Frame Material"><input className={inp} value={door.frameMaterial} onChange={(e) => onPatch({ frameMaterial: e.target.value })} placeholder="GI 1.2mm" /></L>
           <L label="Shutter Type"><input className={inp} value={door.shutterType || ""} onChange={(e) => onPatch({ shutterType: e.target.value })} placeholder="45 mm thick Flush" /></L>
