@@ -16,16 +16,17 @@ import {
   DoorOpen,
   Boxes,
   ChevronRight,
+  Hammer,
   type LucideIcon,
 } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { PageHero } from "@/components/layout/page-hero";
 import { SalesDataGrid } from "@/components/sales/sales-grid";
 import { SalesEntryModal } from "@/components/sales/sales-entry-modal";
-import { PRODUCT_COLUMNS, HARDWARE_COLUMNS, DOOR_COLUMNS, type SalesColDef } from "@/lib/sales/columns";
+import { PRODUCT_COLUMNS, HARDWARE_COLUMNS, DOOR_COLUMNS, INSTALLATION_COLUMNS, type SalesColDef } from "@/lib/sales/columns";
 import type { SaleKind, SalesRow } from "@/app/(app)/sales/actions";
 
-type MasterKind = "product" | "hardware" | "door";
+type MasterKind = "product" | "hardware" | "door" | "installation";
 
 interface LeafDef {
   key: MasterKind;
@@ -76,14 +77,27 @@ const LEAVES: Record<MasterKind, LeafDef> = {
     key: "hardware",
     label: "Hardware Master",
     addLabel: "Hardware",
-    desc: "Hardware & components — make, model, rates & images",
+    desc: "Hardware kit — make, specs, units/door, rate & profit",
     icon: Wrench,
     from: "#0069b3",
     to: "#0180cf",
     soft: "linear-gradient(135deg, #e9f1f9, #f4f9fe)",
     ring: "rgba(0,105,179,0.26)",
     columns: HARDWARE_COLUMNS,
-    primaryKey: "model",
+    primaryKey: "hardwareType",
+  },
+  installation: {
+    key: "installation",
+    label: "Installation",
+    addLabel: "Installation Rate",
+    desc: "Installation charges by building height — rate & AA Tech profit",
+    icon: Hammer,
+    from: "#0a7d8a",
+    to: "#0069b3",
+    soft: "linear-gradient(135deg, #e7f4f4, #f2fafa)",
+    ring: "rgba(10,125,138,0.26)",
+    columns: INSTALLATION_COLUMNS,
+    primaryKey: "scope",
   },
 };
 
@@ -93,10 +107,12 @@ export function MastersTabs({
   productRows,
   hardwareRows,
   doorRows,
+  installationRows,
 }: {
   productRows: SalesRow[];
   hardwareRows: SalesRow[];
   doorRows: SalesRow[];
+  installationRows: SalesRow[];
 }) {
   const router = useRouter();
   const [screen, setScreen] = React.useState<Screen>("home");
@@ -105,11 +121,12 @@ export function MastersTabs({
     product: productRows,
     hardware: hardwareRows,
     door: doorRows,
+    installation: installationRows,
   });
   // Re-sync when the server sends fresh data (e.g. after Refresh).
   React.useEffect(() => {
-    setRowsByKind({ product: productRows, hardware: hardwareRows, door: doorRows });
-  }, [productRows, hardwareRows, doorRows]);
+    setRowsByKind({ product: productRows, hardware: hardwareRows, door: doorRows, installation: installationRows });
+  }, [productRows, hardwareRows, doorRows, installationRows]);
 
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalRow, setModalRow] = React.useState<SalesRow | null>(null);
@@ -168,14 +185,14 @@ export function MastersTabs({
         <div className="mt-1">
           <button
             type="button"
-            onClick={() => setScreen(active === "hardware" ? "home" : "product")}
+            onClick={() => setScreen(active === "hardware" || active === "installation" ? "home" : "product")}
             className="mb-4 inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
           >
             <ArrowLeft size={15} strokeWidth={2.6} /> Back
           </button>
 
           <Breadcrumb
-            trail={active === "hardware" ? ["Masters", "Hardware Master"] : ["Masters", "Product Master", leaf.label]}
+            trail={active === "hardware" ? ["Masters", "Hardware Master"] : active === "installation" ? ["Masters", "Installation"] : ["Masters", "Product Master", leaf.label]}
           />
 
           <div className="mt-3 mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -247,9 +264,9 @@ export function MastersTabs({
               </div>
             }
             stats={[
-              { label: "Fabrication", value: rowsByKind.product.length, icon: Factory, from: "#63b81e", to: "#3f7a14" },
               { label: "Doors", value: rowsByKind.door.length, icon: DoorOpen, from: "#0180cf", to: "#0069b3" },
               { label: "Hardware", value: rowsByKind.hardware.length, icon: Wrench, from: "#0069b3", to: "#0180cf" },
+              { label: "Installation", value: rowsByKind.installation.length, icon: Hammer, from: "#0a7d8a", to: "#0069b3" },
             ]}
           />
 
@@ -268,7 +285,7 @@ export function MastersTabs({
           </div>
 
           {screen === "home" ? (
-            <div className="mt-4 grid grid-cols-2 gap-6 max-md:grid-cols-1">
+            <div className="mt-4 grid grid-cols-3 gap-6 max-lg:grid-cols-2 max-md:grid-cols-1">
               <BlockCard
                 title="Product Master"
                 desc="Doors and fabricated finished-goods catalogues"
@@ -294,6 +311,19 @@ export function MastersTabs({
                 sub={rowsByKind.hardware.length === 1 ? "entry" : "entries"}
                 cta="Open master"
                 onClick={() => openGrid("hardware")}
+              />
+              <BlockCard
+                title={LEAVES.installation.label}
+                desc={LEAVES.installation.desc}
+                icon={LEAVES.installation.icon}
+                from={LEAVES.installation.from}
+                to={LEAVES.installation.to}
+                soft={LEAVES.installation.soft}
+                ring={LEAVES.installation.ring}
+                count={rowsByKind.installation.length}
+                sub={rowsByKind.installation.length === 1 ? "rate" : "rates"}
+                cta="Open master"
+                onClick={() => openGrid("installation")}
               />
             </div>
           ) : (

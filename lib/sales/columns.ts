@@ -168,18 +168,28 @@ export const PRODUCT_COLUMNS: SalesColDef[] = [
   { key: "remarks", label: "Remarks", type: "text", width: 200 },
 ];
 
-// ── Masters: Hardware ──────────────────────────────────────────
+// ── Masters: Hardware Kit (AA Tech "Hardware Kit" sheet) ────────
 export const HARDWARE_COLUMNS: SalesColDef[] = [
   { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
-  { key: "hardwareType", label: "Hardware Type", type: "select", required: true, dynamic: true, allowCustom: true, width: 180 },
-  { key: "make", label: "Make", type: "select", dynamic: true, allowCustom: true, options: ["Kich", "Magnum", "Dorset"], width: 130 },
-  { key: "model", label: "Model", type: "text", width: 150 },
-  { key: "description", label: "Description", type: "text", width: 280 },
-  { key: "uom", label: "UOM", type: "select", options: ["Nos", "Set", "Pair", "Mtr", "Kg", "Lot"], width: 100 },
-  { key: "buyingRate", label: "Buying Rate", type: "number", width: 120 },
-  { key: "sellingRate", label: "Selling Rate", type: "number", width: 120 },
-  { key: "image", label: "Image", type: "url", width: 120 },
-  { key: "quantity", label: "Quantity", type: "number", width: 100 },
+  { key: "hardwareType", label: "Hardware", type: "select", required: true, dynamic: true, allowCustom: true, width: 170 },
+  { key: "make", label: "Make", type: "select", dynamic: true, allowCustom: true, options: ["Kich", "Dorset", "Dorma", "Enviornseal", "Dorplus", "Falcon", "Yale", "Magnum"], width: 130 },
+  { key: "description", label: "Type / Specs", type: "text", width: 260 },
+  { key: "model", label: "Size / Model", type: "text", width: 160 },
+  { key: "quantity", label: "Units / Door", type: "number", width: 110 },
+  { key: "uom", label: "UOM", type: "select", options: ["Nos", "RMT", "Set", "Pair", "Mtr", "Sqmt", "Kg", "Lot"], width: 100 },
+  { key: "sellingRate", label: "Rate", type: "number", width: 110 },
+  { key: "aaTechProfitRate", label: "AA Tech Profit Rate", type: "number", width: 150 },
+  { key: "amount", label: "Amount", type: "number", width: 120 },
+  { key: "kit", label: "Kit Item", type: "bool", width: 95 },
+];
+
+// ── Masters: Installation (AA Tech "Installation" sheet) ───────
+export const INSTALLATION_COLUMNS: SalesColDef[] = [
+  { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
+  { key: "scope", label: "Installation Scope", type: "text", required: true, width: 280 },
+  { key: "rate", label: "Rate", type: "number", width: 120 },
+  { key: "aaTechProfitRate", label: "AA Tech Profit Rate", type: "number", width: 150 },
+  { key: "amount", label: "Amount", type: "number", width: 120 },
 ];
 
 // ── PI (Proforma Invoice) ──────────────────────────────────────
@@ -244,4 +254,5 @@ export const WO_KEYS = WO_COLUMNS.map((c) => c.key);
 export const PI_KEYS = PI_COLUMNS.map((c) => c.key);
 export const PRODUCT_KEYS = PRODUCT_COLUMNS.map((c) => c.key);
 export const HARDWARE_KEYS = HARDWARE_COLUMNS.map((c) => c.key);
+export const INSTALLATION_KEYS = INSTALLATION_COLUMNS.map((c) => c.key);
 export const DOOR_KEYS = DOOR_COLUMNS.map((c) => c.key);

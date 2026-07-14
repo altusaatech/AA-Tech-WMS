@@ -310,11 +310,25 @@ export const masterHardware = pgTable(
     sellingRate: numeric("selling_rate"),
     image: text("image"),
     quantity: numeric("quantity"),
+    aaTechProfitRate: numeric("aa_tech_profit_rate"),
+    amount: numeric("amount"),
+    kit: boolean("kit").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("master_hardware_type_idx").on(t.hardwareType)],
 );
+
+export const masterInstallation = pgTable("master_installation", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  srNo: integer("sr_no").generatedAlwaysAsIdentity(),
+  scope: text("scope"),
+  rate: numeric("rate"),
+  aaTechProfitRate: numeric("aa_tech_profit_rate"),
+  amount: numeric("amount"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const masterDoor = pgTable(
   "master_door",
