@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { quotations, masterProduct, masterHardware, masterDoor } from "@/db/schema";
+import { quotations, masterProduct, masterHardware, masterDoor, masterInstallation } from "@/db/schema";
 import { QuotationBuilder } from "@/components/quotation/quotation-builder";
 import { DEFAULT_NOTES, DEFAULT_SUBJECT, DEFAULT_PI_META, type DoorLine, type PiMeta } from "@/lib/quotation/types";
 
@@ -15,10 +15,11 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
   const [q] = await db.select().from(quotations).where(eq(quotations.id, id));
   if (!q) notFound();
 
-  const [products, hardware, doors] = await Promise.all([
+  const [products, hardware, doors, installations] = await Promise.all([
     db.select().from(masterProduct),
     db.select().from(masterHardware),
     db.select().from(masterDoor),
+    db.select().from(masterInstallation).orderBy(masterInstallation.srNo),
   ]);
 
   const productOptions = products
@@ -74,6 +75,11 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
     ).values(),
   ).sort((a, b) => a.name.localeCompare(b.name) || a.make.localeCompare(b.make) || a.model.localeCompare(b.model));
 
+  // Installation master — flat per-door installation charge by building height.
+  const installationOptions = installations
+    .filter((i) => (i.scope ?? "").trim())
+    .map((i) => ({ scope: (i.scope as string).trim(), rate: Number(i.rate) || 0 }));
+
   return (
     <QuotationBuilder
       id={id}
@@ -90,6 +96,7 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
       productOptions={productOptions}
       hardwareOptions={hardwareOptions}
       doorOptions={doorOptions}
+      installationOptions={installationOptions}
     />
   );
 }

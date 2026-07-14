@@ -31,7 +31,9 @@ export interface DoorLine {
   height: number; // mm
   qty: number;
   ratePerSqm: number; // ₹ / sq.m (door supply)
-  installPerSqm: number; // ₹ / sq.m (installation)
+  installPerSqm: number; // ₹ / sq.m (legacy installation — fallback only)
+  installScope?: string; // building-height scope from the Installation master
+  installRate?: number; // flat ₹ / door installation (from the Installation master)
   hardware: HardwareLine[];
   // ── Proforma-Invoice specific (manual) ──
   location?: string;
@@ -120,6 +122,7 @@ export interface DoorCompute {
   hardwareTotal: number;
   doorHw: number;
   totalSupply: number;
+  installPerDoor: number; // flat installation charge per door
   installTotal: number;
   lineTotal: number;
 }
@@ -145,8 +148,13 @@ export function computeDoor(d: DoorLine): DoorCompute {
   const doorHw = basicSupply + hardwareTotal;
   const qty = n(d.qty) || 0;
   const totalSupply = doorHw * qty;
-  const installTotal = area * n(d.installPerSqm) * qty;
-  return { area, perimeter, basicSupply, hardwareTotal, doorHw, totalSupply, installTotal, lineTotal: totalSupply + installTotal };
+  // Installation is a flat per-door charge chosen from the Installation master
+  // (by building height). Older quotes without a chosen rate fall back to the
+  // legacy area × ₹/sq.m figure.
+  const installRate = n(d.installRate ?? 0);
+  const installPerDoor = installRate > 0 ? installRate : area * n(d.installPerSqm);
+  const installTotal = installPerDoor * qty;
+  return { area, perimeter, basicSupply, hardwareTotal, doorHw, totalSupply, installPerDoor, installTotal, lineTotal: totalSupply + installTotal };
 }
 
 export interface QuoteTotals {

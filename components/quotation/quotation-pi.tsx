@@ -45,16 +45,15 @@ export function QuotationPi({
   const [project, setProject] = React.useState(initial.project);
   const [customer, setCustomer] = React.useState(initial.customer);
   const [subject, setSubject] = React.useState(initial.subject);
-  // Prefill each door's PI installation from the quotation (Area × Install
-  // ₹/sq.m) so the PI totals match the quotation by default. A door that
-  // already carries a manual piInstall is left untouched; the field stays
-  // editable on the PI.
+  // Prefill each door's PI installation from the quotation's flat per-door
+  // installation (from the Installation master) so the PI totals match the
+  // quotation by default. A door that already carries a manual piInstall is
+  // left untouched; the field stays editable on the PI.
   const [lines, setLines] = React.useState<DoorLine[]>(() =>
     initial.lines.map((d) => {
       if (d.piInstall != null) return d;
-      const { area } = computeDoor(d);
-      const perDoorInstall = Math.round(area * (Number(d.installPerSqm) || 0));
-      return { ...d, piInstall: perDoorInstall };
+      const { installPerDoor } = computeDoor(d);
+      return { ...d, piInstall: Math.round(installPerDoor) };
     }),
   );
   const [piMeta, setPiMeta] = React.useState<PiMeta>(initialPiMeta);

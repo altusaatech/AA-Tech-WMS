@@ -52,6 +52,11 @@ interface DoorOption {
   installPerSqm: number;
 }
 
+interface InstallationOption {
+  scope: string; // building-height scope, e.g. "For Building upto 10 floors"
+  rate: number; // flat ₹ / door
+}
+
 const inp =
   "h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] text-slate-800 outline-none transition-all focus:border-[#0180cf] focus:ring-2 focus:ring-[#0180cf]/15";
 
@@ -62,6 +67,7 @@ export function QuotationBuilder({
   productOptions,
   hardwareOptions,
   doorOptions,
+  installationOptions,
 }: {
   id: string;
   initial: QuotationData;
@@ -69,6 +75,7 @@ export function QuotationBuilder({
   productOptions: ProductOption[];
   hardwareOptions: HardwareOption[];
   doorOptions: DoorOption[];
+  installationOptions: InstallationOption[];
 }) {
   const router = useRouter();
   const [offerNo, setOfferNo] = React.useState(initial.offerNo);
@@ -247,6 +254,7 @@ export function QuotationBuilder({
               productOptions={productOptions}
               hardwareOptions={hardwareOptions}
               doorOptions={doorOptions}
+              installationOptions={installationOptions}
               onPickProduct={(t) => pickProduct(d.id, t)}
               onSetCode={(code) => setDoorCode(d.id, code)}
               onPatch={(p) => patchDoor(d.id, p)}
@@ -323,6 +331,7 @@ function DoorCard({
   productOptions,
   hardwareOptions,
   doorOptions,
+  installationOptions,
   onPickProduct,
   onSetCode,
   onPatch,
@@ -338,6 +347,7 @@ function DoorCard({
   productOptions: ProductOption[];
   hardwareOptions: HardwareOption[];
   doorOptions: DoorOption[];
+  installationOptions: InstallationOption[];
   onPickProduct: (type: string) => void;
   onSetCode: (code: string) => void;
   onPatch: (p: Partial<DoorLine>) => void;
@@ -450,7 +460,25 @@ function DoorCard({
           </L>
           <L label="Qty"><input type="number" className={`${inp} text-right`} value={door.qty || ""} onChange={(e) => onPatch({ qty: Number(e.target.value) })} /></L>
           <L label="Rate ₹/sq.m"><input type="number" className={`${inp} text-right`} value={door.ratePerSqm || ""} onChange={(e) => onPatch({ ratePerSqm: Number(e.target.value) })} /></L>
-          <L label="Install ₹/sq.m"><input type="number" className={`${inp} text-right`} value={door.installPerSqm || ""} onChange={(e) => onPatch({ installPerSqm: Number(e.target.value) })} /></L>
+          <L label="Installation (Building Height)">
+            <select
+              className={`${inp} cursor-pointer`}
+              value={door.installScope ?? ""}
+              onChange={(e) => {
+                const scope = e.target.value;
+                const opt = installationOptions.find((o) => o.scope === scope);
+                onPatch({ installScope: scope, installRate: opt ? opt.rate : 0 });
+              }}
+            >
+              <option value="">Select…</option>
+              {door.installScope && !installationOptions.some((o) => o.scope === door.installScope) && (
+                <option value={door.installScope}>{door.installScope}</option>
+              )}
+              {installationOptions.map((o) => (
+                <option key={o.scope} value={o.scope}>{o.scope} — {inr(o.rate)}</option>
+              ))}
+            </select>
+          </L>
         </div>
 
         {/* computed strip */}
@@ -623,19 +651,14 @@ function DoorCard({
         </div>
 
         {/* Per-door price summary (working specification) */}
-        {(() => {
-          const installPerDoor = c.area * (Number(door.installPerSqm) || 0);
-          return (
-            <div className="mt-4 overflow-hidden rounded-xl border border-[#0180cf]/25 bg-gradient-to-br from-[#f3f9fe] to-white">
-              <div className="divide-y divide-slate-100">
-                <SummaryRow label="Total Hardware Cost" value={inr(c.hardwareTotal)} />
-                <SummaryRow label="Total Doorset Price" value={inr(c.doorHw)} />
-                <SummaryRow label="Installation" value={inr(installPerDoor)} />
-                <SummaryRow label="Total Door Price with Installation" value={inr(c.doorHw + installPerDoor)} strong />
-              </div>
-            </div>
-          );
-        })()}
+        <div className="mt-4 overflow-hidden rounded-xl border border-[#0180cf]/25 bg-gradient-to-br from-[#f3f9fe] to-white">
+          <div className="divide-y divide-slate-100">
+            <SummaryRow label="Total Hardware Cost" value={inr(c.hardwareTotal)} />
+            <SummaryRow label="Total Doorset Price" value={inr(c.doorHw)} />
+            <SummaryRow label={`Installation${door.installScope ? ` — ${door.installScope}` : ""}`} value={inr(c.installPerDoor)} />
+            <SummaryRow label="Total Door Price with Installation" value={inr(c.doorHw + c.installPerDoor)} strong />
+          </div>
+        </div>
       </div>
     </div>
   );
