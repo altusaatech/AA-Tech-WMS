@@ -6,8 +6,11 @@ export interface HardwareLine {
   make?: string; // brand/make from the hardware master (e.g. Kich, Dorset)
   specs?: string; // Type / Specs from the hardware master (description)
   model?: string; // Size / Model from the hardware master
-  qty: number;
+  uom?: string; // UOM from the hardware master (Nos, RMT, Set…)
+  qty: number; // Units / Door
   rate: number; // ₹ per unit
+  profitRate?: number; // AA Tech profit rate from the hardware master
+  kit?: boolean; // true when added via "Add Kit" (so "Remove Kit" can clear them)
 }
 
 export interface DoorLine {
@@ -77,7 +80,7 @@ export const DEFAULT_SUBJECT = "Supply of Clean Room Doors";
 
 /** A blank hardware item — used by the builder's "Add Item" action. */
 export function newHardware(name = "", rate = 0): HardwareLine {
-  return { name, make: "", specs: "", model: "", qty: 0, rate };
+  return { name, make: "", specs: "", model: "", uom: "", qty: 0, rate, profitRate: 0 };
 }
 
 let _id = 0;
@@ -102,9 +105,9 @@ export function newDoor(): DoorLine {
     qty: 1,
     ratePerSqm: 0,
     installPerSqm: 0,
-    // A new door starts with 6 blank hardware slots (3 rows × 2 columns) so
-    // the user can fill them in directly; extras come via "Add Item".
-    hardware: Array.from({ length: 6 }, () => newHardware()),
+    // A new door starts with no hardware — the user adds items via "Add Item"
+    // or pulls the standard set in one click via "Add Kit".
+    hardware: [],
   };
 }
 

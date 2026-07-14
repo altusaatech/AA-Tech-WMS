@@ -63,7 +63,9 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
           make: (h.make ?? "").trim(),
           specs: (h.description ?? "").trim(),
           model: (h.model ?? "").trim(),
+          uom: (h.uom ?? "").trim(),
           rate: Number(h.sellingRate) || 0,
+          profitRate: Number(h.aaTechProfitRate) || 0,
           qty: Number(h.quantity) || 0,
           kit: !!h.kit,
         }))

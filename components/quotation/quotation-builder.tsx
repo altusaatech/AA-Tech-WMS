@@ -32,7 +32,9 @@ interface HardwareOption {
   make: string;
   specs: string; // Type / Specs (description) from the hardware master
   model: string; // Size / Model from the hardware master
+  uom: string; // UOM from the hardware master
   rate: number;
+  profitRate: number; // AA Tech profit rate from the hardware master
   qty: number; // default Units / Door fetched from the hardware master
   kit: boolean; // part of the standard door hardware kit
 }
@@ -106,12 +108,18 @@ export function QuotationBuilder({
   function addKit(doorId: string) {
     const kitLines: HardwareLine[] = hardwareOptions
       .filter((o) => o.kit)
-      .map((o) => ({ name: o.name, make: o.make, specs: o.specs, model: o.model, qty: o.qty, rate: o.rate }));
+      .map((o) => ({ name: o.name, make: o.make, specs: o.specs, model: o.model, uom: o.uom, qty: o.qty, rate: o.rate, profitRate: o.profitRate, kit: true }));
     if (!kitLines.length) {
       fireToast({ message: "No kit items found in the hardware master.", type: "error" });
       return;
     }
     setLines((p) => p.map((d) => (d.id === doorId ? { ...d, hardware: [...d.hardware, ...kitLines] } : d)));
+  }
+  // "Remove Kit" — drop every hardware line that was added via "Add Kit".
+  function removeKit(doorId: string) {
+    setLines((p) =>
+      p.map((d) => (d.id === doorId ? { ...d, hardware: d.hardware.filter((h) => !h.kit) } : d)),
+    );
   }
   function removeHw(doorId: string, idx: number) {
     setLines((p) => p.map((d) => (d.id === doorId ? { ...d, hardware: d.hardware.filter((_, i) => i !== idx) } : d)));
@@ -245,6 +253,7 @@ export function QuotationBuilder({
               onPatchHw={(idx, p) => patchHw(d.id, idx, p)}
               onAddHw={() => addHw(d.id)}
               onAddKit={() => addKit(d.id)}
+              onRemoveKit={() => removeKit(d.id)}
               onRemoveHw={(idx) => removeHw(d.id, idx)}
               onRemove={() => removeDoor(d.id)}
             />
@@ -320,6 +329,7 @@ function DoorCard({
   onPatchHw,
   onAddHw,
   onAddKit,
+  onRemoveKit,
   onRemoveHw,
   onRemove,
 }: {
@@ -334,6 +344,7 @@ function DoorCard({
   onPatchHw: (idx: number, p: Partial<HardwareLine>) => void;
   onAddHw: () => void;
   onAddKit: () => void;
+  onRemoveKit: () => void;
   onRemoveHw: (idx: number) => void;
   onRemove: () => void;
 }) {
@@ -453,6 +464,11 @@ function DoorCard({
               <button type="button" onClick={onAddKit} className="inline-flex h-7 items-center gap-1 rounded-lg px-2.5 text-[12px] font-bold text-white shadow-sm transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)" }} title="Add the standard door hardware kit">
                 <Plus size={13} strokeWidth={2.8} /> Add Kit
               </button>
+              {door.hardware.some((h) => h.kit) && (
+                <button type="button" onClick={onRemoveKit} className="inline-flex h-7 items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 text-[12px] font-bold text-red-600 transition-colors hover:bg-red-100" title="Remove the standard door hardware kit">
+                  <Trash2 size={13} strokeWidth={2.6} /> Remove Kit
+                </button>
+              )}
               <button type="button" onClick={onAddHw} className="inline-flex h-7 items-center gap-1 rounded-lg border border-[#0180cf]/40 bg-[#0180cf]/5 px-2.5 text-[12px] font-bold text-[#0069b3] transition-colors hover:bg-[#0180cf]/10">
                 <Plus size={13} strokeWidth={2.8} /> Add Item
               </button>
@@ -468,7 +484,13 @@ function DoorCard({
               const makes = makesByName.get(h.name) ?? [];
               const makeKnown = !h.make || makes.includes(h.make);
               const qty = Number(h.qty) || 0;
-              const sub = [h.specs, h.model].map((s) => (s ?? "").trim()).filter(Boolean).join(" · ");
+              const parts = [
+                h.specs && `Specs: ${h.specs}`,
+                h.model && `Model: ${h.model}`,
+                h.uom && `UOM: ${h.uom}`,
+                (Number(h.profitRate) || 0) > 0 && `Profit: ${inr(Number(h.profitRate))}`,
+              ].filter(Boolean) as string[];
+              const sub = parts.join("  ·  ");
               return (
                 <div key={idx} className="rounded-lg border border-slate-200 bg-slate-50/60 px-2 py-1.5">
                 <div className="flex items-center gap-1.5">
@@ -492,6 +514,8 @@ function DoorCard({
                         make,
                         specs: opt?.specs ?? "",
                         model: opt?.model ?? "",
+                        uom: opt?.uom ?? "",
+                        profitRate: opt?.profitRate ?? 0,
                         ...(opt && opt.rate ? { rate: opt.rate } : {}),
                         ...(opt && opt.qty ? { qty: opt.qty } : {}),
                       });
@@ -515,6 +539,8 @@ function DoorCard({
                         make,
                         specs: opt?.specs ?? "",
                         model: opt?.model ?? "",
+                        uom: opt?.uom ?? "",
+                        profitRate: opt?.profitRate ?? 0,
                         ...(opt && opt.rate ? { rate: opt.rate } : {}),
                         ...(opt && opt.qty ? { qty: opt.qty } : {}),
                       });
