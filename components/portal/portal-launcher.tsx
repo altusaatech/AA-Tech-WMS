@@ -64,8 +64,8 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Sales & quotation pipeline — win rate, order book & trends.",
     href: "/dashboards" as Route,
     icon: TrendingUp,
-    from: "#0a7d8a",
-    to: "#076570",
+    from: "#7c3aed",
+    to: "#6d28d9",
   },
   {
     key: "admin",
@@ -85,8 +85,8 @@ const WORKSPACES: WorkspaceDef[] = [
     href: "/portal/employees" as Route,
     icon: Users,
     logo: "/portal/employees.png",
-    from: "#0069b3",
-    to: "#024a7d",
+    from: "#0d9488",
+    to: "#0f766e",
   },
   {
     key: "user-manual",
@@ -94,8 +94,8 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Guides, walkthroughs, photos & videos for the WMS.",
     href: "/user-manual" as Route,
     icon: BookOpen,
-    from: "#0ea5c4",
-    to: "#0784a5",
+    from: "#f59e0b",
+    to: "#d97706",
   },
 ];
 
@@ -121,7 +121,7 @@ export function PortalLauncher({
   }
 
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-[#0c0807]">
+    <div className="no-scrollbar relative isolate h-[100dvh] overflow-y-auto overflow-x-hidden bg-[#0c0807]">
       <NavArrows />
       {/* poster-wall backdrop — same drifting mosaic as the sign-in screen.
           z-0 (not -z-10) so it paints above the root background, below content. */}

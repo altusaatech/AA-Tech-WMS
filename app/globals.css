@@ -266,6 +266,10 @@ html[data-density="compact"] body {
     overflow-x: hidden;
   }
 
+  /* Hide the scrollbar while keeping scroll (used by the portal). */
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
   body {
     min-height: 100dvh;
     /* Phase 2 — calmer, cleaner canvas: a single faint brand wash (blue +
