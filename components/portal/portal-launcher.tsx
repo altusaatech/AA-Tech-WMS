@@ -60,7 +60,7 @@ const WORKSPACES: WorkspaceDef[] = [
   },
   {
     key: "dashboards",
-    title: "Sales Dashboard",
+    title: "Dashboard",
     desc: "Sales & quotation pipeline — win rate, order book & trends.",
     href: "/dashboards" as Route,
     icon: TrendingUp,
