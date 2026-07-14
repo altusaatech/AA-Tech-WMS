@@ -45,15 +45,16 @@ export function QuotationPi({
   const [project, setProject] = React.useState(initial.project);
   const [customer, setCustomer] = React.useState(initial.customer);
   const [subject, setSubject] = React.useState(initial.subject);
-  // Prefill each door's PI installation from the quotation's flat per-door
-  // installation (from the Installation master) so the PI totals match the
-  // quotation by default. A door that already carries a manual piInstall is
-  // left untouched; the field stays editable on the PI.
+  // The PI installation always mirrors the quotation's flat per-door
+  // installation (from the Installation master) — the quote is the single
+  // source of truth. When a door carries an installation on the quote we
+  // overwrite piInstall with it (even if the PI was saved earlier); only doors
+  // with no quote installation keep any manual PI value.
   const [lines, setLines] = React.useState<DoorLine[]>(() =>
     initial.lines.map((d) => {
-      if (d.piInstall != null) return d;
       const { installPerDoor } = computeDoor(d);
-      return { ...d, piInstall: Math.round(installPerDoor) };
+      if (installPerDoor > 0) return { ...d, piInstall: Math.round(installPerDoor) };
+      return { ...d, piInstall: d.piInstall ?? 0 };
     }),
   );
   const [piMeta, setPiMeta] = React.useState<PiMeta>(initialPiMeta);
@@ -157,7 +158,13 @@ export function QuotationPi({
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-slate-700">{d.doorType || "—"}</td>
                       <td className="border-b border-[#e7eff6] px-2 py-1.5"><input type="number" className={`${inp} h-8 w-16 text-right`} value={d.qty || ""} onChange={(e) => patchDoor(d.id, { qty: Number(e.target.value) })} /></td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right font-semibold tabular-nums text-slate-700">{inr(p.rate)}</td>
-                      <td className="border-b border-[#e7eff6] px-2 py-1.5"><input type="number" className={`${inp} h-8 w-24 text-right`} value={d.piInstall || ""} onChange={(e) => patchDoor(d.id, { piInstall: Number(e.target.value) })} placeholder="0" /></td>
+                      <td className="border-b border-[#e7eff6] px-2 py-1.5">
+                        {computeDoor(d).installPerDoor > 0 ? (
+                          <span className="flex h-8 w-24 items-center justify-end rounded-lg bg-[#f0f6fb] px-2.5 text-right font-semibold tabular-nums text-slate-600 ring-1 ring-inset ring-slate-200" title="Fetched from the quotation's installation">{inr(d.piInstall || 0)}</span>
+                        ) : (
+                          <input type="number" className={`${inp} h-8 w-24 text-right`} value={d.piInstall || ""} onChange={(e) => patchDoor(d.id, { piInstall: Number(e.target.value) })} placeholder="0" />
+                        )}
+                      </td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right font-black tabular-nums text-[#0069b3]">{inr(p.amount)}</td>
                     </tr>
                   );
