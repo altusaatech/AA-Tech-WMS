@@ -64,8 +64,8 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Sales & quotation pipeline — win rate, order book & trends.",
     href: "/dashboards" as Route,
     icon: TrendingUp,
-    from: "#7c3aed",
-    to: "#6d28d9",
+    from: "#f59e0b",
+    to: "#d97706",
   },
   {
     key: "admin",
@@ -94,8 +94,8 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Guides, walkthroughs, photos & videos for the WMS.",
     href: "/user-manual" as Route,
     icon: BookOpen,
-    from: "#f59e0b",
-    to: "#d97706",
+    from: "#7c3aed",
+    to: "#6d28d9",
   },
 ];
 
