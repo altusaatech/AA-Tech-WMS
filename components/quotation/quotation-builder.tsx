@@ -6,7 +6,7 @@ import type { Route } from "next";
 import { ArrowLeft, Save, Printer, Plus, Trash2, Loader2, DoorOpen, FileText, ReceiptText } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
-import { DOOR_ORIENTATIONS, DOOR_CONFIGS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS } from "@/lib/sales/columns";
+import { DOOR_ORIENTATIONS, DOOR_CONFIGS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS, HARDWARE_UOMS } from "@/lib/sales/columns";
 import {
   newDoor,
   newHardware,
@@ -481,105 +481,145 @@ function DoorCard({
               </button>
             </div>
           </div>
-          {door.hardware.length === 0 && (
-            <div className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-[12.5px] text-slate-400">No hardware yet — click <b>Add Item</b> to add one.</div>
+          {door.hardware.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-[12.5px] text-slate-400">No hardware yet — click <b>Add Item</b> or <b>Add Kit</b> to add one.</div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-slate-200">
+              <div className="min-w-[960px]">
+                {/* column headers */}
+                <div className="flex items-center gap-1.5 border-b border-slate-200 bg-slate-50 px-2 py-1.5 text-[10px] font-black uppercase tracking-[0.04em] text-slate-400">
+                  <span className="min-w-0 flex-[1.4]">Hardware</span>
+                  <span className="w-[90px] shrink-0">Make</span>
+                  <span className="min-w-0 flex-1">Type / Specs</span>
+                  <span className="w-[104px] shrink-0">Size / Model</span>
+                  <span className="w-[64px] shrink-0 text-center">Units/Door</span>
+                  <span className="w-[74px] shrink-0">UOM</span>
+                  <span className="w-[72px] shrink-0 text-right">Rate</span>
+                  <span className="w-[84px] shrink-0 text-right">Profit Rate</span>
+                  <span className="w-[74px] shrink-0 text-right">Amount</span>
+                  <span className="w-[22px] shrink-0" />
+                </div>
+                {door.hardware.map((h, idx) => {
+                  const amt = (Number(h.qty) || 0) * (Number(h.rate) || 0);
+                  const known = hwNames.includes(h.name);
+                  const makes = makesByName.get(h.name) ?? [];
+                  const makeKnown = !h.make || makes.includes(h.make);
+                  const uomKnown = !h.uom || HARDWARE_UOMS.includes(h.uom);
+                  const qty = Number(h.qty) || 0;
+                  return (
+                    <div key={idx} className="flex items-center gap-1.5 border-b border-slate-100 bg-white px-2 py-1.5 last:border-0">
+                      {/* Hardware */}
+                      <select
+                        className="h-8 min-w-0 flex-[1.4] cursor-pointer rounded-md border border-slate-200 bg-white px-1.5 text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
+                        value={h.name}
+                        title={h.name}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          const nextMakes = makesByName.get(name) ?? [];
+                          // Pick the make when the type has exactly one (or none); with
+                          // several makes, clear it so the user chooses in the Make box.
+                          const make = nextMakes.length === 1 ? (nextMakes[0] ?? "") : "";
+                          // Always fetch every field from the master as soon as a
+                          // hardware type is picked — resolveHw(name, "") resolves the
+                          // first matching row. Choosing a make below refines it.
+                          const opt = resolveHw(name, make);
+                          onPatchHw(idx, {
+                            name,
+                            make,
+                            specs: opt?.specs ?? "",
+                            model: opt?.model ?? "",
+                            uom: opt?.uom ?? "",
+                            profitRate: opt?.profitRate ?? 0,
+                            ...(opt && opt.rate ? { rate: opt.rate } : {}),
+                            ...(opt && opt.qty ? { qty: opt.qty } : {}),
+                          });
+                        }}
+                      >
+                        <option value="">Select hardware…</option>
+                        {!known && h.name && <option value={h.name}>{h.name}</option>}
+                        {hwNames.map((nm) => (
+                          <option key={nm} value={nm}>{nm}</option>
+                        ))}
+                      </select>
+                      {/* Make */}
+                      <select
+                        className="h-8 w-[90px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-300"
+                        value={h.make ?? ""}
+                        title={h.make ?? ""}
+                        disabled={!h.name}
+                        onChange={(e) => {
+                          const make = e.target.value;
+                          const opt = resolveHw(h.name, make);
+                          onPatchHw(idx, {
+                            make,
+                            specs: opt?.specs ?? "",
+                            model: opt?.model ?? "",
+                            uom: opt?.uom ?? "",
+                            profitRate: opt?.profitRate ?? 0,
+                            ...(opt && opt.rate ? { rate: opt.rate } : {}),
+                            ...(opt && opt.qty ? { qty: opt.qty } : {}),
+                          });
+                        }}
+                      >
+                        <option value="">Make…</option>
+                        {!makeKnown && h.make && <option value={h.make}>{h.make}</option>}
+                        {makes.map((mk) => (
+                          <option key={mk} value={mk}>{mk}</option>
+                        ))}
+                      </select>
+                      {/* Type / Specs */}
+                      <input
+                        className="h-8 min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-1.5 text-[12px] text-slate-700 outline-none focus:border-[#0180cf]"
+                        value={h.specs ?? ""}
+                        title={h.specs ?? ""}
+                        placeholder="Type / Specs"
+                        onChange={(e) => onPatchHw(idx, { specs: e.target.value })}
+                      />
+                      {/* Size / Model */}
+                      <input
+                        className="h-8 w-[104px] shrink-0 rounded-md border border-slate-200 bg-white px-1.5 text-[12px] text-slate-700 outline-none focus:border-[#0180cf]"
+                        value={h.model ?? ""}
+                        title={h.model ?? ""}
+                        placeholder="Size / Model"
+                        onChange={(e) => onPatchHw(idx, { model: e.target.value })}
+                      />
+                      {/* Units / Door */}
+                      <select
+                        className="h-8 w-[64px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-right text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
+                        value={qty || ""}
+                        onChange={(e) => onPatchHw(idx, { qty: Number(e.target.value) })}
+                      >
+                        <option value="">qty</option>
+                        {qty > 50 && <option value={qty}>{qty}</option>}
+                        {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
+                          <option key={n} value={n}>{n}</option>
+                        ))}
+                      </select>
+                      {/* UOM */}
+                      <select
+                        className="h-8 w-[74px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
+                        value={h.uom ?? ""}
+                        onChange={(e) => onPatchHw(idx, { uom: e.target.value })}
+                      >
+                        <option value="">—</option>
+                        {!uomKnown && h.uom && <option value={h.uom}>{h.uom}</option>}
+                        {HARDWARE_UOMS.map((u) => (
+                          <option key={u} value={u}>{u}</option>
+                        ))}
+                      </select>
+                      {/* Rate */}
+                      <input type="number" className="h-8 w-[72px] shrink-0 rounded-md border border-slate-200 bg-white px-1.5 text-right text-[12px] outline-none focus:border-[#0180cf]" value={h.rate || ""} onChange={(e) => onPatchHw(idx, { rate: Number(e.target.value) })} placeholder="rate" />
+                      {/* AA Tech Profit Rate */}
+                      <input type="number" className="h-8 w-[84px] shrink-0 rounded-md border border-slate-200 bg-white px-1.5 text-right text-[12px] outline-none focus:border-[#0180cf]" value={h.profitRate || ""} onChange={(e) => onPatchHw(idx, { profitRate: Number(e.target.value) })} placeholder="—" />
+                      {/* Amount */}
+                      <span className="w-[74px] shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{inr(amt)}</span>
+                      <button type="button" onClick={() => onRemoveHw(idx)} className="w-[22px] shrink-0 rounded-md p-1 text-slate-300 hover:bg-red-50 hover:text-red-600" title="Remove item"><Trash2 size={13} /></button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
-          <div className="grid grid-cols-2 gap-2 max-md:grid-cols-1">
-            {door.hardware.map((h, idx) => {
-              const amt = (Number(h.qty) || 0) * (Number(h.rate) || 0);
-              const known = hwNames.includes(h.name);
-              const makes = makesByName.get(h.name) ?? [];
-              const makeKnown = !h.make || makes.includes(h.make);
-              const qty = Number(h.qty) || 0;
-              const parts = [
-                h.specs && `Specs: ${h.specs}`,
-                h.model && `Model: ${h.model}`,
-                h.uom && `UOM: ${h.uom}`,
-                (Number(h.profitRate) || 0) > 0 && `Profit: ${inr(Number(h.profitRate))}`,
-              ].filter(Boolean) as string[];
-              const sub = parts.join("  ·  ");
-              return (
-                <div key={idx} className="rounded-lg border border-slate-200 bg-slate-50/60 px-2 py-1.5">
-                <div className="flex items-center gap-1.5">
-                  <select
-                    className="h-8 min-w-0 flex-1 cursor-pointer rounded-md border border-slate-200 bg-white px-1.5 text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
-                    value={h.name}
-                    title={h.name}
-                    onChange={(e) => {
-                      const name = e.target.value;
-                      const nextMakes = makesByName.get(name) ?? [];
-                      // Pick the make when the type has exactly one (or none); with
-                      // several makes, clear it so the user chooses in the Make box.
-                      const make = nextMakes.length === 1 ? (nextMakes[0] ?? "") : "";
-                      // Always fetch the selling rate + quantity from the master as
-                      // soon as a hardware type is picked — resolveHw(name, "")
-                      // resolves the first matching row, so the rate is never blank.
-                      // Choosing a specific make below refines it to that make's row.
-                      const opt = resolveHw(name, make);
-                      onPatchHw(idx, {
-                        name,
-                        make,
-                        specs: opt?.specs ?? "",
-                        model: opt?.model ?? "",
-                        uom: opt?.uom ?? "",
-                        profitRate: opt?.profitRate ?? 0,
-                        ...(opt && opt.rate ? { rate: opt.rate } : {}),
-                        ...(opt && opt.qty ? { qty: opt.qty } : {}),
-                      });
-                    }}
-                  >
-                    <option value="">Select hardware…</option>
-                    {!known && h.name && <option value={h.name}>{h.name}</option>}
-                    {hwNames.map((nm) => (
-                      <option key={nm} value={nm}>{nm}</option>
-                    ))}
-                  </select>
-                  <select
-                    className="h-8 w-[92px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-300"
-                    value={h.make ?? ""}
-                    title={h.make ?? ""}
-                    disabled={!h.name}
-                    onChange={(e) => {
-                      const make = e.target.value;
-                      const opt = resolveHw(h.name, make);
-                      onPatchHw(idx, {
-                        make,
-                        specs: opt?.specs ?? "",
-                        model: opt?.model ?? "",
-                        uom: opt?.uom ?? "",
-                        profitRate: opt?.profitRate ?? 0,
-                        ...(opt && opt.rate ? { rate: opt.rate } : {}),
-                        ...(opt && opt.qty ? { qty: opt.qty } : {}),
-                      });
-                    }}
-                  >
-                    <option value="">Make…</option>
-                    {!makeKnown && h.make && <option value={h.make}>{h.make}</option>}
-                    {makes.map((mk) => (
-                      <option key={mk} value={mk}>{mk}</option>
-                    ))}
-                  </select>
-                  <select
-                    className="h-8 w-[54px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-right text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
-                    value={qty || ""}
-                    onChange={(e) => onPatchHw(idx, { qty: Number(e.target.value) })}
-                  >
-                    <option value="">qty</option>
-                    {qty > 50 && <option value={qty}>{qty}</option>}
-                    {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
-                  </select>
-                  <span className="text-[12px] text-slate-300">×</span>
-                  <input type="number" className="h-8 w-16 shrink-0 rounded-md border border-slate-200 bg-white px-1.5 text-right text-[12px] outline-none focus:border-[#0180cf]" value={h.rate || ""} onChange={(e) => onPatchHw(idx, { rate: Number(e.target.value) })} placeholder="rate" />
-                  <span className="w-[58px] shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{inr(amt)}</span>
-                  <button type="button" onClick={() => onRemoveHw(idx)} className="shrink-0 rounded-md p-1 text-slate-300 hover:bg-red-50 hover:text-red-600" title="Remove item"><Trash2 size={13} /></button>
-                </div>
-                {sub && <div className="mt-1 truncate pl-0.5 text-[10.5px] font-medium text-slate-400" title={sub}>{sub}</div>}
-                </div>
-              );
-            })}
-          </div>
         </div>
 
         {/* Per-door price summary (working specification) */}

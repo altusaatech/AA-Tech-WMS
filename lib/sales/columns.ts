@@ -222,6 +222,7 @@ export const PI_COLUMNS: SalesColDef[] = [
  */
 export const DOOR_ORIENTATIONS = ["RH", "LH"];
 export const DOOR_CONFIGS = ["Single", "Double", "Double Unequal", "Triple"];
+export const HARDWARE_UOMS = ["Nos", "RMT", "Set", "Pair", "Mtr", "Sqmt", "Kg", "Lot"];
 export const DOOR_FINISHES = ["POWDERCOATED", "PU PAINTED", "PRIME PAINTED", "ENAMEL PAINTED"];
 export const DOOR_SHADES = ["RAL7035 LT GREY", "RAL9001 WHITE", "RAL7032 SIEMENS GREY", "EPOXY GREY PRIMER"];
 export const DOOR_SHADE_FINISHES = ["SEMIGLOSSY", "MATT", "TEXTURE", "STRUCTURE"];
