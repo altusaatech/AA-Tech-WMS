@@ -121,7 +121,7 @@ export function PortalLauncher({
   }
 
   return (
-    <div className="no-scrollbar relative isolate h-[100dvh] overflow-y-auto overflow-x-hidden bg-[#0c0807]">
+    <div className="no-scrollbar relative isolate flex h-[100dvh] flex-col overflow-y-auto overflow-x-hidden bg-[#0c0807]">
       <NavArrows />
       {/* poster-wall backdrop — same drifting mosaic as the sign-in screen.
           z-0 (not -z-10) so it paints above the root background, below content. */}
@@ -130,7 +130,7 @@ export function PortalLauncher({
       </div>
 
       {/* ── top bar (premium dark glass, matches the sign-in card) ── */}
-      <div className="relative z-10 px-6 pt-6 max-md:px-3">
+      <div className="relative z-10 shrink-0 px-6 pt-4 max-md:px-3">
         <div className="relative mx-auto max-w-[1180px]">
           {/* soft brand glow behind the bar */}
           <div
@@ -196,9 +196,9 @@ export function PortalLauncher({
       </div>
 
       {/* ── content ── */}
-      <main className="relative z-10 mx-auto max-w-[1180px] px-8 pb-20 pt-4 max-md:px-4">
+      <main className="relative z-10 mx-auto flex w-full max-w-[1180px] flex-col px-8 pb-6 pt-3 max-md:px-4 md:min-h-0 md:flex-1">
         {/* welcome */}
-        <div className="mb-8 max-md:mb-6">
+        <div className="mb-4 shrink-0 max-md:mb-4">
           <div className="text-[12px] font-black uppercase tracking-[0.2em] text-[#5cc0f5]">
             A A Tech <span className="text-white/30">/</span> Workspaces
           </div>
@@ -212,8 +212,8 @@ export function PortalLauncher({
         </div>
 
         {/* card grid on a black stage (behind the cards only, not full page) */}
-        <div className="rounded-[30px] border border-white/10 bg-black/70 p-5 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] backdrop-blur-sm max-md:p-3.5">
-          <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">
+        <div className="rounded-[30px] border border-white/10 bg-black/70 p-4 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] backdrop-blur-sm max-md:p-3.5 md:min-h-0 md:flex-1">
+          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1 md:h-full md:grid-rows-3">
             {WORKSPACES.map((w) => (
               <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} />
             ))}
@@ -229,7 +229,7 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
 
   const inner = (
     <div
-      className="group relative flex h-full min-h-[188px] items-center gap-6 overflow-hidden rounded-[22px] p-6 shadow-lg transition-all duration-200 max-sm:flex-col max-sm:items-start max-sm:gap-4"
+      className="group relative flex h-full min-h-[120px] items-center gap-5 overflow-hidden rounded-[22px] p-5 shadow-lg transition-all duration-200 max-sm:flex-col max-sm:items-start max-sm:gap-4"
       style={{
         background: `linear-gradient(145deg, ${ws.from}, ${ws.to})`,
         boxShadow: `0 22px 46px -22px ${ws.to}cc`,
@@ -240,7 +240,7 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
 
       {/* LEFT — clear logo on a white panel (the PNGs aren't transparent) */}
       {ws.logo ? (
-        <span className="relative inline-flex size-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-3 shadow-lg ring-1 ring-white/50 transition-transform group-hover:scale-[1.04] max-md:size-24 max-sm:size-20">
+        <span className="relative inline-flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-2.5 shadow-lg ring-1 ring-white/50 transition-transform group-hover:scale-[1.04] max-md:size-20 max-sm:size-16">
           <img src={ws.logo} alt="" className="h-full w-full object-contain" />
         </span>
       ) : (
@@ -251,10 +251,10 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
 
       {/* RIGHT — title, description, actions */}
       <div className="relative flex min-w-0 flex-1 flex-col">
-        <h2 className="text-[26px] font-black leading-none tracking-[-0.01em] text-white">{ws.title}</h2>
-        <p className="mt-2 text-[13.5px] font-medium leading-snug text-white/85">{ws.desc}</p>
+        <h2 className="text-[23px] font-black leading-none tracking-[-0.01em] text-white max-md:text-[21px]">{ws.title}</h2>
+        <p className="mt-1.5 text-[13px] font-medium leading-snug text-white/85">{ws.desc}</p>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           {locked ? (
             <span className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-black/20 px-3.5 text-[13px] font-bold text-white/80 ring-1 ring-white/15">
               <Lock size={13} strokeWidth={2.5} /> No access
