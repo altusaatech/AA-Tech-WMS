@@ -450,6 +450,7 @@ function DoorCard({
         {/* computed strip */}
         <div className="mt-3 flex flex-wrap gap-2">
           <Chip label="Area" value={`${c.area.toFixed(3)} m²`} />
+          <Chip label="Frame Perimeter" value={`${c.perimeter.toFixed(2)} RMT`} />
           <Chip label="Basic Supply" value={inr(c.basicSupply)} />
           <Chip label="Hardware" value={inr(c.hardwareTotal)} />
           <Chip label="Door + HW" value={inr(c.doorHw)} />

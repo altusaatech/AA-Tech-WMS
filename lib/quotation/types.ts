@@ -115,6 +115,7 @@ const n = (v: number) => (Number.isFinite(v) ? v : 0);
 
 export interface DoorCompute {
   area: number;
+  perimeter: number; // frame perimeter in running metres (RMT)
   basicSupply: number;
   hardwareTotal: number;
   doorHw: number;
@@ -123,15 +124,29 @@ export interface DoorCompute {
   lineTotal: number;
 }
 
+/**
+ * Frame perimeter (RMT) from the working-specification sheet:
+ *   Single door  →  W/1000 + 2 × H/1000
+ *   Double door  →  W/1000 + 3 × H/1000
+ *   Triple door  →  W/1000 + 4 × H/1000
+ * i.e. one head width plus (leaves + 1) door heights.
+ */
+export function framePerimeter(d: DoorLine): number {
+  const cfg = (d.doorConfig || "").toLowerCase();
+  const hMult = cfg.includes("triple") ? 4 : cfg.includes("double") ? 3 : 2;
+  return n(d.width) / 1000 + hMult * (n(d.height) / 1000);
+}
+
 export function computeDoor(d: DoorLine): DoorCompute {
   const area = (n(d.width) / 1000) * (n(d.height) / 1000);
+  const perimeter = framePerimeter(d);
   const basicSupply = area * n(d.ratePerSqm);
   const hardwareTotal = d.hardware.reduce((s, h) => s + n(h.qty) * n(h.rate), 0);
   const doorHw = basicSupply + hardwareTotal;
   const qty = n(d.qty) || 0;
   const totalSupply = doorHw * qty;
   const installTotal = area * n(d.installPerSqm) * qty;
-  return { area, basicSupply, hardwareTotal, doorHw, totalSupply, installTotal, lineTotal: totalSupply + installTotal };
+  return { area, perimeter, basicSupply, hardwareTotal, doorHw, totalSupply, installTotal, lineTotal: totalSupply + installTotal };
 }
 
 export interface QuoteTotals {
