@@ -61,9 +61,11 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
         .map((h) => ({
           name: (h.hardwareType || h.description || "").trim(),
           make: (h.make ?? "").trim(),
+          specs: (h.description ?? "").trim(),
           model: (h.model ?? "").trim(),
           rate: Number(h.sellingRate) || 0,
           qty: Number(h.quantity) || 0,
+          kit: !!h.kit,
         }))
         .filter((o) => o.name)
         .map((o) => [`${o.name}|${o.make}|${o.model}`, o] as const),

@@ -30,9 +30,11 @@ interface ProductOption {
 interface HardwareOption {
   name: string;
   make: string;
-  model: string;
+  specs: string; // Type / Specs (description) from the hardware master
+  model: string; // Size / Model from the hardware master
   rate: number;
-  qty: number; // default quantity fetched from the hardware master
+  qty: number; // default Units / Door fetched from the hardware master
+  kit: boolean; // part of the standard door hardware kit
 }
 
 interface DoorOption {
@@ -98,6 +100,18 @@ export function QuotationBuilder({
   }
   function addHw(doorId: string) {
     setLines((p) => p.map((d) => (d.id === doorId ? { ...d, hardware: [...d.hardware, newHardware()] } : d)));
+  }
+  // "Add Kit" — append every hardware master item flagged as a standard kit
+  // item, pre-filled with its make, specs, model, units/door and rate.
+  function addKit(doorId: string) {
+    const kitLines: HardwareLine[] = hardwareOptions
+      .filter((o) => o.kit)
+      .map((o) => ({ name: o.name, make: o.make, specs: o.specs, model: o.model, qty: o.qty, rate: o.rate }));
+    if (!kitLines.length) {
+      fireToast({ message: "No kit items found in the hardware master.", type: "error" });
+      return;
+    }
+    setLines((p) => p.map((d) => (d.id === doorId ? { ...d, hardware: [...d.hardware, ...kitLines] } : d)));
   }
   function removeHw(doorId: string, idx: number) {
     setLines((p) => p.map((d) => (d.id === doorId ? { ...d, hardware: d.hardware.filter((_, i) => i !== idx) } : d)));
@@ -230,6 +244,7 @@ export function QuotationBuilder({
               onPatch={(p) => patchDoor(d.id, p)}
               onPatchHw={(idx, p) => patchHw(d.id, idx, p)}
               onAddHw={() => addHw(d.id)}
+              onAddKit={() => addKit(d.id)}
               onRemoveHw={(idx) => removeHw(d.id, idx)}
               onRemove={() => removeDoor(d.id)}
             />
@@ -304,6 +319,7 @@ function DoorCard({
   onPatch,
   onPatchHw,
   onAddHw,
+  onAddKit,
   onRemoveHw,
   onRemove,
 }: {
@@ -317,6 +333,7 @@ function DoorCard({
   onPatch: (p: Partial<DoorLine>) => void;
   onPatchHw: (idx: number, p: Partial<HardwareLine>) => void;
   onAddHw: () => void;
+  onAddKit: () => void;
   onRemoveHw: (idx: number) => void;
   onRemove: () => void;
 }) {
@@ -432,9 +449,14 @@ function DoorCard({
         <div className="mt-4">
           <div className="mb-1.5 flex items-center justify-between gap-2">
             <div className="text-[11px] font-black uppercase tracking-[0.08em] text-slate-400">Hardware (type × make × qty × rate)</div>
-            <button type="button" onClick={onAddHw} className="inline-flex h-7 items-center gap-1 rounded-lg border border-[#0180cf]/40 bg-[#0180cf]/5 px-2.5 text-[12px] font-bold text-[#0069b3] transition-colors hover:bg-[#0180cf]/10">
-              <Plus size={13} strokeWidth={2.8} /> Add Item
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button type="button" onClick={onAddKit} className="inline-flex h-7 items-center gap-1 rounded-lg px-2.5 text-[12px] font-bold text-white shadow-sm transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)" }} title="Add the standard door hardware kit">
+                <Plus size={13} strokeWidth={2.8} /> Add Kit
+              </button>
+              <button type="button" onClick={onAddHw} className="inline-flex h-7 items-center gap-1 rounded-lg border border-[#0180cf]/40 bg-[#0180cf]/5 px-2.5 text-[12px] font-bold text-[#0069b3] transition-colors hover:bg-[#0180cf]/10">
+                <Plus size={13} strokeWidth={2.8} /> Add Item
+              </button>
+            </div>
           </div>
           {door.hardware.length === 0 && (
             <div className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-[12.5px] text-slate-400">No hardware yet — click <b>Add Item</b> to add one.</div>
@@ -446,8 +468,10 @@ function DoorCard({
               const makes = makesByName.get(h.name) ?? [];
               const makeKnown = !h.make || makes.includes(h.make);
               const qty = Number(h.qty) || 0;
+              const sub = [h.specs, h.model].map((s) => (s ?? "").trim()).filter(Boolean).join(" · ");
               return (
-                <div key={idx} className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50/60 px-2 py-1.5">
+                <div key={idx} className="rounded-lg border border-slate-200 bg-slate-50/60 px-2 py-1.5">
+                <div className="flex items-center gap-1.5">
                   <select
                     className="h-8 min-w-0 flex-1 cursor-pointer rounded-md border border-slate-200 bg-white px-1.5 text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
                     value={h.name}
@@ -466,6 +490,7 @@ function DoorCard({
                       onPatchHw(idx, {
                         name,
                         make,
+                        specs: opt?.specs ?? "",
                         model: opt?.model ?? "",
                         ...(opt && opt.rate ? { rate: opt.rate } : {}),
                         ...(opt && opt.qty ? { qty: opt.qty } : {}),
@@ -488,6 +513,7 @@ function DoorCard({
                       const opt = resolveHw(h.name, make);
                       onPatchHw(idx, {
                         make,
+                        specs: opt?.specs ?? "",
                         model: opt?.model ?? "",
                         ...(opt && opt.rate ? { rate: opt.rate } : {}),
                         ...(opt && opt.qty ? { qty: opt.qty } : {}),
@@ -515,6 +541,8 @@ function DoorCard({
                   <input type="number" className="h-8 w-16 shrink-0 rounded-md border border-slate-200 bg-white px-1.5 text-right text-[12px] outline-none focus:border-[#0180cf]" value={h.rate || ""} onChange={(e) => onPatchHw(idx, { rate: Number(e.target.value) })} placeholder="rate" />
                   <span className="w-[58px] shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{inr(amt)}</span>
                   <button type="button" onClick={() => onRemoveHw(idx)} className="shrink-0 rounded-md p-1 text-slate-300 hover:bg-red-50 hover:text-red-600" title="Remove item"><Trash2 size={13} /></button>
+                </div>
+                {sub && <div className="mt-1 truncate pl-0.5 text-[10.5px] font-medium text-slate-400" title={sub}>{sub}</div>}
                 </div>
               );
             })}
