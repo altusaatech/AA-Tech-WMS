@@ -135,7 +135,7 @@ export function QuotationPi({
                 <th className="px-3 py-2.5">Description</th>
                 <th className="px-3 py-2.5 text-right">Qty</th>
                 <th className="px-3 py-2.5 text-right">Rate ₹</th>
-                <th className="px-3 py-2.5 text-right">Install ₹</th>
+                <th className="px-3 py-2.5 text-right">Installation ₹</th>
                 <th className="px-3 py-2.5 text-right">Amount ₹</th>
               </tr>
             </thead>
@@ -158,11 +158,11 @@ export function QuotationPi({
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-slate-700">{d.doorType || "—"}</td>
                       <td className="border-b border-[#e7eff6] px-2 py-1.5"><input type="number" className={`${inp} h-8 w-16 text-right`} value={d.qty || ""} onChange={(e) => patchDoor(d.id, { qty: Number(e.target.value) })} /></td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right font-semibold tabular-nums text-slate-700">{inr(p.rate)}</td>
-                      <td className="border-b border-[#e7eff6] px-2 py-1.5">
+                      <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right">
                         {computeDoor(d).installPerDoor > 0 ? (
-                          <span className="flex h-8 w-24 items-center justify-end rounded-lg bg-[#f0f6fb] px-2.5 text-right font-semibold tabular-nums text-slate-600 ring-1 ring-inset ring-slate-200" title="Fetched from the quotation's installation">{inr(d.piInstall || 0)}</span>
+                          <span className="font-semibold tabular-nums text-slate-600" title="Fetched from the quotation's installation">{inr(d.piInstall || 0)}</span>
                         ) : (
-                          <input type="number" className={`${inp} h-8 w-24 text-right`} value={d.piInstall || ""} onChange={(e) => patchDoor(d.id, { piInstall: Number(e.target.value) })} placeholder="0" />
+                          <input type="number" className={`${inp} ml-auto h-8 w-24 text-right`} value={d.piInstall || ""} onChange={(e) => patchDoor(d.id, { piInstall: Number(e.target.value) })} placeholder="0" />
                         )}
                       </td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right font-black tabular-nums text-[#0069b3]">{inr(p.amount)}</td>
@@ -279,7 +279,7 @@ function PiPrint({
         </colgroup>
         <thead>
           <tr style={{ background: "linear-gradient(180deg,#0180cf,#0069b3)", color: "#fff" }}>
-            {["Sr No", "Door Code", "Width (mm)", "Height (mm)", "Description", "HSN Code", "UOM", "Qty Nos", "Rate ₹", "Install ₹", "Amount ₹"].map((h) => (
+            {["Sr No", "Door Code", "Width (mm)", "Height (mm)", "Description", "HSN Code", "UOM", "Qty Nos", "Rate ₹", "Installation ₹", "Amount ₹"].map((h) => (
               <th key={h} className={c} style={{ textAlign: "center", fontWeight: 700, wordBreak: "break-word" }}>{h}</th>
             ))}
           </tr>
