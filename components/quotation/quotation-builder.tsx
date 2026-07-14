@@ -575,7 +575,32 @@ function DoorCard({
             })}
           </div>
         </div>
+
+        {/* Per-door price summary (working specification) */}
+        {(() => {
+          const installPerDoor = c.area * (Number(door.installPerSqm) || 0);
+          return (
+            <div className="mt-4 overflow-hidden rounded-xl border border-[#0180cf]/25 bg-gradient-to-br from-[#f3f9fe] to-white">
+              <div className="divide-y divide-slate-100">
+                <SummaryRow label="Total Hardware Cost" value={inr(c.hardwareTotal)} />
+                <SummaryRow label="Total Doorset Price" value={inr(c.doorHw)} />
+                <SummaryRow label="Installation" value={inr(installPerDoor)} />
+                <SummaryRow label="Total Door Price with Installation" value={inr(c.doorHw + installPerDoor)} strong />
+              </div>
+            </div>
+          );
+        })()}
       </div>
+    </div>
+  );
+}
+
+/** One line in the per-door price summary footer. */
+function SummaryRow({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div className={`flex items-center justify-between gap-3 px-4 ${strong ? "bg-[#0180cf]/[0.06] py-2.5" : "py-2"}`}>
+      <span className={`text-[13px] ${strong ? "font-black text-slate-800" : "font-semibold text-slate-500"}`}>{label}</span>
+      <span className={`tabular-nums ${strong ? "text-[15px] font-black text-[#0069b3]" : "text-[13.5px] font-bold text-slate-700"}`}>{value}</span>
     </div>
   );
 }
