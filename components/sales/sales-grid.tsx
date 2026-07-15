@@ -231,7 +231,14 @@ export function SalesDataGrid({
     }
   }
 
-  function onCellDown(r: number, c: number) {
+  function onCellDown(r: number, c: number, shift = false) {
+    // Shift-click extends the current selection from its top-left origin, so a
+    // large block can be picked without dragging across a scrolling grid:
+    // click the header cell, scroll, then shift-click the bottom-right cell.
+    if (shift && sel) {
+      setSel(normRange(sel.r1, sel.c1, r, c));
+      return;
+    }
     setAnchor({ r, c });
     setSel({ r1: r, c1: c, r2: r, c2: c });
   }
@@ -612,7 +619,7 @@ export function SalesDataGrid({
                 <div>
                   <h3 className="text-[15px] font-black text-slate-800">Select the range to import</h3>
                   <p className="text-[12px] text-slate-500">
-                    Sheet “{rangeGrid.name}” → {title ?? kind} · click the <b>top-left</b> cell (the header row), drag to the <b>bottom-right</b>
+                    Sheet “{rangeGrid.name}” → {title ?? kind} · click the <b>header row</b> cell, then <b>drag</b> (or <b>shift-click</b>) the <b>bottom-right</b> data cell
                   </p>
                 </div>
               </div>
@@ -642,7 +649,7 @@ export function SalesDataGrid({
                         return (
                           <td
                             key={c}
-                            onMouseDown={(e) => { e.preventDefault(); onCellDown(r, c); }}
+                            onMouseDown={(e) => { e.preventDefault(); onCellDown(r, c, e.shiftKey); }}
                             onMouseEnter={() => onCellEnter(r, c)}
                             title={val}
                             className={`h-7 max-w-[110px] cursor-cell truncate border px-2 ${
@@ -673,7 +680,7 @@ export function SalesDataGrid({
                     <span className="text-slate-400"> · top row = headers</span>
                   </span>
                 ) : (
-                  <span className="text-slate-400">No selection yet — click and drag over your table.{rangeGrid.truncated ? ` (showing first ${MAX_PREVIEW_ROWS} rows)` : ""}</span>
+                  <span className="text-slate-400">No selection yet — click the header cell, then drag or shift-click the last data cell.{rangeGrid.truncated ? ` (showing first ${MAX_PREVIEW_ROWS} rows)` : ""}</span>
                 )}
               </div>
               <div className="flex items-center gap-2.5">
