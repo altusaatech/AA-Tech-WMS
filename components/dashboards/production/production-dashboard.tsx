@@ -7,8 +7,9 @@ import {
   FileText, Workflow, Rocket, Zap, Star, AlertTriangle, PackageCheck, Hourglass, MapPin, PencilRuler,
 } from "lucide-react";
 import {
-  KpiCard, Section, TrendBars, StatusBars, InsightsPanel, DetailModal, ProgressStat,
+  Section, TrendBars, StatusBars, InsightsPanel, DetailModal, ProgressStat,
   WorkflowTimeline, ExportButtons, inr, compactInr, Gauge, MetricChip,
+  StatCard, ActivityFeed, Donut, type Activity,
 } from "@/components/dashboards/shared/kit";
 
 export interface ProdRow {
@@ -94,6 +95,33 @@ export function ProductionDashboard({ rows }: { rows: ProdRow[] }) {
     return Array.from(m.entries()).sort(([, a], [, b]) => b - a).slice(0, 6).map(([label, v]) => ({ label, value: v }));
   }, [filtered]);
 
+  // monthly sparklines + deltas (respond to filters)
+  const sp = React.useMemo(() => {
+    const g = () => new Map<string, number>();
+    const totM = g(), dispM = g(), valM = g();
+    for (const r of filtered) {
+      if (!r.date) continue; const m = r.date.slice(0, 7);
+      totM.set(m, (totM.get(m) ?? 0) + 1);
+      if (r.dispatched) dispM.set(m, (dispM.get(m) ?? 0) + 1);
+      valM.set(m, (valM.get(m) ?? 0) + r.value);
+    }
+    const months = [...new Set([...totM.keys(), ...dispM.keys(), ...valM.keys()])].sort().slice(-8);
+    const arr = (mp: Map<string, number>) => months.map((m) => mp.get(m) ?? 0);
+    const d = (mp: Map<string, number>) => { const a = mp.get(months[months.length - 1] ?? "") ?? 0, b = mp.get(months[months.length - 2] ?? "") ?? 0; return b ? Math.max(-999, Math.min(999, Math.round(((a - b) / b) * 100))) : a ? 100 : 0; };
+    return { tot: arr(totM), disp: arr(dispM), val: arr(valM), dTot: d(totM), dDisp: d(dispM), dVal: d(valM) };
+  }, [filtered]);
+
+  const activities: Activity[] = React.useMemo(() => {
+    const acts = filtered.map((r): Activity => {
+      if (r.dispatched) return { kind: "dispatch", title: `Dispatched · ${r.ourSoNo}`, subtitle: r.company, date: r.date, amount: r.value };
+      if (r.woIssued) return { kind: "so", title: `Work Order · ${r.ourSoNo}`, subtitle: r.company, date: r.date, amount: r.value };
+      if (r.bomReleased) return { kind: "bom", title: `BOM released · ${r.ourSoNo}`, subtitle: r.company, date: r.date, amount: r.value };
+      if (r.gaApproved) return { kind: "ga", title: `GA approved · ${r.ourSoNo}`, subtitle: r.company, date: r.date, amount: r.value };
+      return { kind: "so", title: `Order ${r.ourSoNo}`, subtitle: r.company, date: r.date, amount: r.value };
+    });
+    return acts.filter((a) => a.date).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7);
+  }, [filtered]);
+
   const meta = {
     all: { title: "Orders in Production", Icon: Factory, from: "#0180cf", to: "#0069b3", rows: filtered },
     ga: { title: "GA Approved", Icon: BadgeCheck, from: "#0a7d8a", to: "#0069b3", rows: filtered.filter((r) => r.gaApproved) },
@@ -123,16 +151,26 @@ export function ProductionDashboard({ rows }: { rows: ProdRow[] }) {
         </span>
       </div>
 
-      {/* KPIs (8) */}
+      {/* hero stat cards */}
       <div className="grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
-        <KpiCard label="Orders in Production" value={k.total} blurb="Confirmed sales orders" Icon={Factory} from="#0180cf" to="#0069b3" onDetails={() => setModal("all")} />
-        <KpiCard label="GA Approved" value={k.gaApproved} blurb="Cleared GA drawing" Icon={BadgeCheck} from="#0a7d8a" to="#0069b3" onDetails={() => setModal("ga")} />
-        <KpiCard label="BOM Released" value={k.bomReleased} blurb="Bill of materials done" Icon={ClipboardCheck} from="#4a9616" to="#3f7a14" onDetails={() => setModal("bom")} />
-        <KpiCard label="Work Orders Issued" value={k.woIssued} blurb="Released to floor" Icon={Wrench} from="#0069b3" to="#0180cf" onDetails={() => setModal("wo")} />
-        <KpiCard label="Dispatched" value={k.dispatched} blurb="Delivered to site" Icon={Truck} from="#63b81e" to="#3f7a14" onDetails={() => setModal("disp")} />
-        <KpiCard label="On-Time Dispatches" value={k.onTime} blurb="On/before target" Icon={CheckCircle2} from="#63b81e" to="#3f7a14" onDetails={() => setModal("ontime")} />
-        <KpiCard label="Delayed Dispatches" value={k.delayed} blurb={`Avg ${k.avgDelay}d late`} Icon={Clock3} from="#b45309" to="#92400e" onDetails={() => setModal("delayed")} />
-        <KpiCard label="On-Time Rate" value={k.onTimePct} suffix="%" blurb="Delivery reliability" Icon={Timer} from="#0a7d8a" to="#0069b3" />
+        <StatCard label="In Production" display={String(k.total)} delta={sp.dTot} spark={sp.tot} Icon={Factory} from="#2a78d6" to="#185fa5" onDetails={() => setModal("all")} />
+        <StatCard label="Dispatched" display={String(k.dispatched)} delta={sp.dDisp} spark={sp.disp} Icon={Truck} from="#63b81e" to="#4a9616" onDetails={() => setModal("disp")} />
+        <StatCard label="On-Time Rate" display={`${k.onTimePct}%`} Icon={Timer} from="#7c3aed" to="#6d28d9" />
+        <StatCard label="Order Value" display={compactInr(k.value)} delta={sp.dVal} spark={sp.val} Icon={IndianRupee} from="#f59e0b" to="#d97706" />
+      </div>
+
+      {/* recent activity + on-time */}
+      <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
+        <div className="col-span-2 max-lg:col-span-1"><Section title="Recent Activity" Icon={Clock3}><ActivityFeed items={activities} /></Section></div>
+        <Section title="On-Time Delivery" Icon={Timer}>
+          <div className="flex flex-col items-center gap-3 py-1">
+            <Donut pct={k.onTimePct} caption="On-Time" />
+            <div className="grid w-full grid-cols-2 gap-2.5">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-center"><div className="text-[11px] font-bold uppercase tracking-[0.05em] text-slate-400">On Time</div><div className="text-[18px] font-black tabular-nums text-[#3f7a14]">{k.onTime}</div></div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-center"><div className="text-[11px] font-bold uppercase tracking-[0.05em] text-slate-400">Delayed</div><div className="text-[18px] font-black tabular-nums text-[#b45309]">{k.delayed}</div></div>
+            </div>
+          </div>
+        </Section>
       </div>
 
       {/* progress + stage */}
@@ -163,10 +201,11 @@ export function ProductionDashboard({ rows }: { rows: ProdRow[] }) {
         />
       </Section>
 
-      <InsightsPanel items={insights(k)} />
-
       {/* ── advanced: Delivery Performance & Bottlenecks ── */}
       <DeliveryPerformance rows={filtered} k={k} />
+
+      {/* Insights always last */}
+      <InsightsPanel items={insights(k)} />
 
       {/* KPI popup */}
       {active && (

@@ -1,7 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ArrowRight, X, Lightbulb, type LucideIcon } from "lucide-react";
+import {
+  ArrowRight, X, Lightbulb, TrendingUp, TrendingDown, ShoppingCart, ReceiptText, FileText, Inbox,
+  BadgeCheck, ClipboardCheck, Truck, IndianRupee, Star, type LucideIcon,
+} from "lucide-react";
 import { useCountUp } from "@/lib/use-count-up";
 
 export const inr = (v: number) => "₹" + new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(v || 0));
@@ -320,6 +323,168 @@ export function SummaryTile({ icon: Icon, label, value }: { icon: LucideIcon; la
     <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5">
       <div className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.05em] text-slate-400"><Icon size={12} className="text-[#0069b3]" /> {label}</div>
       <div className="mt-0.5 text-[16px] font-black tabular-nums text-slate-800" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>{value}</div>
+    </div>
+  );
+}
+
+/* ── Mockup-style KPI stat card: value + month-over-month delta + sparkline ── */
+export function ago(dateStr: string): string {
+  if (!dateStr) return "";
+  const then = new Date(dateStr + (dateStr.length <= 10 ? "T00:00:00Z" : "")).getTime();
+  if (Number.isNaN(then)) return "";
+  const days = Math.round((Date.now() - then) / 86400_000);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days}d ago`;
+  const mo = Math.round(days / 30);
+  return mo < 12 ? `${mo}mo ago` : `${Math.round(mo / 12)}y ago`;
+}
+
+export function Sparkline({ data, to }: { data: number[]; to: string }) {
+  const w = 118, h = 38;
+  if (!data || data.length < 2) return <span className="text-[11px] text-slate-300">—</span>;
+  const max = Math.max(...data), min = Math.min(...data), rng = max - min || 1;
+  const pts = data.map((v, i) => [(i / (data.length - 1)) * w, h - 4 - ((v - min) / rng) * (h - 8)] as const);
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+  const area = `${line} L${w} ${h} L0 ${h} Z`;
+  const id = `sp-${to.replace(/\W/g, "")}`;
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+      <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={to} stopOpacity="0.28" /><stop offset="100%" stopColor={to} stopOpacity="0" /></linearGradient></defs>
+      <path d={area} fill={`url(#${id})`} />
+      <path d={line} fill="none" stroke={to} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={pts[pts.length - 1]![0]} cy={pts[pts.length - 1]![1]} r="3" fill={to} stroke="#fff" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+export function StatCard({ label, display, delta, spark, Icon, from, to, onDetails }: {
+  label: string; display: string; delta?: number; spark?: number[]; Icon: LucideIcon; from: string; to: string; onDetails?: () => void;
+}) {
+  const up = (delta ?? 0) >= 0;
+  return (
+    <div onClick={onDetails} className={`group relative overflow-hidden rounded-[24px] border border-slate-200/80 bg-gradient-to-br from-white to-[#f6fafd] p-5 shadow-[0_16px_40px_-24px_rgba(1,128,207,0.35)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_28px_58px_-28px_rgba(1,128,207,0.5)] ${onDetails ? "cursor-pointer" : ""}`}>
+      <span aria-hidden className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
+      <div className="relative flex items-start justify-between gap-2">
+        <span className="relative inline-flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105" style={{ background: `linear-gradient(140deg, ${from}, ${to})`, boxShadow: `0 12px 24px -10px ${to}` }}>
+          <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />
+          <Icon size={21} strokeWidth={2.3} className="relative" />
+        </span>
+        <div className="min-w-0 flex-1 text-right">
+          <div className="truncate text-[11.5px] font-black uppercase tracking-[0.06em] text-slate-400">{label}</div>
+          <div className="tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(26px, 3vw, 34px)", letterSpacing: "-0.03em", lineHeight: 1.05 }}>{display}</div>
+        </div>
+      </div>
+      <div className="relative mt-3 flex items-end justify-between gap-2">
+        {delta != null ? (
+          <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[12px] font-black tabular-nums" style={{ background: up ? "rgba(99,184,30,0.14)" : "rgba(245,158,11,0.16)", color: up ? "#3f7a14" : "#b45309" }}>
+            {up ? <TrendingUp size={13} strokeWidth={2.8} /> : <TrendingDown size={13} strokeWidth={2.8} />}{up ? "+" : ""}{delta}%
+          </span>
+        ) : <span />}
+        {spark && <Sparkline data={spark} to={to} />}
+      </div>
+      {delta != null && <div className="relative mt-1 text-[11px] font-semibold text-slate-400">vs last month</div>}
+    </div>
+  );
+}
+
+/** Conversion donut with a centred % + caption. */
+export function Donut({ pct, caption = "Conversion" }: { pct: number; caption?: string }) {
+  const p = Math.max(0, Math.min(100, pct));
+  const r = 46, c = 2 * Math.PI * r, off = c * (1 - p / 100);
+  return (
+    <div className="relative shrink-0">
+      <svg viewBox="0 0 120 120" className="w-[128px]">
+        <defs><linearGradient id="donutg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#63b81e" /><stop offset="100%" stopColor="#0180cf" /></linearGradient></defs>
+        <circle cx="60" cy="60" r={r} fill="none" stroke="#eef2f6" strokeWidth="13" />
+        <circle cx="60" cy="60" r={r} fill="none" stroke="url(#donutg)" strokeWidth="13" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off} transform="rotate(-90 60 60)" style={{ transition: "stroke-dashoffset 1s ease-out", filter: "drop-shadow(0 2px 4px rgba(1,128,207,0.35))" }} />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 24, lineHeight: 1 }}>{p}%</div>
+        <div className="text-[10px] font-bold uppercase tracking-[0.04em] text-slate-400">{caption}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Colourful conversion/pipeline funnel — centred tapering bands. */
+export function FunnelChart({ stages }: { stages: { label: string; value: number; from: string; to: string }[] }) {
+  const max = Math.max(1, ...stages.map((s) => s.value));
+  return (
+    <div className="space-y-2.5">
+      {stages.map((s, i) => {
+        const w = 40 + Math.round((s.value / max) * 60);
+        const prev = i > 0 ? stages[i - 1]!.value : 0;
+        const drop = i > 0 && prev ? Math.round((s.value / prev) * 100) : null;
+        return (
+          <div key={s.label} className="flex items-center gap-3">
+            <div className="flex min-w-0 flex-1 justify-center">
+              <div className="relative flex h-9 items-center justify-center overflow-hidden rounded-lg text-[12.5px] font-black text-white shadow-md" style={{ width: `${w}%`, background: `linear-gradient(135deg, ${s.from}, ${s.to})`, boxShadow: `0 8px 18px -8px ${s.to}` }}>
+                <span aria-hidden className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
+                <span className="relative tabular-nums">{s.value}</span>
+              </div>
+            </div>
+            <div className="w-[116px] shrink-0">
+              <div className="flex items-center gap-1.5 text-[12px] font-bold text-slate-600"><span className="inline-block size-2 rounded-full" style={{ background: s.to }} />{s.label}</div>
+              {drop != null && <div className="pl-3.5 text-[10.5px] font-semibold text-slate-400">{drop}% of prev</div>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Recent-activity feed. Kinds map to an icon + gradient so pages pass plain data. */
+export type ActivityKind = "so" | "po" | "quote" | "enquiry" | "ga" | "bom" | "dispatch" | "payment";
+export interface Activity { kind: ActivityKind; title: string; subtitle: string; date: string; amount?: number }
+const ACT_META: Record<ActivityKind, { Icon: LucideIcon; from: string; to: string }> = {
+  so: { Icon: ShoppingCart, from: "#7c3aed", to: "#6d28d9" },
+  po: { Icon: ReceiptText, from: "#63b81e", to: "#4a9616" },
+  quote: { Icon: FileText, from: "#0180cf", to: "#0069b3" },
+  enquiry: { Icon: Inbox, from: "#0a7d8a", to: "#0069b3" },
+  ga: { Icon: BadgeCheck, from: "#0a7d8a", to: "#0069b3" },
+  bom: { Icon: ClipboardCheck, from: "#4a9616", to: "#3f7a14" },
+  dispatch: { Icon: Truck, from: "#63b81e", to: "#3f7a14" },
+  payment: { Icon: IndianRupee, from: "#f59e0b", to: "#d97706" },
+};
+export function ActivityFeed({ items }: { items: Activity[] }) {
+  if (items.length === 0) return <p className="py-6 text-center text-[13px] text-slate-400">No recent activity.</p>;
+  return (
+    <div className="space-y-2">
+      {items.map((a, i) => {
+        const m = ACT_META[a.kind];
+        return (
+          <div key={i} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white px-3 py-2 transition-colors hover:bg-slate-50/70">
+            <span className="relative inline-flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl text-white shadow" style={{ background: `linear-gradient(140deg, ${m.from}, ${m.to})` }}>
+              <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-white/25 to-transparent" />
+              <m.Icon size={16} strokeWidth={2.3} className="relative" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[12.5px] font-bold text-slate-700" title={a.title}>{a.title}</div>
+              <div className="truncate text-[11.5px] text-slate-400">{a.subtitle}</div>
+            </div>
+            <div className="shrink-0 text-right">
+              {!!a.amount && a.amount > 0 && <div className="text-[12px] font-black tabular-nums text-slate-600">{compactInr(a.amount)}</div>}
+              <div className="text-[10.5px] font-semibold text-slate-400">{ago(a.date)}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Celebratory summary banner used at the top/bottom of a dashboard. */
+export function InsightBanner({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
+  return (
+    <div className="relative flex flex-wrap items-center justify-between gap-3 overflow-hidden rounded-[22px] border border-[#63b81e]/25 px-5 py-4 shadow-sm" style={{ background: "linear-gradient(120deg, #eef6ec, #ffffff 60%, #eaf3fd)" }}>
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(99,184,30,0.10) 1px, transparent 0)", backgroundSize: "20px 20px" }} />
+      <div className="relative flex items-center gap-3">
+        <span className="inline-flex size-11 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)", boxShadow: "0 12px 26px -12px #0069b3" }}><Star size={20} strokeWidth={2.3} /></span>
+        <p className="text-[14px] font-bold text-slate-700">{children}</p>
+      </div>
+      {right && <span className="relative text-[13px] font-black tabular-nums text-[#0069b3]">{right}</span>}
     </div>
   );
 }

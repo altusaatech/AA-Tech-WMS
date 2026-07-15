@@ -7,8 +7,9 @@ import {
   FileText, ClipboardCheck, Workflow, Wrench, Rocket, Zap, Star, AlertTriangle, Timer,
 } from "lucide-react";
 import {
-  KpiCard, Section, TrendBars, StatusBars, InsightsPanel, DetailModal, ProgressStat,
+  Section, TrendBars, StatusBars, InsightsPanel, DetailModal, ProgressStat,
   WorkflowTimeline, ExportButtons, inr, compactInr, Gauge, MetricChip,
+  StatCard, ActivityFeed, Donut, type Activity,
 } from "@/components/dashboards/shared/kit";
 
 export interface SoRow {
@@ -79,6 +80,34 @@ export function SalesOrderDashboard({ rows }: { rows: SoRow[] }) {
     { label: "Not in BOM", value: k.total - k.bomSent },
   ].filter((x) => x.value > 0);
 
+  // monthly sparklines + deltas (respond to filters)
+  const sp = React.useMemo(() => {
+    const g = () => new Map<string, number>();
+    const soM = g(), gaM = g(), bomM = g(), valM = g();
+    for (const r of filtered) {
+      if (!r.date) continue; const m = r.date.slice(0, 7);
+      soM.set(m, (soM.get(m) ?? 0) + 1);
+      if (r.gaCompleted) gaM.set(m, (gaM.get(m) ?? 0) + 1);
+      if (r.bomCompleted) bomM.set(m, (bomM.get(m) ?? 0) + 1);
+      valM.set(m, (valM.get(m) ?? 0) + r.value);
+    }
+    const months = [...new Set([...soM.keys(), ...gaM.keys(), ...bomM.keys(), ...valM.keys()])].sort().slice(-8);
+    const arr = (mp: Map<string, number>) => months.map((m) => mp.get(m) ?? 0);
+    const d = (mp: Map<string, number>) => { const a = mp.get(months[months.length - 1] ?? "") ?? 0, b = mp.get(months[months.length - 2] ?? "") ?? 0; return b ? Math.max(-999, Math.min(999, Math.round(((a - b) / b) * 100))) : a ? 100 : 0; };
+    return { so: arr(soM), ga: arr(gaM), bom: arr(bomM), val: arr(valM), dSo: d(soM), dGa: d(gaM), dBom: d(bomM), dVal: d(valM) };
+  }, [filtered]);
+
+  const readiness = k.total ? Math.round((k.bomDone / k.total) * 100) : 0;
+
+  const activities: Activity[] = React.useMemo(() => {
+    const acts = filtered.map((r): Activity => {
+      if (r.bomCompleted) return { kind: "bom", title: `BOM ready · ${r.ourSoNo}`, subtitle: r.company, date: r.date, amount: r.value };
+      if (r.gaCompleted) return { kind: "ga", title: `GA approved · ${r.ourSoNo}`, subtitle: r.company, date: r.date, amount: r.value };
+      return { kind: "so", title: `Sales Order ${r.ourSoNo}`, subtitle: r.company, date: r.date, amount: r.value };
+    });
+    return acts.filter((a) => a.date).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7);
+  }, [filtered]);
+
   const meta = {
     all: { title: "Sales Orders", Icon: FileCheck2, from: "#0180cf", to: "#0069b3", rows: filtered },
     gaReq: { title: "GA Drawings Required", Icon: PencilRuler, from: "#0a7d8a", to: "#0069b3", rows: filtered.filter((r) => r.gaRequired) },
@@ -108,16 +137,26 @@ export function SalesOrderDashboard({ rows }: { rows: SoRow[] }) {
         </span>
       </div>
 
-      {/* KPIs (7) */}
+      {/* hero stat cards */}
       <div className="grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
-        <KpiCard label="Total Sales Orders" value={k.total} blurb="Confirmed orders" Icon={FileCheck2} from="#0180cf" to="#0069b3" onDetails={() => setModal("all")} />
-        <KpiCard label="GA Drawings Required" value={k.gaReq} blurb="Orders needing GA" Icon={PencilRuler} from="#0a7d8a" to="#0069b3" onDetails={() => setModal("gaReq")} />
-        <KpiCard label="GA Drawings Completed" value={k.gaDone} blurb="GA approved" Icon={CheckCircle2} from="#63b81e" to="#3f7a14" onDetails={() => setModal("gaDone")} />
-        <KpiCard label="GA Drawings Pending" value={k.gaPend} blurb="GA awaited" Icon={Clock3} from="#b45309" to="#92400e" onDetails={() => setModal("gaPend")} />
-        <KpiCard label="Orders Sent for BOM" value={k.bomSent} blurb="Reached BOM stage" Icon={ClipboardList} from="#0069b3" to="#0180cf" onDetails={() => setModal("bomSent")} />
-        <KpiCard label="BOM Completed" value={k.bomDone} blurb="BOM released" Icon={PackageCheck} from="#63b81e" to="#3f7a14" onDetails={() => setModal("bomDone")} />
-        <KpiCard label="BOM Pending" value={k.bomPend} blurb="BOM in progress" Icon={Hourglass} from="#b45309" to="#92400e" onDetails={() => setModal("bomPend")} />
-        <KpiCard label="Order Book Value" display={compactInr(k.value)} blurb="Confirmed value" Icon={IndianRupee} from="#0a7d8a" to="#0069b3" />
+        <StatCard label="Sales Orders" display={String(k.total)} delta={sp.dSo} spark={sp.so} Icon={FileCheck2} from="#2a78d6" to="#185fa5" onDetails={() => setModal("all")} />
+        <StatCard label="GA Completed" display={String(k.gaDone)} delta={sp.dGa} spark={sp.ga} Icon={CheckCircle2} from="#63b81e" to="#4a9616" onDetails={() => setModal("gaDone")} />
+        <StatCard label="BOM Completed" display={String(k.bomDone)} delta={sp.dBom} spark={sp.bom} Icon={PackageCheck} from="#7c3aed" to="#6d28d9" onDetails={() => setModal("bomDone")} />
+        <StatCard label="Order Book Value" display={compactInr(k.value)} delta={sp.dVal} spark={sp.val} Icon={IndianRupee} from="#f59e0b" to="#d97706" />
+      </div>
+
+      {/* recent activity + readiness */}
+      <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
+        <div className="col-span-2 max-lg:col-span-1"><Section title="Recent Activity" Icon={Clock3}><ActivityFeed items={activities} /></Section></div>
+        <Section title="Production Readiness" Icon={Rocket}>
+          <div className="flex flex-col items-center gap-3 py-1">
+            <Donut pct={readiness} caption="Ready" />
+            <div className="grid w-full grid-cols-2 gap-2.5">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-center"><div className="text-[11px] font-bold uppercase tracking-[0.05em] text-slate-400">GA Req.</div><div className="text-[18px] font-black tabular-nums text-slate-800">{k.gaReq}</div></div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-center"><div className="text-[11px] font-bold uppercase tracking-[0.05em] text-slate-400">In BOM</div><div className="text-[18px] font-black tabular-nums text-[#0069b3]">{k.bomSent}</div></div>
+            </div>
+          </div>
+        </Section>
       </div>
 
       {/* progress + status */}
@@ -144,10 +183,11 @@ export function SalesOrderDashboard({ rows }: { rows: SoRow[] }) {
         <WorkflowTimeline stages={[{ label: "Sales Order", count: k.total }, { label: "GA Drawing", count: k.gaDone }, { label: "BOM", count: k.bomDone }, { label: "Work Order", count: filtered.filter((r) => r.woNo).length }]} icons={[FileCheck2, PencilRuler, ClipboardCheck, Wrench]} />
       </Section>
 
-      <InsightsPanel items={insights(k)} />
-
       {/* ── advanced: Production Readiness & Operations ── */}
       <ProductionReadiness rows={filtered} />
+
+      {/* Insights always last */}
+      <InsightsPanel items={insights(k)} />
 
       {/* KPI popup */}
       {active && (

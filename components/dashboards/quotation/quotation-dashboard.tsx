@@ -7,8 +7,9 @@ import {
   Sparkles, Target, AlertTriangle, Rocket, IndianRupee,
 } from "lucide-react";
 import {
-  KpiCard, Section, TrendBars, StatusBars, InsightsPanel, DetailModal, Funnel, ProgressStat,
+  Section, TrendBars, StatusBars, InsightsPanel, DetailModal, Funnel, ProgressStat,
   WorkflowTimeline, ExportButtons, compactInr, Gauge, MetricChip,
+  StatCard, ActivityFeed, Donut, type Activity,
 } from "@/components/dashboards/shared/kit";
 
 export interface QuoteRow {
@@ -75,6 +76,35 @@ export function QuotationDashboard({ rows }: { rows: QuoteRow[] }) {
     return Array.from(m.entries()).sort(([, a], [, b]) => b - a).slice(0, 6).map(([label, v]) => ({ label, value: v }));
   }, [filtered]);
 
+  // monthly sparklines + month-over-month deltas (respond to filters)
+  const sp = React.useMemo(() => {
+    const g = () => new Map<string, number>();
+    const enq = g(), sent = g(), pia = g(), val = g();
+    for (const r of filtered) {
+      if (!r.date) continue; const m = r.date.slice(0, 7);
+      enq.set(m, (enq.get(m) ?? 0) + 1);
+      if (r.sent) sent.set(m, (sent.get(m) ?? 0) + 1);
+      if (r.piApproved) pia.set(m, (pia.get(m) ?? 0) + 1);
+      val.set(m, (val.get(m) ?? 0) + r.value);
+    }
+    const months = [...new Set([...enq.keys(), ...sent.keys(), ...pia.keys(), ...val.keys()])].sort().slice(-8);
+    const arr = (mp: Map<string, number>) => months.map((m) => mp.get(m) ?? 0);
+    const d = (mp: Map<string, number>) => { const a = mp.get(months[months.length - 1] ?? "") ?? 0, b = mp.get(months[months.length - 2] ?? "") ?? 0; return b ? Math.max(-999, Math.min(999, Math.round(((a - b) / b) * 100))) : a ? 100 : 0; };
+    return { enq: arr(enq), sent: arr(sent), pia: arr(pia), val: arr(val), dEnq: d(enq), dSent: d(sent), dPia: d(pia), dVal: d(val) };
+  }, [filtered]);
+
+  const convRate = k.enquiries ? Math.round((k.converted / k.enquiries) * 100) : 0;
+
+  const activities: Activity[] = React.useMemo(() => {
+    const acts = filtered.map((r): Activity => {
+      if (r.converted) return { kind: "so", title: `Sales Order ${r.soNo ?? ""}`.trim(), subtitle: r.company, date: r.date, amount: r.value };
+      if (r.piApproved) return { kind: "po", title: `PI approved · ${r.company}`, subtitle: r.piNo ?? r.enquiryNo, date: r.date, amount: r.value };
+      if (r.sent) return { kind: "quote", title: `Quotation sent · ${r.company}`, subtitle: r.quoteNo, date: r.date, amount: r.value };
+      return { kind: "enquiry", title: `Enquiry · ${r.company}`, subtitle: r.enquiryNo, date: r.date, amount: r.value };
+    });
+    return acts.filter((a) => a.date).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7);
+  }, [filtered]);
+
   const modalMeta = {
     enquiries: { title: "Total Enquiries Received", Icon: Inbox, from: "#0180cf", to: "#0069b3", rows: filtered },
     sent: { title: "Quotations Sent", Icon: Send, from: "#0a7d8a", to: "#0069b3", rows: filtered.filter((r) => r.sent) },
@@ -106,14 +136,26 @@ export function QuotationDashboard({ rows }: { rows: QuoteRow[] }) {
         </span>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
-        <KpiCard label="Total Enquiries Received" value={k.enquiries} blurb="All enquiries logged" Icon={Inbox} from="#0180cf" to="#0069b3" onDetails={() => setModal("enquiries")} />
-        <KpiCard label="Quotations Sent" value={k.sent} blurb="Quotes issued to customers" Icon={Send} from="#0a7d8a" to="#0069b3" onDetails={() => setModal("sent")} />
-        <KpiCard label="Revised Quotations" value={k.revised} blurb="Re-issued after revision" Icon={RefreshCcw} from="#7c3aed" to="#6d28d9" onDetails={() => setModal("revised")} />
-        <KpiCard label="Proforma Invoices Sent" value={k.piSent} blurb="PI generated & sent" Icon={FileStack} from="#0069b3" to="#0180cf" onDetails={() => setModal("piSent")} />
-        <KpiCard label="PI Approved" value={k.piApproved} blurb="Approved by customers" Icon={BadgeCheck} from="#63b81e" to="#3f7a14" onDetails={() => setModal("piApproved")} />
-        <KpiCard label="Pending PI / Not Sent" value={k.pendingPi} blurb="Awaiting a PI" Icon={Clock3} from="#b45309" to="#92400e" onDetails={() => setModal("pendingPi")} />
+      {/* hero stat cards */}
+      <div className="grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
+        <StatCard label="Total Enquiries" display={String(k.enquiries)} delta={sp.dEnq} spark={sp.enq} Icon={Inbox} from="#2a78d6" to="#185fa5" onDetails={() => setModal("enquiries")} />
+        <StatCard label="Quotations Sent" display={String(k.sent)} delta={sp.dSent} spark={sp.sent} Icon={Send} from="#63b81e" to="#4a9616" onDetails={() => setModal("sent")} />
+        <StatCard label="PI Approved" display={String(k.piApproved)} delta={sp.dPia} spark={sp.pia} Icon={BadgeCheck} from="#7c3aed" to="#6d28d9" onDetails={() => setModal("piApproved")} />
+        <StatCard label="Quoted Value" display={compactInr(k.value)} delta={sp.dVal} spark={sp.val} Icon={IndianRupee} from="#f59e0b" to="#d97706" />
+      </div>
+
+      {/* recent activity + conversion */}
+      <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
+        <div className="col-span-2 max-lg:col-span-1"><Section title="Recent Activity" Icon={Clock3}><ActivityFeed items={activities} /></Section></div>
+        <Section title="Enquiry → Order Conversion" Icon={Target}>
+          <div className="flex flex-col items-center gap-3 py-1">
+            <Donut pct={convRate} />
+            <div className="grid w-full grid-cols-2 gap-2.5">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-center"><div className="text-[11px] font-bold uppercase tracking-[0.05em] text-slate-400">Sent</div><div className="text-[18px] font-black tabular-nums text-slate-800">{k.sent}</div></div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-center"><div className="text-[11px] font-bold uppercase tracking-[0.05em] text-slate-400">Won</div><div className="text-[18px] font-black tabular-nums text-[#0069b3]">{k.converted}</div></div>
+            </div>
+          </div>
+        </Section>
       </div>
 
       {/* funnel + PI approval + pending/completed */}
@@ -144,10 +186,11 @@ export function QuotationDashboard({ rows }: { rows: QuoteRow[] }) {
         </Section></div>
       </div>
 
-      <InsightsPanel items={insights(k)} />
-
       {/* ── advanced: Smart Sales Forecast ── */}
       <SalesForecast rows={filtered} />
+
+      {/* Insights always last */}
+      <InsightsPanel items={insights(k)} />
 
 
       {active && (
