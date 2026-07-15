@@ -21,25 +21,33 @@ export function KpiCard({ label, value, display, suffix, blurb, Icon, from, to, 
 }) {
   const v = useCountUp(value ?? 0, 900);
   return (
-    <div className="group relative overflow-hidden rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-      <span aria-hidden className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
-      <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -translate-x-[200%] -skew-x-12 bg-gradient-to-r from-transparent via-slate-100/70 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
-      <Icon aria-hidden className="pointer-events-none absolute -bottom-6 -right-5" size={120} strokeWidth={1.3} style={{ color: to, opacity: 0.07 }} />
-      <div className="relative flex items-start justify-between">
+    <div className="group relative overflow-hidden rounded-[26px] border border-slate-200/80 bg-gradient-to-br from-white to-[#f3f8fc] p-5 shadow-[0_16px_40px_-24px_rgba(1,128,207,0.35)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_30px_60px_-28px_rgba(1,128,207,0.55)]">
+      {/* glossy top accent + hairline */}
+      <span aria-hidden className="absolute inset-x-0 top-0 h-2" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
+      <span aria-hidden className="absolute inset-x-0 top-2 h-px bg-white/70" />
+      {/* corner colour glow */}
+      <span aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl" style={{ background: `radial-gradient(circle, ${to}40, transparent 70%)` }} />
+      {/* sheen sweep */}
+      <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -translate-x-[200%] -skew-x-12 bg-gradient-to-r from-transparent via-white/70 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
+      <Icon aria-hidden className="pointer-events-none absolute -bottom-6 -right-5" size={124} strokeWidth={1.3} style={{ color: to, opacity: 0.08 }} />
+      <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[12px] font-bold uppercase tracking-[0.06em] text-slate-400">{label}</div>
-          <div className="mt-1.5 truncate tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: display ? "clamp(24px, 2.8vw, 34px)" : "clamp(32px, 4vw, 44px)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+          <div className="text-[12px] font-black uppercase tracking-[0.08em] text-slate-400">{label}</div>
+          <div className="mt-2 truncate tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: display ? "clamp(26px, 2.9vw, 36px)" : "clamp(34px, 4.2vw, 48px)", letterSpacing: "-0.035em", lineHeight: 1, textShadow: "0 1px 0 rgba(255,255,255,0.7)" }}>
             {display ?? v}{suffix}
           </div>
-          <div className="mt-0.5 text-[12.5px] font-medium text-slate-500">{blurb}</div>
+          <div className="mt-1 text-[12.5px] font-semibold text-slate-500">{blurb}</div>
         </div>
-        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 12px 26px -12px ${to}` }}>
-          <Icon size={22} strokeWidth={2.2} />
+        <span className="relative inline-flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" style={{ background: `linear-gradient(140deg, ${from}, ${to})`, boxShadow: `0 14px 28px -10px ${to}` }}>
+          <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-white/35 to-transparent" />
+          <span aria-hidden className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/30" />
+          <Icon size={23} strokeWidth={2.3} className="relative" />
         </span>
       </div>
       {onDetails && (
-        <button type="button" onClick={onDetails} className="relative mt-4 inline-flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-[13px] font-extrabold text-white shadow-md transition-all hover:-translate-y-0.5" style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}` }}>
-          View Details <ArrowRight size={14} strokeWidth={2.7} className="transition-transform group-hover:translate-x-0.5" />
+        <button type="button" onClick={onDetails} className="relative mt-4 inline-flex h-9 items-center gap-1.5 overflow-hidden rounded-xl px-4 text-[13px] font-extrabold text-white shadow-md transition-all hover:-translate-y-0.5" style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}` }}>
+          <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-white/25 to-transparent" />
+          <span className="relative inline-flex items-center gap-1.5">View Details <ArrowRight size={14} strokeWidth={2.7} className="transition-transform group-hover:translate-x-0.5" /></span>
         </button>
       )}
     </div>
@@ -48,47 +56,72 @@ export function KpiCard({ label, value, display, suffix, blurb, Icon, from, to, 
 
 export function Section({ title, Icon, children, className = "" }: { title: string; Icon?: LucideIcon; children: React.ReactNode; className?: string }) {
   return (
-    <section className={`relative overflow-hidden rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm ${className}`}>
+    <section className={`relative overflow-hidden rounded-[22px] border border-slate-200/80 bg-gradient-to-br from-white to-[#f7fbfe] p-5 shadow-[0_14px_36px_-24px_rgba(1,128,207,0.3)] ${className}`}>
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.45]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(1,128,207,0.05) 1px, transparent 0)", backgroundSize: "24px 24px" }} />
-      <h2 className="relative mb-4 flex items-center gap-2 text-[15px] font-black text-slate-800" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>
-        {Icon && <Icon size={16} className="text-[#0069b3]" />} {title}
+      <h2 className="relative mb-4 flex items-center gap-2.5 text-[15.5px] font-black text-slate-800" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>
+        {Icon && (
+          <span className="relative inline-flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-lg text-white shadow-sm" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)" }}>
+            <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />
+            <Icon size={14} strokeWidth={2.4} className="relative" />
+          </span>
+        )}
+        {title}
       </h2>
       <div className="relative">{children}</div>
     </section>
   );
 }
 
-/** Vertical bar chart (monthly trends). */
+/** Vertical bar chart (monthly trends) — glossy gradient bars over a recessive
+ *  gridline backdrop, rounded tops anchored to the baseline. */
 export function TrendBars({ data, format }: { data: { label: string; value: number }[]; format?: (v: number) => string }) {
   const max = Math.max(1, ...data.map((d) => d.value));
   if (data.length === 0) return <p className="py-8 text-center text-[13px] text-slate-400">No data in range.</p>;
   return (
-    <div className="flex h-44 items-end gap-3">
-      {data.map((d, i) => (
-        <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
-          <span className="text-[11.5px] font-black tabular-nums text-slate-700">{format ? format(d.value) : d.value}</span>
-          <div className="w-full rounded-t-lg transition-all" style={{ height: `${(d.value / max) * 100}%`, minHeight: 6, background: "linear-gradient(180deg, #63b81e, #0180cf)" }} />
-          <span className="text-[10.5px] font-semibold text-slate-400">{d.label}</span>
+    <div className="relative pt-1">
+      <div className="relative flex h-48 items-end gap-3">
+        {/* recessive gridlines */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 bottom-[24px] flex flex-col justify-between">
+          {[0, 1, 2, 3, 4].map((i) => <div key={i} className="h-px w-full bg-slate-100" />)}
         </div>
-      ))}
+        {data.map((d, i) => (
+          <div key={i} className="group/bar relative z-[1] flex flex-1 flex-col items-center justify-end gap-1.5">
+            <span className="rounded-md bg-slate-900/[0.05] px-1.5 py-0.5 text-[11.5px] font-black tabular-nums text-slate-700 transition-transform group-hover/bar:-translate-y-0.5">{format ? format(d.value) : d.value}</span>
+            <div
+              className="relative w-full max-w-[44px] overflow-hidden rounded-t-[6px] transition-all duration-500 group-hover/bar:brightness-105"
+              style={{
+                height: `${(d.value / max) * 100}%`,
+                minHeight: 8,
+                background: "linear-gradient(180deg, #7ed957 0%, #63b81e 34%, #0180cf 100%)",
+                boxShadow: "0 -3px 14px -3px rgba(1,128,207,0.45), inset 0 1px 0 rgba(255,255,255,0.55)",
+              }}
+            >
+              <span aria-hidden className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/45 to-transparent" />
+            </div>
+            <span className="text-[10.5px] font-bold text-slate-400">{d.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-/** Horizontal breakdown bars. */
+/** Horizontal breakdown bars — glossy gradient fills in an inset track. */
 export function StatusBars({ data }: { data: { label: string; value: number }[] }) {
   const max = Math.max(1, ...data.map((d) => d.value));
   if (data.length === 0) return <p className="py-6 text-center text-[13px] text-slate-400">No data.</p>;
   return (
-    <div className="space-y-3">
+    <div className="space-y-3.5">
       {data.map((d) => (
         <div key={d.label}>
-          <div className="mb-1 flex items-center justify-between text-[12.5px] font-semibold text-slate-600">
+          <div className="mb-1 flex items-center justify-between text-[12.5px] font-bold text-slate-600">
             <span className="truncate">{d.label}</span>
             <span className="tabular-nums font-black text-slate-800">{d.value}</span>
           </div>
-          <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full rounded-full" style={{ width: `${Math.max(5, (d.value / max) * 100)}%`, background: "linear-gradient(90deg, #63b81e, #0180cf)" }} />
+          <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.09)" }}>
+            <div className="relative h-full rounded-full transition-[width] duration-700" style={{ width: `${Math.max(5, (d.value / max) * 100)}%`, background: "linear-gradient(90deg, #63b81e, #0180cf)", boxShadow: "0 1px 6px -1px rgba(1,128,207,0.55)" }}>
+              <span aria-hidden className="absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/30" />
+            </div>
           </div>
         </div>
       ))}
@@ -148,8 +181,11 @@ export function Funnel({ stages }: { stages: { label: string; value: number }[] 
         return (
           <div key={s.label} className="flex items-center gap-3">
             <div className="w-28 shrink-0 truncate text-right text-[12px] font-semibold text-slate-600" title={s.label}>{s.label}</div>
-            <div className="relative h-8 flex-1 overflow-hidden rounded-lg bg-slate-100">
-              <div className="flex h-full min-w-[34px] items-center rounded-lg px-2.5 text-[12px] font-black text-white transition-all" style={{ width: `${Math.max(9, (s.value / max) * 100)}%`, background: "linear-gradient(90deg, #63b81e, #0180cf)" }}>{s.value}</div>
+            <div className="relative h-8 flex-1 overflow-hidden rounded-lg bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.09)" }}>
+              <div className="relative flex h-full min-w-[34px] items-center rounded-lg px-2.5 text-[12px] font-black text-white transition-all duration-700" style={{ width: `${Math.max(9, (s.value / max) * 100)}%`, background: "linear-gradient(90deg, #63b81e, #0180cf)", boxShadow: "0 2px 8px -2px rgba(1,128,207,0.5)" }}>
+                <span aria-hidden className="absolute inset-x-0 top-0 h-1/2 rounded-t-lg bg-white/25" />
+                <span className="relative">{s.value}</span>
+              </div>
             </div>
             <div className="w-10 shrink-0 text-[11px] font-bold text-slate-400">{conv != null ? `${conv}%` : ""}</div>
           </div>
@@ -164,8 +200,8 @@ export function ProgressStat({ label, done, total, from = "#63b81e", to = "#0180
   const pct = total ? Math.round((done / total) * 100) : 0;
   return (
     <div>
-      <div className="mb-1 flex items-center justify-between text-[12.5px] font-semibold text-slate-600"><span>{label}</span><span className="tabular-nums font-black text-slate-800">{done}/{total} · {pct}%</span></div>
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${from}, ${to})` }} /></div>
+      <div className="mb-1 flex items-center justify-between text-[12.5px] font-bold text-slate-600"><span>{label}</span><span className="tabular-nums font-black text-slate-800">{done}/{total} · {pct}%</span></div>
+      <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.09)" }}><div className="relative h-full rounded-full transition-[width] duration-700" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${from}, ${to})`, boxShadow: `0 1px 6px -1px ${to}88` }}><span aria-hidden className="absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/30" /></div></div>
     </div>
   );
 }
@@ -234,7 +270,7 @@ export function Gauge({ pct, label, sub, from = "#63b81e", to = "#0180cf" }: { p
       <svg viewBox="0 0 140 80" className="w-full max-w-[190px]">
         <defs><linearGradient id={id} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor={from} /><stop offset="100%" stopColor={to} /></linearGradient></defs>
         <path d="M14 72 A56 56 0 0 1 126 72" fill="none" stroke="#eef2f6" strokeWidth="12" strokeLinecap="round" />
-        <path d="M14 72 A56 56 0 0 1 126 72" fill="none" stroke={`url(#${id})`} strokeWidth="12" strokeLinecap="round" strokeDasharray={len} strokeDashoffset={off} style={{ transition: "stroke-dashoffset 1s ease-out" }} />
+        <path d="M14 72 A56 56 0 0 1 126 72" fill="none" stroke={`url(#${id})`} strokeWidth="12" strokeLinecap="round" strokeDasharray={len} strokeDashoffset={off} style={{ transition: "stroke-dashoffset 1s ease-out", filter: `drop-shadow(0 2px 4px ${to}55)` }} />
       </svg>
       <div className="-mt-7 text-center">
         <div className="tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 28, letterSpacing: "-0.02em", lineHeight: 1 }}>{Math.round(p)}%</div>
@@ -271,7 +307,8 @@ export function Heatmap({ matrix, rowLabels, colLabels }: { matrix: number[][]; 
 /** Compact metric chip for the smart-insight strips. */
 export function MetricChip({ icon: Icon, label, value, tint = "#0069b3" }: { icon: LucideIcon; label: string; value: string; tint?: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+    <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-[#f6fafd] px-4 py-3 shadow-[0_10px_26px_-20px_rgba(1,128,207,0.4)]">
+      <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${tint}, ${tint}66)` }} />
       <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.05em] text-slate-400"><Icon size={13} style={{ color: tint }} /> {label}</div>
       <div className="mt-1 text-[19px] font-black tabular-nums text-slate-800" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>{value}</div>
     </div>
