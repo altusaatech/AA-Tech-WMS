@@ -26,6 +26,7 @@ export function PageHero({
   Icon,
   stats,
   actions,
+  center = false,
 }: {
   eyebrow?: string;
   title: string;
@@ -33,6 +34,8 @@ export function PageHero({
   Icon?: LucideIcon;
   stats?: HeroStat[];
   actions?: React.ReactNode;
+  /** Stack and centre the eyebrow, icon, title, subtitle and actions. */
+  center?: boolean;
 }) {
   return (
     <div
@@ -44,8 +47,8 @@ export function PageHero({
     >
       <HeroBackdrop Icon={Icon} />
 
-      <div className="relative flex items-start justify-between gap-6 flex-wrap">
-        <div className="flex items-start gap-4 min-w-0">
+      <div className={`relative flex gap-6 ${center ? "flex-col items-center text-center" : "items-start justify-between flex-wrap"}`}>
+        <div className={`flex gap-4 min-w-0 ${center ? "flex-col items-center" : "items-start"}`}>
           {Icon && (
             <span
               className="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg max-md:size-12"
@@ -56,13 +59,13 @@ export function PageHero({
           )}
           <div className="min-w-0">
             {eyebrow && (
-              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+              <div className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400 ${center ? "justify-center" : ""}`}>
                 <span className="inline-block size-1.5 rounded-full bg-[#63b81e] shadow-[0_0_8px_#63b81e88]" />
                 {eyebrow}
               </div>
             )}
             <h1
-              className="mt-1.5"
+              className={`mt-1.5 ${center ? "mx-auto" : ""}`}
               style={{
                 fontFamily: "var(--font-display), system-ui, sans-serif",
                 fontWeight: 900,
@@ -79,10 +82,10 @@ export function PageHero({
             >
               {title}
             </h1>
-            {subtitle && <p className="mt-2 text-[14px] text-slate-500 max-w-2xl">{subtitle}</p>}
+            {subtitle && <p className={`mt-2 text-[14px] text-slate-500 max-w-2xl ${center ? "mx-auto" : ""}`}>{subtitle}</p>}
           </div>
         </div>
-        {actions && <div className="relative flex items-center gap-2.5 shrink-0">{actions}</div>}
+        {actions && <div className={`relative flex items-center gap-2.5 ${center ? "justify-center" : "shrink-0"}`}>{actions}</div>}
       </div>
 
       {stats && stats.length > 0 && (
