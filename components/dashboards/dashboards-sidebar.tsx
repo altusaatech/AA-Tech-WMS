@@ -26,8 +26,8 @@ export function DashboardsSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[264px] shrink-0 max-md:w-full">
-      <div className="sticky top-[84px] flex flex-col gap-3.5 rounded-[24px] border border-slate-200 bg-white/85 p-3.5 shadow-[0_20px_50px_-30px_rgba(1,128,207,0.4)] backdrop-blur max-md:static">
+    <aside className="sticky top-[84px] w-[264px] shrink-0 self-start max-md:static max-md:w-full">
+      <div className="no-scrollbar flex max-h-[calc(100dvh-104px)] flex-col gap-3.5 overflow-y-auto rounded-[24px] border border-slate-200 bg-white/85 p-3.5 shadow-[0_20px_50px_-30px_rgba(1,128,207,0.4)] backdrop-blur max-md:max-h-none max-md:overflow-visible">
         <div className="mb-1 flex items-center gap-2.5 px-1.5 pt-0.5">
           <span className="relative inline-flex size-9 items-center justify-center overflow-hidden rounded-xl text-white shadow" style={{ background: GRAD }}>
             <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />
