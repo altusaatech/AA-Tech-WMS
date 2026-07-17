@@ -8,7 +8,7 @@ import {
   ReceiptText, Star, type LucideIcon,
 } from "lucide-react";
 import { useCountUp } from "@/lib/use-count-up";
-import { Section, Heatmap, MetricChip, StatusBars } from "@/components/dashboards/shared/kit";
+import { Section, Heatmap, MetricChip, StatusBars, DonutBreakdown } from "@/components/dashboards/shared/kit";
 
 export interface EnquiryRow {
   enquiryNo: string; company: string; person: string; product: string; item: string; amount: number;
@@ -479,7 +479,7 @@ function SmartInsights({ rows }: { rows: EnquiryRow[] }) {
         </div>
         <div className="space-y-4">
           <div><div className="mb-2 flex items-center gap-2 text-[13px] font-black text-slate-700"><Users size={15} className="text-[#0069b3]" /> Top Customers</div><StatusBars data={byCustomer} /></div>
-          <div><div className="mb-2 flex items-center gap-2 text-[13px] font-black text-slate-700"><Package size={15} className="text-[#0069b3]" /> Most Requested</div><StatusBars data={byProduct} /></div>
+          <div><div className="mb-2 flex items-center gap-2 text-[13px] font-black text-slate-700"><Package size={15} className="text-[#0069b3]" /> Most Requested</div><DonutBreakdown data={byProduct} centerLabel="Enquiries" /></div>
         </div>
       </div>
     </section>

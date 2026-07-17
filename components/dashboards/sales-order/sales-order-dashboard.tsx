@@ -7,9 +7,9 @@ import {
   FileText, ClipboardCheck, Workflow, Wrench, Rocket, Zap, Star, AlertTriangle, Timer,
 } from "lucide-react";
 import {
-  Section, TrendBars, StatusBars, InsightsPanel, DetailModal, ProgressStat,
+  Section, StatusBars, InsightsPanel, DetailModal, ProgressStat,
   WorkflowTimeline, ExportButtons, inr, compactInr, Gauge, MetricChip,
-  StatCard, ActivityFeed, Donut, type Activity,
+  StatCard, ActivityFeed, Donut, AreaChart, DonutBreakdown, type Activity,
 } from "@/components/dashboards/shared/kit";
 
 export interface SoRow {
@@ -168,12 +168,12 @@ export function SalesOrderDashboard({ rows }: { rows: SoRow[] }) {
             <ProgressStat label="Orders Production-ready" done={k.bomDone} total={k.total} from="#0a7d8a" to="#0069b3" />
           </div>
         </Section>
-        <div className="col-span-2 max-lg:col-span-1"><Section title="Sales Order Status" Icon={Layers}><StatusBars data={stageDist} /></Section></div>
+        <div className="col-span-2 max-lg:col-span-1"><Section title="Sales Order Status" Icon={Layers}><DonutBreakdown data={stageDist} centerLabel="Orders" /></Section></div>
       </div>
 
       {/* trend + pending + engineer */}
       <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
-        <Section title="Monthly Sales Order Trend" Icon={TrendingUp}><TrendBars data={trend} /></Section>
+        <Section title="Monthly Sales Order Trend" Icon={TrendingUp}><AreaChart data={trend} /></Section>
         <Section title="Pending Work Analysis" Icon={Hourglass}>{pendingWork.length ? <StatusBars data={pendingWork} /> : <p className="py-6 text-center text-[13px] text-slate-400">Nothing pending 🎉</p>}</Section>
         <Section title="Engineer Workload (sample)" Icon={Users}><StatusBars data={engLoad} /></Section>
       </div>

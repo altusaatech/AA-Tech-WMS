@@ -7,9 +7,9 @@ import {
   Sparkles, Target, AlertTriangle, Rocket, IndianRupee,
 } from "lucide-react";
 import {
-  Section, TrendBars, StatusBars, InsightsPanel, DetailModal, Funnel, ProgressStat,
+  Section, TrendBars, InsightsPanel, DetailModal, Funnel, ProgressStat,
   WorkflowTimeline, ExportButtons, compactInr, Gauge, MetricChip,
-  StatCard, ActivityFeed, Donut, type Activity,
+  StatCard, ActivityFeed, Donut, AreaChart, DonutBreakdown, type Activity,
 } from "@/components/dashboards/shared/kit";
 
 export interface QuoteRow {
@@ -174,13 +174,13 @@ export function QuotationDashboard({ rows }: { rows: QuoteRow[] }) {
 
       {/* trends */}
       <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
-        <Section title="Monthly Quotation Trend" Icon={TrendingUp}><TrendBars data={trend} /></Section>
+        <Section title="Monthly Quotation Trend" Icon={TrendingUp}><AreaChart data={trend} /></Section>
         <Section title="Quotation Revision Trend" Icon={RefreshCcw}><TrendBars data={revisionTrend} /></Section>
       </div>
 
       {/* customer distribution + workflow */}
       <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
-        <Section title="Customer-wise Quotations" Icon={Users}><StatusBars data={custDist} /></Section>
+        <Section title="Customer-wise Quotations" Icon={Users}><DonutBreakdown data={custDist} centerLabel="Quotes" /></Section>
         <div className="col-span-2 max-lg:col-span-1"><Section title="Workflow" Icon={GitBranch}>
           <WorkflowTimeline stages={[{ label: "Enquiry", count: k.enquiries }, { label: "Quotation", count: k.sent }, { label: "PI", count: k.piSent }, { label: "PI Approval", count: k.piApproved }, { label: "Sales Order", count: k.converted }]} icons={[MessagesSquare, FileText, ReceiptText, PartyPopper, FileCheck2]} />
         </Section></div>

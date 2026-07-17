@@ -475,6 +475,75 @@ export function ActivityFeed({ items }: { items: Activity[] }) {
   );
 }
 
+/** Smooth area + line trend chart (an alternative to vertical bars). */
+export function AreaChart({ data, from = "#63b81e", to = "#0180cf", format }: { data: { label: string; value: number }[]; from?: string; to?: string; format?: (v: number) => string }) {
+  if (data.length < 2) return <p className="py-8 text-center text-[13px] text-slate-400">Not enough data for a trend.</p>;
+  const W = 560, H = 176, padL = 12, padR = 12, padT = 22, padB = 26;
+  const max = Math.max(1, ...data.map((d) => d.value));
+  const n = data.length;
+  const xAt = (i: number) => padL + (i / (n - 1)) * (W - padL - padR);
+  const yAt = (v: number) => H - padB - (v / max) * (H - padT - padB);
+  const pts = data.map((d, i) => [xAt(i), yAt(d.value)] as const);
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+  const area = `${line} L${xAt(n - 1).toFixed(1)} ${H - padB} L${xAt(0).toFixed(1)} ${H - padB} Z`;
+  const id = `ar-${to.replace(/\W/g, "")}`;
+  const grid = [0, 0.25, 0.5, 0.75, 1].map((f) => H - padB - f * (H - padT - padB));
+  return (
+    <div className="w-full">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" preserveAspectRatio="none" style={{ maxHeight: 200 }}>
+        <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={to} stopOpacity="0.28" /><stop offset="100%" stopColor={to} stopOpacity="0.02" /></linearGradient></defs>
+        {grid.map((y, i) => <line key={i} x1={padL} y1={y} x2={W - padR} y2={y} stroke="#eef2f6" strokeWidth="1" />)}
+        <path d={area} fill={`url(#${id})`} />
+        <path d={line} fill="none" stroke={to} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: `drop-shadow(0 3px 5px ${to}44)` }} />
+        {pts.map((p, i) => (
+          <g key={i}>
+            <circle cx={p[0]} cy={p[1]} r="3.4" fill="#fff" stroke={to} strokeWidth="2" />
+            <text x={p[0]} y={p[1] - 9} textAnchor="middle" fontSize="11" fontWeight="800" fill="#334155">{format ? format(data[i]!.value) : data[i]!.value}</text>
+            <text x={p[0]} y={H - 9} textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#94a3b8">{data[i]!.label}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+/** Categorical donut breakdown with a legend (part-to-whole). */
+const DONUT_COLORS = ["#2a78d6", "#63b81e", "#0a7d8a", "#f59e0b", "#7c3aed", "#1baf7a", "#e87ba4", "#eb6834"];
+export function DonutBreakdown({ data, centerLabel = "Total" }: { data: { label: string; value: number }[]; centerLabel?: string }) {
+  const sorted = [...data].filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  if (sorted.length === 0) return <p className="py-6 text-center text-[13px] text-slate-400">No data.</p>;
+  const top = sorted.slice(0, 6);
+  const rest = sorted.slice(6);
+  const items = rest.length ? [...top, { label: "Other", value: rest.reduce((s, x) => s + x.value, 0) }] : top;
+  const total = items.reduce((s, x) => s + x.value, 0) || 1;
+  const R = 54, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <div className="flex items-center gap-4 max-sm:flex-col">
+      <svg viewBox="0 0 140 140" className="w-[142px] shrink-0">
+        <circle cx="70" cy="70" r={R} fill="none" stroke="#eef2f6" strokeWidth="16" />
+        {items.map((it, i) => {
+          const len = (it.value / total) * C;
+          const seg = Math.max(0, len - 1.4);
+          const el = <circle key={i} cx="70" cy="70" r={R} fill="none" stroke={DONUT_COLORS[i % DONUT_COLORS.length]} strokeWidth="16" strokeDasharray={`${seg} ${C - seg}`} strokeDashoffset={-acc} transform="rotate(-90 70 70)" style={{ transition: "stroke-dasharray 0.8s ease-out" }} />;
+          acc += len;
+          return el;
+        })}
+        <text x="70" y="66" textAnchor="middle" fontSize="26" fontWeight="900" fill="#0f172a" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>{total}</text>
+        <text x="70" y="82" textAnchor="middle" fontSize="10" fontWeight="700" fill="#94a3b8" style={{ textTransform: "uppercase", letterSpacing: "0.04em" }}>{centerLabel}</text>
+      </svg>
+      <ul className="min-w-0 flex-1 space-y-1.5">
+        {items.map((it, i) => (
+          <li key={i} className="flex items-center justify-between gap-2 text-[12.5px]">
+            <span className="flex min-w-0 items-center gap-2"><span className="size-2.5 shrink-0 rounded-full" style={{ background: DONUT_COLORS[i % DONUT_COLORS.length] }} /><span className="truncate font-semibold text-slate-600" title={it.label}>{it.label}</span></span>
+            <span className="shrink-0 tabular-nums font-black text-slate-800">{it.value} <span className="font-semibold text-slate-400">{Math.round((it.value / total) * 100)}%</span></span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** Celebratory summary banner used at the top/bottom of a dashboard. */
 export function InsightBanner({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
   return (

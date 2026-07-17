@@ -7,9 +7,9 @@ import {
   FileText, Workflow, Rocket, Zap, Star, AlertTriangle, PackageCheck, Hourglass, MapPin, PencilRuler,
 } from "lucide-react";
 import {
-  Section, TrendBars, StatusBars, InsightsPanel, DetailModal, ProgressStat,
+  Section, StatusBars, InsightsPanel, DetailModal, ProgressStat,
   WorkflowTimeline, ExportButtons, inr, compactInr, Gauge, MetricChip,
-  StatCard, ActivityFeed, Donut, type Activity,
+  StatCard, ActivityFeed, Donut, AreaChart, DonutBreakdown, type Activity,
 } from "@/components/dashboards/shared/kit";
 
 export interface ProdRow {
@@ -183,12 +183,12 @@ export function ProductionDashboard({ rows }: { rows: ProdRow[] }) {
             <ProgressStat label="Dispatched" done={k.dispatched} total={k.total} />
           </div>
         </Section>
-        <div className="col-span-2 max-lg:col-span-1"><Section title="Production Stage" Icon={Layers}><StatusBars data={stageDist} /></Section></div>
+        <div className="col-span-2 max-lg:col-span-1"><Section title="Production Stage" Icon={Layers}><DonutBreakdown data={stageDist} centerLabel="Orders" /></Section></div>
       </div>
 
       {/* trend + on-time + bottleneck */}
       <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
-        <Section title="Monthly Dispatch Trend" Icon={TrendingUp}><TrendBars data={trend} /></Section>
+        <Section title="Monthly Dispatch Trend" Icon={TrendingUp}><AreaChart data={trend} /></Section>
         <Section title="On-Time vs Delayed" Icon={Timer}>{onTimeDist.length ? <StatusBars data={onTimeDist} /> : <p className="py-6 text-center text-[13px] text-slate-400">No dispatches yet.</p>}</Section>
         <Section title="Bottleneck Analysis" Icon={MapPin}>{bottleneck.length ? <StatusBars data={bottleneck} /> : <p className="py-6 text-center text-[13px] text-slate-400">Nothing stuck 🎉</p>}</Section>
       </div>
