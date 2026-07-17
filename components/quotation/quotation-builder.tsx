@@ -12,6 +12,7 @@ import {
   newHardware,
   computeDoor,
   computeTotals,
+  hardwareQty,
   inr,
   inr2,
   type DoorLine,
@@ -528,12 +529,16 @@ function DoorCard({
                   <span className="w-[22px] shrink-0" />
                 </div>
                 {door.hardware.map((h, idx) => {
-                  const amt = (Number(h.qty) || 0) * (Number(h.rate) || 0);
+                  // Gasket/Intumescent Tape (= frame perimeter) and Drop Seal/Kick
+                  // Plate (= width/1000) auto-compute their Units/Door from the
+                  // door dimensions; everything else uses the entered quantity.
+                  const autoQty = /gasket|intumescent|drop\s*seal|kick\s*plate/i.test(h.name);
+                  const qty = hardwareQty(h, door);
+                  const amt = qty * (Number(h.rate) || 0);
                   const known = hwNames.includes(h.name);
                   const makes = makesByName.get(h.name) ?? [];
                   const makeKnown = !h.make || makes.includes(h.make);
                   const uomKnown = !h.uom || HARDWARE_UOMS.includes(h.uom);
-                  const qty = Number(h.qty) || 0;
                   return (
                     <div key={idx} className="flex items-center gap-1.5 border-b border-slate-100 bg-white px-2 py-1.5 last:border-0">
                       {/* Hardware */}
@@ -612,17 +617,26 @@ function DoorCard({
                         onChange={(e) => onPatchHw(idx, { model: e.target.value })}
                       />
                       {/* Units / Door */}
-                      <select
-                        className="h-8 w-[64px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-right text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
-                        value={qty || ""}
-                        onChange={(e) => onPatchHw(idx, { qty: Number(e.target.value) })}
-                      >
-                        <option value="">qty</option>
-                        {qty > 50 && <option value={qty}>{qty}</option>}
-                        {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
-                          <option key={n} value={n}>{n}</option>
-                        ))}
-                      </select>
+                      {autoQty ? (
+                        <span
+                          className="inline-flex h-8 w-[64px] shrink-0 items-center justify-end rounded-md border border-[#0180cf]/25 bg-[#0180cf]/[0.06] px-1.5 text-right text-[12px] font-black tabular-nums text-[#0069b3]"
+                          title="Auto-calculated from the door dimensions"
+                        >
+                          {qty ? qty.toFixed(2) : "—"}
+                        </span>
+                      ) : (
+                        <select
+                          className="h-8 w-[64px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-right text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"
+                          value={qty || ""}
+                          onChange={(e) => onPatchHw(idx, { qty: Number(e.target.value) })}
+                        >
+                          <option value="">qty</option>
+                          {qty > 50 && <option value={qty}>{qty}</option>}
+                          {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
+                            <option key={n} value={n}>{n}</option>
+                          ))}
+                        </select>
+                      )}
                       {/* UOM */}
                       <select
                         className="h-8 w-[74px] shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white px-1 text-[12px] font-semibold text-slate-700 outline-none focus:border-[#0180cf]"

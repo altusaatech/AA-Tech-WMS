@@ -213,7 +213,7 @@ export function PortalLauncher({
 
         {/* card grid on a black stage (behind the cards only, not full page) */}
         <div className="rounded-[30px] border border-white/10 bg-black/70 p-4 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] backdrop-blur-sm max-md:p-3.5 md:min-h-0 md:flex-1">
-          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1 md:h-full md:grid-rows-3">
+          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1 md:h-full md:grid-cols-3 md:grid-rows-2">
             {WORKSPACES.map((w) => (
               <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} />
             ))}

@@ -140,11 +140,25 @@ export function framePerimeter(d: DoorLine): number {
   return n(d.width) / 1000 + hMult * (n(d.height) / 1000);
 }
 
+/**
+ * Effective Units/Door for a hardware line. A few items are dimension-driven and
+ * override the master's fixed quantity:
+ *   Gasket / Intumescent Tape → frame perimeter  (single 2H+W, double 3H+W)
+ *   Drop Seal / Kick Plate     → door width / 1000
+ * Everything else keeps its entered quantity.
+ */
+export function hardwareQty(h: HardwareLine, d: DoorLine): number {
+  const name = (h.name || "").toLowerCase();
+  if (/gasket|intumescent/.test(name)) return Math.round(framePerimeter(d) * 100) / 100;
+  if (/drop\s*seal|kick\s*plate/.test(name)) return Math.round((n(d.width) / 1000) * 100) / 100;
+  return n(h.qty);
+}
+
 export function computeDoor(d: DoorLine): DoorCompute {
   const area = (n(d.width) / 1000) * (n(d.height) / 1000);
   const perimeter = framePerimeter(d);
   const basicSupply = area * n(d.ratePerSqm);
-  const hardwareTotal = d.hardware.reduce((s, h) => s + n(h.qty) * n(h.rate), 0);
+  const hardwareTotal = d.hardware.reduce((s, h) => s + hardwareQty(h, d) * n(h.rate), 0);
   const doorHw = basicSupply + hardwareTotal;
   const qty = n(d.qty) || 0;
   const totalSupply = doorHw * qty;

@@ -70,7 +70,8 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
           qty: Number(h.quantity) || 0,
           kit: !!h.kit,
         }))
-        .filter((o) => o.name)
+        // A hardware whose Make is blank is not offered in the working-spec picker.
+        .filter((o) => o.name && o.make)
         .map((o) => [`${o.name}|${o.make}|${o.model}`, o] as const),
     ).values(),
   ).sort((a, b) => a.name.localeCompare(b.name) || a.make.localeCompare(b.make) || a.model.localeCompare(b.model));
