@@ -169,10 +169,12 @@ export const PRODUCT_COLUMNS: SalesColDef[] = [
 ];
 
 // ── Masters: Hardware Kit (AA Tech "Hardware Kit" sheet) ────────
+export const HARDWARE_MAKES = ["Kich", "Dorset", "Dorma", "Enviornseal", "Dorplus", "Falcon", "Yale", "Magnum"];
+
 export const HARDWARE_COLUMNS: SalesColDef[] = [
   { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
   { key: "hardwareType", label: "Hardware", type: "select", required: true, dynamic: true, allowCustom: true, width: 170 },
-  { key: "make", label: "Make", type: "select", dynamic: true, allowCustom: true, options: ["Kich", "Dorset", "Dorma", "Enviornseal", "Dorplus", "Falcon", "Yale", "Magnum"], width: 130 },
+  { key: "make", label: "Make", type: "select", dynamic: true, allowCustom: true, options: HARDWARE_MAKES, width: 130 },
   { key: "description", label: "Type / Specs", type: "text", width: 260 },
   { key: "model", label: "Size / Model", type: "text", width: 160 },
   { key: "quantity", label: "Units / Door", type: "number", width: 110 },

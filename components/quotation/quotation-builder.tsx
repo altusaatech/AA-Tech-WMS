@@ -6,7 +6,7 @@ import type { Route } from "next";
 import { ArrowLeft, Save, Printer, Plus, Trash2, Loader2, DoorOpen, FileText, ReceiptText } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
-import { DOOR_ORIENTATIONS, DOOR_CONFIGS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS, HARDWARE_UOMS } from "@/lib/sales/columns";
+import { DOOR_ORIENTATIONS, DOOR_CONFIGS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS, HARDWARE_UOMS, HARDWARE_MAKES } from "@/lib/sales/columns";
 import {
   newDoor,
   newHardware,
@@ -394,6 +394,14 @@ function DoorCard({
     for (const arr of m.values()) arr.sort((a, b) => a.localeCompare(b));
     return m;
   }, [hardwareOptions]);
+  // Every make available anywhere — the standard make list plus any make present
+  // in the hardware master — so the Make dropdown can offer all of them, not just
+  // the ones tied to the selected hardware type.
+  const allMakes = React.useMemo(() => {
+    const s = new Set<string>(HARDWARE_MAKES);
+    for (const o of hardwareOptions) if (o.make) s.add(o.make);
+    return Array.from(s).sort((a, b) => a.localeCompare(b));
+  }, [hardwareOptions]);
   const resolveHw = React.useCallback(
     (name: string, make: string) =>
       hardwareOptions.find((o) => o.name === name && (make ? o.make === make : true)),
@@ -630,23 +638,45 @@ function DoorCard({
                         onChange={(e) => {
                           const make = e.target.value;
                           const opt = resolveHw(h.name, make);
-                          onPatchHw(idx, {
-                            make,
-                            specs: opt?.specs ?? "",
-                            // Kick Plate → substitute the door width into the master template.
-                            model: resolveHwModel(h.name, opt?.model ?? "", Number(door.width) || 0),
-                            uom: opt?.uom ?? "",
-                            profitRate: opt?.profitRate ?? 0,
-                            ...(opt && opt.rate ? { rate: opt.rate } : {}),
-                            ...(opt && opt.qty ? { qty: opt.qty } : {}),
-                          });
+                          // A make from the master (matches this hardware) auto-fills the
+                          // rest of the row. A make picked from "All makes" that the master
+                          // doesn't have for this item only sets the make — the existing
+                          // specs / model / rate are left intact rather than wiped.
+                          onPatchHw(
+                            idx,
+                            opt
+                              ? {
+                                  make,
+                                  specs: opt.specs ?? "",
+                                  // Kick Plate → substitute the door width into the master template.
+                                  model: resolveHwModel(h.name, opt.model ?? "", Number(door.width) || 0),
+                                  uom: opt.uom ?? "",
+                                  profitRate: opt.profitRate ?? 0,
+                                  ...(opt.rate ? { rate: opt.rate } : {}),
+                                  ...(opt.qty ? { qty: opt.qty } : {}),
+                                }
+                              : { make },
+                          );
                         }}
                       >
                         <option value="">Make…</option>
                         {!makeKnown && h.make && <option value={h.make}>{h.make}</option>}
-                        {makes.map((mk) => (
-                          <option key={mk} value={mk}>{mk}</option>
-                        ))}
+                        {makes.length > 0 && (
+                          <optgroup label="For this hardware">
+                            {makes.map((mk) => (
+                              <option key={mk} value={mk}>{mk}</option>
+                            ))}
+                          </optgroup>
+                        )}
+                        {allMakes.filter((mk) => !makes.includes(mk)).length > 0 && (
+                          <optgroup label="All makes">
+                            {allMakes
+                              .filter((mk) => !makes.includes(mk))
+                              .map((mk) => (
+                                <option key={mk} value={mk}>{mk}</option>
+                              ))}
+                          </optgroup>
+                        )}
                       </select>
                       {/* Type / Specs — free text with master values as dropdown suggestions */}
                       <input
