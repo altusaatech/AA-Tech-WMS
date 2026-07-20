@@ -19,6 +19,7 @@ export default async function QuotationPiPage({ params }: { params: Promise<{ id
     <QuotationPi
       id={id}
       initial={{
+        enquiryNo: q.enquiryNo ?? "",
         offerNo: q.offerNo ?? "",
         quoteDate: q.quoteDate ?? "",
         project: q.project ?? "",

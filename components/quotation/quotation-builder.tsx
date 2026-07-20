@@ -81,6 +81,7 @@ export function QuotationBuilder({
   installationOptions: InstallationOption[];
 }) {
   const router = useRouter();
+  const [enquiryNo, setEnquiryNo] = React.useState(initial.enquiryNo);
   const [offerNo, setOfferNo] = React.useState(initial.offerNo);
   const [quoteDate, setQuoteDate] = React.useState(initial.quoteDate);
   const [project, setProject] = React.useState(initial.project);
@@ -183,7 +184,7 @@ export function QuotationBuilder({
   async function save() {
     setSaving(true);
     try {
-      await saveQuotation(id, { offerNo, quoteDate, project, customer, subject }, lines, notes, piMeta);
+      await saveQuotation(id, { enquiryNo, offerNo, quoteDate, project, customer, subject }, lines, notes, piMeta);
       fireToast({ message: "Quotation saved", type: "success" });
       router.refresh();
     } finally {
@@ -196,7 +197,7 @@ export function QuotationBuilder({
   async function goToPi() {
     setSaving(true);
     try {
-      await saveQuotation(id, { offerNo, quoteDate, project, customer, subject }, lines, notes, piMeta);
+      await saveQuotation(id, { enquiryNo, offerNo, quoteDate, project, customer, subject }, lines, notes, piMeta);
       router.push(`/quotation/${id}/pi` as Route);
     } finally {
       setSaving(false);
@@ -252,7 +253,8 @@ export function QuotationBuilder({
 
         {/* header card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="grid grid-cols-5 gap-3 max-lg:grid-cols-2 max-md:grid-cols-1">
+          <div className="grid grid-cols-6 gap-3 max-lg:grid-cols-2 max-md:grid-cols-1">
+            <L label="Enquiry No"><input className={inp} value={enquiryNo} onChange={(e) => setEnquiryNo(e.target.value)} placeholder="ENQ-2025-001" /></L>
             <L label="Offer No"><input className={inp} value={offerNo} onChange={(e) => setOfferNo(e.target.value)} placeholder="170051" /></L>
             <L label="Date"><input type="date" className={inp} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} /></L>
             <L label="Project"><input className={inp} value={project} onChange={(e) => setProject(e.target.value)} placeholder="Project name" /></L>
@@ -312,7 +314,7 @@ export function QuotationBuilder({
       {/* ───────────── PRINT LAYOUT ───────────── */}
       <QuotationPrint
         active
-        header={{ offerNo, quoteDate, project, customer, subject }}
+        header={{ enquiryNo, offerNo, quoteDate, project, customer, subject }}
         lines={lines}
         notes={notes}
         totals={totals}
@@ -877,7 +879,7 @@ function QuotationPrint({
   hideTotals,
 }: {
   active: boolean;
-  header: { offerNo: string; quoteDate: string; project: string; customer: string; subject: string };
+  header: { enquiryNo: string; offerNo: string; quoteDate: string; project: string; customer: string; subject: string };
   lines: DoorLine[];
   notes: string[];
   totals: ReturnType<typeof computeTotals>;
@@ -961,6 +963,7 @@ function QuotationPrint({
 
       {/* meta band */}
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, background: "linear-gradient(90deg, #eef6fc, #eef7e6)", border: "1px solid #d7e7f3", borderRadius: 4, padding: "4px 10px", marginTop: 6, fontSize: 9 }}>
+        {header.enquiryNo ? <span><b style={{ color: "#0069b3" }}>Enquiry No:</b> {header.enquiryNo}</span> : null}
         <span><b style={{ color: "#0069b3" }}>Offer No:</b> {header.offerNo || "—"}</span>
         <span><b style={{ color: "#0069b3" }}>Date:</b> {header.quoteDate || "—"}</span>
         <span><b style={{ color: "#0069b3" }}>Customer:</b> {header.customer || "—"}</span>

@@ -20,6 +20,8 @@ import {
   CheckCircle2,
   Pencil,
 } from "lucide-react";
+import Link from "next/link";
+import type { Route } from "next";
 import { deleteSalesRow, importSalesRows, type SaleKind, type SalesRow } from "@/app/(app)/sales/actions";
 import type { SalesColDef } from "@/lib/sales/columns";
 
@@ -69,6 +71,7 @@ export function SalesDataGrid({
   onImported,
   from = "#0069b3",
   to = "#0180cf",
+  enquiryPiMap,
 }: {
   kind: SaleKind;
   title?: string;
@@ -79,6 +82,9 @@ export function SalesDataGrid({
   onImported: (rows: SalesRow[]) => void;
   from?: string;
   to?: string;
+  /** Enquiry No (trimmed, lower-cased) → quotation id. When set, the Enquiry No
+   *  cell links to that quotation's PI. */
+  enquiryPiMap?: Record<string, string>;
 }) {
   const [q, setQ] = React.useState("");
   const [sortKey, setSortKey] = React.useState<string | null>(null);
@@ -474,17 +480,35 @@ export function SalesDataGrid({
                     onClick={() => onEdit(row)}
                     className={`group cursor-pointer transition-colors hover:bg-[#e4f2fc] ${i % 2 ? "bg-[#f5fafe]" : "bg-white"}`}
                   >
-                    {columns.map((c) => (
-                      <td
-                        key={c.key}
-                        className={`whitespace-nowrap border-b border-r border-[#e7eff6] px-3.5 py-2.5 text-slate-600 ${
-                          c.type === "number" ? "text-right font-semibold tabular-nums" : ""
-                        }`}
-                        style={{ minWidth: c.width ?? 130 }}
-                      >
-                        <CellValue row={row} col={c} />
-                      </td>
-                    ))}
+                    {columns.map((c) => {
+                      const piId =
+                        enquiryPiMap && c.key === "enquiryNo"
+                          ? enquiryPiMap[String(row[c.key] ?? "").trim().toLowerCase()]
+                          : undefined;
+                      return (
+                        <td
+                          key={c.key}
+                          className={`whitespace-nowrap border-b border-r border-[#e7eff6] px-3.5 py-2.5 text-slate-600 ${
+                            c.type === "number" ? "text-right font-semibold tabular-nums" : ""
+                          }`}
+                          style={{ minWidth: c.width ?? 130 }}
+                        >
+                          {piId ? (
+                            <Link
+                              href={`/quotation/${piId}/pi` as Route}
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 font-bold text-[#0069b3] hover:underline"
+                              title="Open the PI for this enquiry"
+                            >
+                              {String(row[c.key])}
+                              <ExternalLink size={11} />
+                            </Link>
+                          ) : (
+                            <CellValue row={row} col={c} />
+                          )}
+                        </td>
+                      );
+                    })}
                     <td className="sticky right-0 bg-inherit px-1.5">
                       <div className="flex items-center justify-end gap-0.5">
                         <button

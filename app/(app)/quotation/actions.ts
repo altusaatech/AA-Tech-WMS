@@ -23,6 +23,7 @@ export async function saveQuotation(
   await db
     .update(quotations)
     .set({
+      enquiryNo: header.enquiryNo || null,
       offerNo: header.offerNo || null,
       quoteDate: header.quoteDate || null,
       project: header.project || null,

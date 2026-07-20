@@ -85,6 +85,7 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
     <QuotationBuilder
       id={id}
       initial={{
+        enquiryNo: q.enquiryNo ?? "",
         offerNo: q.offerNo ?? "",
         quoteDate: q.quoteDate ?? "",
         project: q.project ?? "",

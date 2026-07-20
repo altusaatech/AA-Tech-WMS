@@ -41,6 +41,7 @@ export interface DoorLine {
 }
 
 export interface QuotationHeader {
+  enquiryNo: string;
   offerNo: string;
   quoteDate: string;
   project: string;

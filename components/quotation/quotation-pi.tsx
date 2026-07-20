@@ -40,6 +40,9 @@ export function QuotationPi({
   initialPiMeta: PiMeta;
 }) {
   const router = useRouter();
+  // Enquiry No isn't edited on the PI, but keep it so saving here doesn't wipe
+  // the value the register links against.
+  const enquiryNo = initial.enquiryNo;
   const [offerNo, setOfferNo] = React.useState(initial.offerNo);
   const [quoteDate, setQuoteDate] = React.useState(initial.quoteDate);
   const [project, setProject] = React.useState(initial.project);
@@ -72,7 +75,7 @@ export function QuotationPi({
   async function save() {
     setSaving(true);
     try {
-      await saveQuotation(id, { offerNo, quoteDate, project, customer, subject }, lines, initial.notes, piMeta);
+      await saveQuotation(id, { enquiryNo, offerNo, quoteDate, project, customer, subject }, lines, initial.notes, piMeta);
       fireToast({ message: "Proforma Invoice saved", type: "success" });
       router.refresh();
     } finally {

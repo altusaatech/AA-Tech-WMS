@@ -117,6 +117,7 @@ export function SalesWorkspace({
   gaRows,
   woRows,
   piRows,
+  enquiryPiMap = {},
 }: {
   quoteRows: SalesRow[];
   bomRows: SalesRow[];
@@ -124,6 +125,9 @@ export function SalesWorkspace({
   gaRows: SalesRow[];
   woRows: SalesRow[];
   piRows: SalesRow[];
+  /** Enquiry No (trimmed, lower-cased) → quotation id, for the Quote Status
+   *  register's Enquiry No → PI links. */
+  enquiryPiMap?: Record<string, string>;
 }) {
   const [view, setView] = React.useState<View>("hub");
   const [active, setActive] = React.useState<Kind>("quote");
@@ -258,7 +262,7 @@ export function SalesWorkspace({
             </button>
           </div>
 
-          <SalesDataGrid kind={active} title={current.label} columns={current.columns} rows={rows} onEdit={openEdit} onDeleted={onDeleted} onImported={onImported} from={current.from} to={current.to} />
+          <SalesDataGrid kind={active} title={current.label} columns={current.columns} rows={rows} onEdit={openEdit} onDeleted={onDeleted} onImported={onImported} from={current.from} to={current.to} enquiryPiMap={active === "quote" ? enquiryPiMap : undefined} />
         </div>
       )}
 

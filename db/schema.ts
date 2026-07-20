@@ -360,6 +360,9 @@ export const masterDoor = pgTable(
 
 export const quotations = pgTable("quotations", {
   id: uuid("id").primaryKey().defaultRandom(),
+  // Enquiry No ties a quotation/PI back to its Quote Status register row, so the
+  // register can link the enquiry number straight to this quotation's PI.
+  enquiryNo: text("enquiry_no"),
   offerNo: text("offer_no"),
   quoteDate: date("quote_date"),
   project: text("project"),
