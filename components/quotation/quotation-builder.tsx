@@ -13,6 +13,8 @@ import {
   computeDoor,
   computeTotals,
   hardwareQty,
+  resolveHwModel,
+  kickPlateModel,
   inr,
   inr2,
   type DoorLine,
@@ -99,7 +101,21 @@ export function QuotationBuilder({
     setLines((p) => [...p, newDoor()]);
   }
   function patchDoor(doorId: string, patch: Partial<DoorLine>) {
-    setLines((p) => p.map((d) => (d.id === doorId ? { ...d, ...patch } : d)));
+    setLines((p) =>
+      p.map((d) => {
+        if (d.id !== doorId) return d;
+        const next = { ...d, ...patch };
+        // When the door width changes, re-resolve any Kick Plate Size/Model from
+        // the master template so it always reflects the current door width.
+        if (patch.width !== undefined) {
+          const tmpl = hardwareOptions.find((o) => /kick\s*plate/i.test(o.name))?.model ?? `"width of door" x 250mm`;
+          next.hardware = next.hardware.map((h) =>
+            /kick\s*plate/i.test(h.name) ? { ...h, model: kickPlateModel(tmpl, Number(next.width) || 0) } : h,
+          );
+        }
+        return next;
+      }),
+    );
   }
   function patchHw(doorId: string, idx: number, patch: Partial<HardwareLine>) {
     setLines((p) =>
@@ -383,6 +399,23 @@ function DoorCard({
       hardwareOptions.find((o) => o.name === name && (make ? o.make === make : true)),
     [hardwareOptions],
   );
+  // Distinct suggestion values for the free-text spec fields (Type/Specs and
+  // Size/Model). Filtered to the chosen hardware (and make, when picked) so the
+  // dropdown shows the relevant master values; falls back to every distinct
+  // value when nothing is selected yet.
+  const fieldOptions = React.useCallback(
+    (field: "specs" | "model", name: string, make: string) => {
+      const set = new Set<string>();
+      for (const o of hardwareOptions) {
+        if (name && o.name !== name) continue;
+        if (make && o.make !== make) continue;
+        const v = o[field];
+        if (v) set.add(v);
+      }
+      return Array.from(set).sort((a, b) => a.localeCompare(b));
+    },
+    [hardwareOptions],
+  );
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-[#f3f9fe] to-white px-4 py-2.5">
@@ -535,10 +568,23 @@ function DoorCard({
                   const autoQty = /gasket|intumescent|drop\s*seal|kick\s*plate/i.test(h.name);
                   const qty = hardwareQty(h, door);
                   const amt = qty * (Number(h.rate) || 0);
+                  // Human-readable formula for the auto-calculated Units/Door — shown
+                  // to the client so the derived quantity is transparent.
+                  const dcfg = (door.doorConfig || "").toLowerCase();
+                  const hMult = dcfg.includes("triple") ? 4 : dcfg.includes("double") ? 3 : 2;
+                  const leaves = dcfg.includes("triple") ? "Triple" : dcfg.includes("double") ? "Double" : "Single";
+                  const isPerimeter = /gasket|intumescent/i.test(h.name);
+                  const autoFormula = !autoQty
+                    ? ""
+                    : isPerimeter
+                      ? `${leaves} door — (Height/1000 × ${hMult}) + (Width/1000) = (${Number(door.height) || 0}/1000 × ${hMult}) + ${Number(door.width) || 0}/1000 = ${qty.toFixed(2)}`
+                      : `Width/1000 = ${Number(door.width) || 0}/1000 = ${qty.toFixed(2)}`;
                   const known = hwNames.includes(h.name);
                   const makes = makesByName.get(h.name) ?? [];
                   const makeKnown = !h.make || makes.includes(h.make);
                   const uomKnown = !h.uom || HARDWARE_UOMS.includes(h.uom);
+                  const specsOpts = fieldOptions("specs", h.name, h.make ?? "");
+                  const modelOpts = fieldOptions("model", h.name, h.make ?? "");
                   return (
                     <div key={idx} className="flex items-center gap-1.5 border-b border-slate-100 bg-white px-2 py-1.5 last:border-0">
                       {/* Hardware */}
@@ -560,7 +606,8 @@ function DoorCard({
                             name,
                             make,
                             specs: opt?.specs ?? "",
-                            model: opt?.model ?? "",
+                            // Kick Plate → substitute the door width into the master template.
+                            model: resolveHwModel(name, opt?.model ?? "", Number(door.width) || 0),
                             uom: opt?.uom ?? "",
                             profitRate: opt?.profitRate ?? 0,
                             ...(opt && opt.rate ? { rate: opt.rate } : {}),
@@ -586,7 +633,8 @@ function DoorCard({
                           onPatchHw(idx, {
                             make,
                             specs: opt?.specs ?? "",
-                            model: opt?.model ?? "",
+                            // Kick Plate → substitute the door width into the master template.
+                            model: resolveHwModel(h.name, opt?.model ?? "", Number(door.width) || 0),
                             uom: opt?.uom ?? "",
                             profitRate: opt?.profitRate ?? 0,
                             ...(opt && opt.rate ? { rate: opt.rate } : {}),
@@ -600,27 +648,43 @@ function DoorCard({
                           <option key={mk} value={mk}>{mk}</option>
                         ))}
                       </select>
-                      {/* Type / Specs */}
+                      {/* Type / Specs — free text with master values as dropdown suggestions */}
                       <input
+                        list={`specs-${door.id}-${idx}`}
                         className="h-8 min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-1.5 text-[12px] text-slate-700 outline-none focus:border-[#0180cf]"
                         value={h.specs ?? ""}
                         title={h.specs ?? ""}
                         placeholder="Type / Specs"
                         onChange={(e) => onPatchHw(idx, { specs: e.target.value })}
                       />
-                      {/* Size / Model */}
+                      {specsOpts.length > 0 && (
+                        <datalist id={`specs-${door.id}-${idx}`}>
+                          {specsOpts.map((s) => (
+                            <option key={s} value={s} />
+                          ))}
+                        </datalist>
+                      )}
+                      {/* Size / Model — free text with master values as dropdown suggestions */}
                       <input
+                        list={`model-${door.id}-${idx}`}
                         className="h-8 w-[104px] shrink-0 rounded-md border border-slate-200 bg-white px-1.5 text-[12px] text-slate-700 outline-none focus:border-[#0180cf]"
                         value={h.model ?? ""}
                         title={h.model ?? ""}
                         placeholder="Size / Model"
                         onChange={(e) => onPatchHw(idx, { model: e.target.value })}
                       />
+                      {modelOpts.length > 0 && (
+                        <datalist id={`model-${door.id}-${idx}`}>
+                          {modelOpts.map((m) => (
+                            <option key={m} value={m} />
+                          ))}
+                        </datalist>
+                      )}
                       {/* Units / Door */}
                       {autoQty ? (
                         <span
                           className="inline-flex h-8 w-[64px] shrink-0 items-center justify-end rounded-md border border-[#0180cf]/25 bg-[#0180cf]/[0.06] px-1.5 text-right text-[12px] font-black tabular-nums text-[#0069b3]"
-                          title="Auto-calculated from the door dimensions"
+                          title={autoFormula || "Auto-calculated from the door dimensions"}
                         >
                           {qty ? qty.toFixed(2) : "—"}
                         </span>
@@ -659,6 +723,18 @@ function DoorCard({
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* Formula legend — surfaced so the client can see how the auto
+              quantities (highlighted Units/Door) are derived. */}
+          {door.hardware.some((h) => /gasket|intumescent|drop\s*seal|kick\s*plate/i.test(h.name)) && (
+            <div className="mt-2 rounded-lg border border-[#0180cf]/20 bg-[#0180cf]/[0.04] px-3 py-2 text-[11.5px] leading-relaxed text-slate-500">
+              <span className="font-black uppercase tracking-[0.06em] text-[#0069b3]">Quantity basis (RMT)</span>
+              <div className="mt-1 flex flex-wrap gap-x-6 gap-y-0.5">
+                <span><b className="text-slate-600">Gasket / Intumescent Tape</b> — Single: (Height/1000 × 2) + (Width/1000) · Double: (Height/1000 × 3) + (Width/1000)</span>
+                <span><b className="text-slate-600">Drop Seal / Kick Plate</b> — (Width/1000)</span>
               </div>
             </div>
           )}

@@ -154,6 +154,25 @@ export function hardwareQty(h: HardwareLine, d: DoorLine): number {
   return n(h.qty);
 }
 
+/**
+ * A Kick Plate's Size / Model is stored in the Hardware master as a template
+ * carrying the placeholder `"width of door"` (e.g. `"width of door" x 250mm`).
+ * In a quotation the placeholder is replaced with the actual door width so the
+ * working specification reads e.g. `900 x 250mm`.
+ */
+export function kickPlateModel(template: string, width: number): string {
+  const w = width ? String(width) : `"width of door"`;
+  return (template || "").replace(/["“”']?\s*width of door\s*["“”']?/i, w);
+}
+
+/**
+ * Size / Model to store on a hardware line when it is fetched from the master.
+ * Only the Kick Plate is width-driven; everything else keeps the master value.
+ */
+export function resolveHwModel(name: string, model: string, width: number): string {
+  return /kick\s*plate/i.test(name || "") ? kickPlateModel(model, width) : model;
+}
+
 export function computeDoor(d: DoorLine): DoorCompute {
   const area = (n(d.width) / 1000) * (n(d.height) / 1000);
   const perimeter = framePerimeter(d);
