@@ -101,7 +101,7 @@ export default async function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var raw=localStorage.getItem('aatech.displayScale')||'auto';var f;if(raw==='auto'){var r=window.innerWidth/1440;f=Math.round(Math.min(1.35,Math.max(1,r))*100)/100;}else{var m={smaller:0.9,'default':1,larger:1.15,largest:1.3};f=m[raw]||1;}document.documentElement.style.zoom=String(f);}catch(e){}})();",
+              "(function(){try{var raw=localStorage.getItem('aatech.displayScale')||'auto';var f;if(raw==='auto'){var r=window.innerWidth/1440;f=Math.round(Math.min(1.35,Math.max(1,r))*100)/100;}else{var m={smaller:0.9,'default':1,larger:1.15,largest:1.3};f=m[raw]||1;}document.documentElement.style.zoom=String(f);document.documentElement.style.setProperty('--app-zoom-inv',String(1/f));}catch(e){}})();",
           }}
         />
         <DisplayScaleProvider />

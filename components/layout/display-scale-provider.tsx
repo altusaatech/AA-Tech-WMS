@@ -21,6 +21,10 @@ export function DisplayScaleProvider() {
     const apply = () => {
       const factor = computeFactor(readScaleMode(), window.innerWidth);
       document.documentElement.style.zoom = String(factor);
+      // Counter the compounded zoom on Radix popper wrappers (see globals.css
+      // [data-radix-popper-content-wrapper]) so menus/popovers don't drift and
+      // clip off the viewport edge under display-scale zoom.
+      document.documentElement.style.setProperty("--app-zoom-inv", String(1 / factor));
     };
     apply();
 

@@ -253,6 +253,23 @@ html[data-density="compact"] body {
   line-height: var(--density-line-height);
 }
 
+/* Radix Popper wrappers (dropdown menus, popovers, selects) are position:fixed
+   and placed via transform:translate() computed by Floating UI. CSS `zoom` on an
+   ancestor — our display-scale zoom on <html> and the compact-density zoom on
+   <body> — COMPOUNDS that translate, so the further a trigger sits from the
+   origin the further its menu is pushed, clipping off the right/bottom edge.
+   Counter the compounded zoom on the wrapper itself so the menu lands exactly
+   where Floating UI intended. `--app-zoom-inv` (= 1 / display-scale factor) is
+   set alongside the zoom in app/layout.tsx + DisplayScaleProvider. Centred
+   Radix dialogs use translate(-50%) and are scale-invariant, so they're left
+   untouched. */
+[data-radix-popper-content-wrapper] {
+  zoom: var(--app-zoom-inv, 1);
+}
+html[data-density="compact"] [data-radix-popper-content-wrapper] {
+  zoom: calc(var(--app-zoom-inv, 1) / 0.92);
+}
+
 @layer base {
   html {
     color: var(--color-ink);
