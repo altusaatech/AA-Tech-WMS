@@ -44,47 +44,40 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
           const up = delta > 0;
           const flat = delta === 0;
           const arrow = up ? "▲" : flat ? "→" : "▼";
-          const deltaColor = flat
-            ? "var(--color-ink-subtle)"
-            : up
-              ? "var(--color-green-deep)"
-              : "var(--color-red-deep)";
           const isOpen = expanded === item.key;
-          const neon = `var(--kpi-neon-${item.neonKey})`;
-          const neonDeep = `var(--kpi-neon-${item.neonKey}-deep)`;
 
           return (
             <div role="listitem" key={item.key}>
               <div
                 className="group relative overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1"
                 style={{
-                  background: "var(--color-surface-card)",
-                  border: `1px solid ${isOpen ? `rgb(${neonDeep})` : "var(--color-hairline-strong)"}`,
+                  background: "linear-gradient(135deg, #63b81e, #0180cf)",
+                  border: "1px solid rgba(255,255,255,0.25)",
                   boxShadow: isOpen
-                    ? `0 0 0 1px rgb(${neonDeep}), 0 12px 28px -16px rgb(${neon} / 0.6)`
-                    : "0 1px 2px rgba(15,23,42,0.05)",
+                    ? "0 0 0 2px rgba(255,255,255,0.75), 0 16px 34px -16px rgba(1,128,207,0.6)"
+                    : "0 12px 26px -16px rgba(1,128,207,0.5)",
                 }}
               >
-                {/* top accent rail */}
+                {/* top sheen so the gradient reads as a glossy button */}
                 <span
                   aria-hidden
-                  className="absolute inset-x-0 top-0 h-[3px]"
-                  style={{ background: `linear-gradient(90deg, rgb(${neon}), rgb(${neonDeep}))` }}
+                  className="pointer-events-none absolute inset-0"
+                  style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 46%)" }}
                 />
-                {/* shine sweep on hover (sits behind the content) */}
+                {/* shine sweep on hover */}
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -translate-x-[200%] -skew-x-12 bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]"
+                  className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -translate-x-[200%] -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]"
                 />
-                <div className="flex items-start justify-between gap-2 px-3.5 pt-3 pb-3">
+                <div className="relative flex items-start justify-between gap-2 px-3.5 pt-3 pb-3">
                   <Link
                     href={item.href}
                     className="group/link min-w-0 flex-1 outline-none"
                     aria-label={`${item.label} — view tasks`}
                   >
                     <span
-                      className="flex items-center gap-1 uppercase font-black tracking-[0.07em] leading-none"
-                      style={{ fontSize: 12.5, color: `rgb(${neonDeep})` }}
+                      className="flex items-center gap-1 uppercase font-black tracking-[0.07em] leading-none text-white"
+                      style={{ fontSize: 12.5 }}
                     >
                       {item.label}
                       <ArrowUpRight
@@ -95,7 +88,7 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
                     </span>
                     <Counter
                       value={kpi.current}
-                      className="block tabular-nums leading-none mt-1.5 text-ink-strong"
+                      className="block tabular-nums leading-none mt-1.5 text-white"
                       style={{
                         fontFamily: "var(--font-display), system-ui, sans-serif",
                         fontWeight: 900,
@@ -104,11 +97,11 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
                       }}
                     />
                     <span
-                      className="mt-1.5 inline-flex items-center gap-1 tabular-nums font-extrabold"
-                      style={{ fontSize: 12, color: deltaColor }}
+                      className="mt-1.5 inline-flex items-center gap-1 tabular-nums font-extrabold text-white/90"
+                      style={{ fontSize: 12 }}
                     >
                       {arrow} {Math.abs(delta)}
-                      <span className="font-semibold opacity-60">vs last</span>
+                      <span className="font-semibold text-white/60">vs last</span>
                     </span>
                   </Link>
 
@@ -119,8 +112,8 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
                     aria-label={isOpen ? `Collapse ${item.label} details` : `Expand ${item.label} details`}
                     className="inline-flex size-6 shrink-0 items-center justify-center rounded-full transition-colors"
                     style={{
-                      color: isOpen ? "#fff" : `rgb(${neonDeep})`,
-                      background: isOpen ? `rgb(${neonDeep})` : `color-mix(in srgb, rgb(${neon}) 14%, transparent)`,
+                      color: isOpen ? "#0069b3" : "#fff",
+                      background: isOpen ? "#fff" : "rgba(255,255,255,0.22)",
                     }}
                   >
                     {isOpen ? <Minus size={16} strokeWidth={3} /> : <Plus size={16} strokeWidth={3} />}
