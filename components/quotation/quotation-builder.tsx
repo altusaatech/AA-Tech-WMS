@@ -404,6 +404,16 @@ function DoorCard({
     for (const o of hardwareOptions) if (o.make) s.add(o.make);
     return Array.from(s).sort((a, b) => a.localeCompare(b));
   }, [hardwareOptions]);
+  // Every distinct Type/Specs and Size/Model in the master — so those dropdowns
+  // can offer all values, not just the ones for the selected hardware.
+  const allSpecs = React.useMemo(
+    () => Array.from(new Set(hardwareOptions.map((o) => o.specs).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+    [hardwareOptions],
+  );
+  const allModels = React.useMemo(
+    () => Array.from(new Set(hardwareOptions.map((o) => o.model).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+    [hardwareOptions],
+  );
   const resolveHw = React.useCallback(
     (name: string, make: string) =>
       hardwareOptions.find((o) => o.name === name && (make ? o.make === make : true)),
@@ -593,8 +603,12 @@ function DoorCard({
                   const makes = makesByName.get(h.name) ?? [];
                   const makeKnown = !h.make || makes.includes(h.make);
                   const uomKnown = !h.uom || HARDWARE_UOMS.includes(h.uom);
-                  const specsOpts = fieldOptions("specs", h.name, h.make ?? "");
-                  const modelOpts = fieldOptions("model", h.name, h.make ?? "");
+                  // Relevant values (for the selected hardware/make) first, then
+                  // every other value in the master so any option can be picked.
+                  const relSpecs = fieldOptions("specs", h.name, h.make ?? "");
+                  const relModels = fieldOptions("model", h.name, h.make ?? "");
+                  const specsOpts = [...relSpecs, ...allSpecs.filter((s) => !relSpecs.includes(s))];
+                  const modelOpts = [...relModels, ...allModels.filter((m) => !relModels.includes(m))];
                   return (
                     <div key={idx} className="flex items-center gap-1.5 border-b border-slate-100 bg-white px-2 py-1.5 last:border-0">
                       {/* Hardware */}
