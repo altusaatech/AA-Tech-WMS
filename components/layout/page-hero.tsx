@@ -49,8 +49,9 @@ export function PageHero({
     >
       <HeroBackdrop Icon={Icon} />
 
-      {/* Compact centred hero: icon + title on one row, no oversized whitespace. */}
-      <div className={`relative flex ${center ? "flex-col items-center gap-2.5 text-center" : "gap-6 items-start justify-between flex-wrap"}`}>
+      {/* Compact hero: icon + title on the left, actions (e.g. search) on the
+          right — a single short row, no stacked whitespace. */}
+      <div className={`relative flex flex-wrap items-center gap-x-4 gap-y-2.5 ${center ? "justify-between" : "gap-6 items-start justify-between"}`}>
         <div className={`flex min-w-0 ${center ? "flex-row items-center gap-2.5" : "gap-4 items-start"}`}>
           {Icon && (
             <span
@@ -88,7 +89,7 @@ export function PageHero({
             {subtitle && !center && <p className="mt-2 text-[14px] text-slate-500 max-w-2xl">{subtitle}</p>}
           </div>
         </div>
-        {actions && <div className={`relative flex items-center gap-2.5 ${center ? "justify-center" : "shrink-0"}`}>{actions}</div>}
+        {actions && <div className="relative flex shrink-0 items-center gap-2.5">{actions}</div>}
       </div>
 
       {stats && stats.length > 0 && (

@@ -195,9 +195,7 @@ export function SalesWorkspace({
         <>
           <PageHero
             center
-            eyebrow="Production System"
             title="Anant Avinya Technologies Production System"
-            subtitle="Pick a module — open its Form to add an entry, or its Register to view stored data."
             Icon={TrendingUp}
             actions={
               <div className="relative">

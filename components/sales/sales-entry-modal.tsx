@@ -81,7 +81,12 @@ export function SalesEntryModal({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[200] bg-slate-900/45 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0" />
         <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-[201] flex max-h-[92vh] w-[min(980px,95vw)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl border border-white/70 bg-white shadow-[0_40px_120px_-20px_rgba(0,40,80,0.55)] ring-1 ring-slate-900/10 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-bottom-2"
+          className="fixed left-1/2 top-1/2 z-[201] flex w-[min(980px,95vw)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl border border-white/70 bg-white shadow-[0_40px_120px_-20px_rgba(0,40,80,0.55)] ring-1 ring-slate-900/10 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-bottom-2"
+          // The display-scale zoom scales vh up, so a plain max-h:92vh renders
+          // taller than the screen — the header/footer fell off and the fields
+          // never scrolled. Divide by the zoom so the modal fits and the field
+          // area scrolls inside it.
+          style={{ maxHeight: "calc(92dvh * var(--app-zoom-inv, 1))" }}
           aria-describedby={undefined}
         >
           {open && (
