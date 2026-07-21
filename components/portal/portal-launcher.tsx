@@ -121,7 +121,14 @@ export function PortalLauncher({
   }
 
   return (
-    <div className="no-scrollbar relative isolate flex h-[100dvh] flex-col overflow-y-auto overflow-x-hidden bg-[#0c0807]">
+    <div
+      className="no-scrollbar relative isolate flex flex-col overflow-y-auto overflow-x-hidden bg-[#0c0807]"
+      // The display-scale zoom on <html> makes 100dvh render taller than the
+      // physical screen (viewport units are scaled by the zoom), which forced a
+      // scrollbar. Divide by the zoom (via --app-zoom-inv = 1/zoom) so the
+      // launcher is exactly one screen tall — everything fits, no scroll.
+      style={{ height: "calc(100dvh * var(--app-zoom-inv, 1))" }}
+    >
       <NavArrows />
       {/* poster-wall backdrop — same drifting mosaic as the sign-in screen.
           z-0 (not -z-10) so it paints above the root background, below content. */}
@@ -195,11 +202,11 @@ export function PortalLauncher({
         </div>
       </div>
 
-      {/* ── content ── */}
-      <main className="relative z-10 mx-auto flex w-full max-w-[1180px] flex-col px-8 pb-6 pt-5 max-md:px-4 md:min-h-0 md:flex-1">
+      {/* ── content — compact grid, vertically centred so it never scrolls ── */}
+      <main className="relative z-10 mx-auto flex w-full max-w-[1180px] flex-col justify-center px-8 pb-5 pt-3 max-md:px-4 md:min-h-0 md:flex-1">
         {/* card grid on a black stage (behind the cards only, not full page) */}
-        <div className="rounded-[30px] border border-white/10 bg-black/70 p-4 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] backdrop-blur-sm max-md:p-3.5 md:min-h-0 md:flex-1">
-          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1 md:h-full md:grid-cols-3 md:grid-rows-2">
+        <div className="rounded-[26px] border border-white/10 bg-black/70 p-3 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] backdrop-blur-sm">
+          <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1 md:grid-cols-3">
             {WORKSPACES.map((w) => (
               <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} />
             ))}
@@ -215,10 +222,10 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
 
   const inner = (
     <div
-      className="group relative flex h-full min-h-[120px] items-center gap-5 overflow-hidden rounded-[22px] p-5 shadow-lg transition-all duration-200 max-sm:flex-col max-sm:items-start max-sm:gap-4"
+      className="group relative flex items-center gap-4 overflow-hidden rounded-[20px] p-4 shadow-lg transition-all duration-200 max-sm:flex-col max-sm:items-start max-sm:gap-3"
       style={{
         background: `linear-gradient(145deg, ${ws.from}, ${ws.to})`,
-        boxShadow: `0 22px 46px -22px ${ws.to}cc`,
+        boxShadow: `0 18px 38px -22px ${ws.to}cc`,
       }}
     >
       {/* subtle sheen */}
@@ -226,29 +233,29 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
 
       {/* LEFT — clear logo on a white panel (the PNGs aren't transparent) */}
       {ws.logo ? (
-        <span className="relative inline-flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-2.5 shadow-lg ring-1 ring-white/50 transition-transform group-hover:scale-[1.04] max-md:size-20 max-sm:size-16">
+        <span className="relative inline-flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-lg ring-1 ring-white/50 transition-transform group-hover:scale-[1.04] max-sm:size-12">
           <img src={ws.logo} alt="" className="h-full w-full object-contain" />
         </span>
       ) : (
-        <span className="relative inline-flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm">
-          <Icon size={28} strokeWidth={2.2} />
+        <span className="relative inline-flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm max-sm:size-12">
+          <Icon size={24} strokeWidth={2.2} />
         </span>
       )}
 
       {/* RIGHT — title, description, actions */}
       <div className="relative flex min-w-0 flex-1 flex-col">
-        <h2 className="text-[23px] font-black leading-none tracking-[-0.01em] text-white max-md:text-[21px]">{ws.title}</h2>
-        <p className="mt-1.5 text-[13px] font-medium leading-snug text-white/85">{ws.desc}</p>
+        <h2 className="text-[18px] font-black leading-none tracking-[-0.01em] text-white">{ws.title}</h2>
+        <p className="mt-1 line-clamp-2 text-[12px] font-medium leading-snug text-white/85">{ws.desc}</p>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-2.5">
           {locked ? (
-            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-black/20 px-3.5 text-[13px] font-bold text-white/80 ring-1 ring-white/15">
-              <Lock size={13} strokeWidth={2.5} /> No access
+            <span className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-black/20 px-3 text-[12.5px] font-bold text-white/80 ring-1 ring-white/15">
+              <Lock size={12} strokeWidth={2.5} /> No access
             </span>
           ) : (
-            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-white px-4 text-[13.5px] font-extrabold shadow-sm transition-transform group-hover:translate-x-0.5" style={{ color: ws.to }}>
+            <span className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white px-3.5 text-[12.5px] font-extrabold shadow-sm transition-transform group-hover:translate-x-0.5" style={{ color: ws.to }}>
               Enter workspace
-              <ArrowRight size={15} strokeWidth={2.7} />
+              <ArrowRight size={14} strokeWidth={2.7} />
             </span>
           )}
         </div>
