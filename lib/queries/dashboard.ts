@@ -1,4 +1,4 @@
-import { and, gte, lt, inArray, getTableColumns } from "drizzle-orm";
+import { and, gte, lt, inArray, getTableColumns, max } from "drizzle-orm";
 import { db, employees, tasks } from "@/lib/db";
 import type { Task } from "@/lib/db";
 import type { DashboardData, DashboardFilters, KpiSet } from "@/lib/types";
@@ -73,6 +73,29 @@ export async function loadDashboardData(
     { revalidate: 60, tags: [CACHE_TAGS.tasks] },
   )();
   return { ...data, generatedAt: new Date() };
+}
+
+/**
+ * Auto-widen the DEFAULT dashboard range when it would otherwise be empty.
+ * The default window is "last 30 days", but if every task is older than that
+ * (e.g. freshly imported historical data, or a quiet month), the dashboard
+ * opens blank. When the user hasn't set a range explicitly and the newest task
+ * predates the default window, anchor the window to that newest task so the
+ * dashboard always lands on the latest activity instead of an empty state.
+ */
+export async function widenRangeIfDefaultEmpty(
+  filters: DashboardFilters,
+  rangeExplicit: boolean,
+): Promise<DashboardFilters> {
+  if (rangeExplicit || !filters.startDate) return filters;
+  const [row] = await db.select({ latest: max(tasks.createdAt) }).from(tasks);
+  const raw = row?.latest as unknown as string | Date | null | undefined;
+  const latest = raw ? new Date(raw) : null;
+  // A task already falls in the default window (or there are no tasks) — leave it.
+  if (!latest || latest >= filters.startDate) return filters;
+  // Newest task is older than the default 30-day window: widen back to a 30-day
+  // window ending at "now" that reaches the most recent activity.
+  return { ...filters, startDate: new Date(latest.getTime() - 30 * MS_PER_DAY) };
 }
 
 async function loadDashboardDataUncached(

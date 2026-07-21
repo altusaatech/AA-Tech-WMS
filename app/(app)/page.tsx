@@ -11,7 +11,7 @@ import { DashboardHero } from "@/components/dashboard/dashboard-hero";
 import { DashboardLoadError } from "@/components/dashboard/dashboard-load-error";
 import { listEmployees } from "@/lib/queries/employees";
 import { listDistinctSubjects } from "@/lib/queries/tasks";
-import { loadDashboardData } from "@/lib/queries/dashboard";
+import { loadDashboardData, widenRangeIfDefaultEmpty } from "@/lib/queries/dashboard";
 import { getStatusDisplayMap } from "@/lib/queries/status-display";
 import { getMyDayCounts, getMyTodayTasks } from "@/lib/queries/my-day";
 import { MobileToday } from "@/components/dashboard/mobile-today";
@@ -29,7 +29,11 @@ interface PageProps {
 
 export default async function DashboardPage({ searchParams }: PageProps) {
   const sp = await searchParams;
-  const filters = parseFilters(sp);
+  // Auto-widen the default range when it would be empty: if the user hasn't
+  // picked a range and every task is older than the default 30-day window, the
+  // dashboard anchors to the most recent activity instead of opening blank.
+  const rangeExplicit = sp.start != null || sp.end != null;
+  const filters = await widenRangeIfDefaultEmpty(parseFilters(sp), rangeExplicit);
 
   const me = await getCurrentEmployee().catch(() => null);
 
