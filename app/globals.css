@@ -278,9 +278,12 @@ html[data-density="compact"] [data-radix-popper-content-wrapper] {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     /* The display-scale zoom (up to 1.35×) can scale full-width layers past the
-       viewport and surface a horizontal scrollbar at the page/viewport level,
-       which body's overflow-x:hidden doesn't reach. Clip it here too. */
-    overflow-x: hidden;
+       viewport and surface a horizontal scrollbar at the page/viewport level.
+       Use `clip` (not `hidden`): `overflow-x: hidden` forces overflow-y to
+       `auto`, turning <html>/<body> into scroll containers and silently
+       breaking every `position: sticky` element (e.g. the dashboards sidebar).
+       `clip` still hides the horizontal overflow but keeps overflow-y visible. */
+    overflow-x: clip;
   }
 
   /* Hide the scrollbar while keeping scroll (used by the portal). */
@@ -297,7 +300,9 @@ html[data-density="compact"] [data-radix-popper-content-wrapper] {
       radial-gradient(ellipse 60% 45% at 0% 100%, rgba(99, 184, 30, 0.035), transparent 60%),
       linear-gradient(180deg, #fbfcfd 0%, #f6f8fa 100%);
     background-attachment: fixed;
-    overflow-x: hidden;
+    /* `clip` not `hidden` — see the note on <html> above. `hidden` would make
+       <body> a scroll container and break sticky sidebars. */
+    overflow-x: clip;
   }
 
   ::selection {
