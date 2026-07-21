@@ -712,13 +712,14 @@ function DoorCard({
                           ))}
                         </datalist>
                       )}
-                      {/* Units / Door */}
-                      {autoQty ? (
+                      {/* Units / Door — auto (read-only) once the driving dimension
+                          is entered; otherwise a manual dropdown so it never locks. */}
+                      {autoQty && qty > 0 ? (
                         <span
                           className="inline-flex h-8 w-[64px] shrink-0 items-center justify-end rounded-md border border-[#0180cf]/25 bg-[#0180cf]/[0.06] px-1.5 text-right text-[12px] font-black tabular-nums text-[#0069b3]"
                           title={autoFormula || "Auto-calculated from the door dimensions"}
                         >
-                          {qty ? qty.toFixed(2) : "—"}
+                          {qty.toFixed(2)}
                         </span>
                       ) : (
                         <select

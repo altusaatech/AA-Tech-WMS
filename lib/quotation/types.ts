@@ -150,8 +150,18 @@ export function framePerimeter(d: DoorLine): number {
  */
 export function hardwareQty(h: HardwareLine, d: DoorLine): number {
   const name = (h.name || "").toLowerCase();
-  if (/gasket|intumescent/.test(name)) return Math.round(framePerimeter(d) * 100) / 100;
-  if (/drop\s*seal|kick\s*plate/.test(name)) return Math.round((n(d.width) / 1000) * 100) / 100;
+  // Dimension-driven items auto-compute their Units/Door — but only once the
+  // driving dimension exists. Until the door width/height is entered the auto
+  // value would be 0, so fall back to the manually-entered qty so the field
+  // stays usable (and never locks on a blank "—").
+  if (/gasket|intumescent/.test(name)) {
+    const p = Math.round(framePerimeter(d) * 100) / 100;
+    return p > 0 ? p : n(h.qty);
+  }
+  if (/drop\s*seal|kick\s*plate/.test(name)) {
+    const w = n(d.width);
+    return w > 0 ? Math.round((w / 1000) * 100) / 100 : n(h.qty);
+  }
   return n(h.qty);
 }
 
