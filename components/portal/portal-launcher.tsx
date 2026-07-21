@@ -196,21 +196,7 @@ export function PortalLauncher({
       </div>
 
       {/* ── content ── */}
-      <main className="relative z-10 mx-auto flex w-full max-w-[1180px] flex-col px-8 pb-6 pt-3 max-md:px-4 md:min-h-0 md:flex-1">
-        {/* welcome */}
-        <div className="mb-4 shrink-0 max-md:mb-4">
-          <div className="text-[12px] font-black uppercase tracking-[0.2em] text-[#5cc0f5]">
-            A A Tech <span className="text-white/30">/</span> Workspaces
-          </div>
-          <h1
-            className="mt-1.5 text-white"
-            style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(28px, 3.6vw, 42px)", letterSpacing: "-0.03em", lineHeight: 1.03, textShadow: "0 2px 24px rgba(0,0,0,0.5)" }}
-          >
-            Welcome back, {firstName}
-          </h1>
-          <p className="mt-1.5 text-[15px] text-white/70">Pick a workspace to jump into.</p>
-        </div>
-
+      <main className="relative z-10 mx-auto flex w-full max-w-[1180px] flex-col px-8 pb-6 pt-5 max-md:px-4 md:min-h-0 md:flex-1">
         {/* card grid on a black stage (behind the cards only, not full page) */}
         <div className="rounded-[30px] border border-white/10 bg-black/70 p-4 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] backdrop-blur-sm max-md:p-3.5 md:min-h-0 md:flex-1">
           <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1 md:h-full md:grid-cols-3 md:grid-rows-2">

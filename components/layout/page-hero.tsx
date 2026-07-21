@@ -39,7 +39,9 @@ export function PageHero({
 }) {
   return (
     <div
-      className="relative overflow-hidden rounded-[28px] border border-white/80 px-9 py-8 max-md:px-5 max-md:py-6"
+      className={`relative overflow-hidden rounded-[28px] border border-white/80 max-md:px-5 ${
+        center ? "px-6 py-4 max-md:py-4" : "px-9 py-8 max-md:py-6"
+      }`}
       style={{
         background: "linear-gradient(120deg, #e9f3fd 0%, #ffffff 46%, #edf7e3 100%)",
         boxShadow: "0 28px 64px -38px rgba(15,60,100,0.30), inset 0 1px 0 rgba(255,255,255,0.9)",
@@ -47,29 +49,30 @@ export function PageHero({
     >
       <HeroBackdrop Icon={Icon} />
 
-      <div className={`relative flex gap-6 ${center ? "flex-col items-center text-center" : "items-start justify-between flex-wrap"}`}>
-        <div className={`flex gap-4 min-w-0 ${center ? "flex-col items-center" : "items-start"}`}>
+      {/* Compact centred hero: icon + title on one row, no oversized whitespace. */}
+      <div className={`relative flex ${center ? "flex-col items-center gap-2.5 text-center" : "gap-6 items-start justify-between flex-wrap"}`}>
+        <div className={`flex min-w-0 ${center ? "flex-row items-center gap-2.5" : "gap-4 items-start"}`}>
           {Icon && (
             <span
-              className="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg max-md:size-12"
+              className={`inline-flex shrink-0 items-center justify-center rounded-2xl text-white shadow-lg ${center ? "size-10" : "size-14 max-md:size-12"}`}
               style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)", boxShadow: "0 14px 30px -14px rgba(1,128,207,0.55)" }}
             >
-              <Icon size={26} strokeWidth={2.3} />
+              <Icon size={center ? 20 : 26} strokeWidth={2.3} />
             </span>
           )}
           <div className="min-w-0">
             {eyebrow && (
-              <div className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400 ${center ? "justify-center" : ""}`}>
+              <div className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 ${center ? "justify-center" : ""}`}>
                 <span className="inline-block size-1.5 rounded-full bg-[#63b81e] shadow-[0_0_8px_#63b81e88]" />
                 {eyebrow}
               </div>
             )}
             <h1
-              className={`mt-1.5 ${center ? "mx-auto" : ""}`}
+              className={`${center ? "mx-auto mt-0.5" : "mt-1.5"}`}
               style={{
                 fontFamily: "var(--font-display), system-ui, sans-serif",
                 fontWeight: 900,
-                fontSize: "clamp(26px, 3.1vw, 38px)",
+                fontSize: center ? "clamp(20px, 2.2vw, 27px)" : "clamp(26px, 3.1vw, 38px)",
                 letterSpacing: "-0.035em",
                 lineHeight: 1.03,
                 width: "fit-content",
@@ -82,7 +85,7 @@ export function PageHero({
             >
               {title}
             </h1>
-            {subtitle && <p className={`mt-2 text-[14px] text-slate-500 max-w-2xl ${center ? "mx-auto" : ""}`}>{subtitle}</p>}
+            {subtitle && !center && <p className="mt-2 text-[14px] text-slate-500 max-w-2xl">{subtitle}</p>}
           </div>
         </div>
         {actions && <div className={`relative flex items-center gap-2.5 ${center ? "justify-center" : "shrink-0"}`}>{actions}</div>}

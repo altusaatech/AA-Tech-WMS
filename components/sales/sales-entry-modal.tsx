@@ -234,8 +234,8 @@ function FormBody({
 
   return (
     <>
-      {/* ── header ── */}
-      <header className="relative overflow-hidden px-6 py-5" style={{ background: `linear-gradient(120deg, ${from}, ${to})` }}>
+      {/* ── header (pinned — always shows which register you're filling) ── */}
+      <header className="relative shrink-0 overflow-hidden px-6 py-5" style={{ background: `linear-gradient(120deg, ${from}, ${to})` }}>
         <Icon className="pointer-events-none absolute -right-5 -top-5 text-white/10" size={130} strokeWidth={1.5} />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-3.5">
@@ -263,7 +263,7 @@ function FormBody({
       {/* ── fields ── */}
       {/* items-end so the inputs in each 2-col row line up even when one field's
           label wraps to two lines and its neighbour's stays on one. */}
-      <div className="grid grid-cols-1 items-end gap-x-5 gap-y-4 overflow-y-auto bg-gradient-to-b from-[#f7fbff] to-white px-6 py-6 md:grid-cols-2">
+      <div className="grid min-h-0 flex-1 grid-cols-1 content-start items-end gap-x-5 gap-y-4 overflow-y-auto bg-gradient-to-b from-[#f7fbff] to-white px-6 py-6 md:grid-cols-2">
         {editable.map((c) => (
           <Field
             key={c.key}
@@ -280,8 +280,8 @@ function FormBody({
         ))}
       </div>
 
-      {/* ── footer ── */}
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-white px-6 py-4">
+      {/* ── footer (pinned — Submit / Save changes always reachable) ── */}
+      <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-white px-6 py-4">
         <span className={`inline-flex items-center gap-1.5 text-[12.5px] font-semibold ${errorCount ? "text-red-600" : "text-transparent"}`}>
           <AlertCircle size={14} /> {errorCount > 0 ? `${errorCount} field${errorCount > 1 ? "s" : ""} need attention` : "ok"}
         </span>
@@ -308,7 +308,7 @@ function FormBody({
             style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 12px 28px -10px ${to}cc` }}
           >
             {phase === "saving" ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} strokeWidth={2.4} />}
-            {row ? "Save changes" : "Save"}
+            {row ? "Save changes" : "Submit"}
           </button>
         </div>
       </footer>
