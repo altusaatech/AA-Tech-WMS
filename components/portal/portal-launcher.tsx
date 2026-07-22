@@ -206,7 +206,9 @@ export function PortalLauncher({
       <main className="relative z-10 mx-auto flex w-full max-w-[1180px] flex-col justify-center px-8 pb-5 pt-3 max-md:px-4 md:min-h-0 md:flex-1">
         {/* card grid on a black stage (behind the cards only, not full page) */}
         <div className="rounded-[26px] border border-white/10 bg-black/70 p-3 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] backdrop-blur-sm">
-          <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1 md:grid-cols-3">
+          {/* auto-rows-fr → every row is the same height, so all six cards are
+              identical rectangles regardless of description length. */}
+          <div className="grid auto-rows-fr grid-cols-2 gap-3 max-sm:grid-cols-1 md:grid-cols-3">
             {WORKSPACES.map((w) => (
               <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} />
             ))}
@@ -222,7 +224,7 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
 
   const inner = (
     <div
-      className="group relative flex items-center gap-4 overflow-hidden rounded-[20px] p-4 shadow-lg transition-all duration-200 max-sm:flex-col max-sm:items-start max-sm:gap-3"
+      className="group relative flex h-full items-center gap-4 overflow-hidden rounded-[20px] p-4 shadow-lg transition-all duration-200 max-sm:flex-col max-sm:items-start max-sm:gap-3"
       style={{
         background: `linear-gradient(145deg, ${ws.from}, ${ws.to})`,
         boxShadow: `0 18px 38px -22px ${ws.to}cc`,
@@ -267,7 +269,7 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
   if (locked) return inner;
 
   return (
-    <Link href={ws.href} className="block transition-transform duration-200 hover:-translate-y-1">
+    <Link href={ws.href} className="block h-full transition-transform duration-200 hover:-translate-y-1">
       {inner}
     </Link>
   );
