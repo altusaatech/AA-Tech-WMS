@@ -2,15 +2,16 @@
 
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { salesQuotes, salesBom, salesSo, salesGa, salesWo, salesPi, masterProduct, masterHardware, masterDoor, masterInstallation } from "@/db/schema";
+import { salesKyc, salesQuotes, salesBom, salesSo, salesGa, salesWo, salesPi, masterProduct, masterHardware, masterDoor, masterInstallation } from "@/db/schema";
 import { requireUser } from "@/lib/auth/current";
-import { QUOTE_KEYS, BOM_KEYS, SO_KEYS, GA_KEYS, WO_KEYS, PI_KEYS, PRODUCT_KEYS, HARDWARE_KEYS, DOOR_KEYS, INSTALLATION_KEYS } from "@/lib/sales/columns";
+import { KYC_KEYS, QUOTE_KEYS, BOM_KEYS, SO_KEYS, GA_KEYS, WO_KEYS, PI_KEYS, PRODUCT_KEYS, HARDWARE_KEYS, DOOR_KEYS, INSTALLATION_KEYS } from "@/lib/sales/columns";
 
-export type SaleKind = "quote" | "bom" | "so" | "ga" | "wo" | "pi" | "product" | "hardware" | "door" | "installation";
+export type SaleKind = "kyc" | "quote" | "bom" | "so" | "ga" | "wo" | "pi" | "product" | "hardware" | "door" | "installation";
 
 /** One registry entry per workflow/master module. Adding one = one line here. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const REGISTRY: Record<SaleKind, { table: any; keys: string[] }> = {
+  kyc: { table: salesKyc, keys: KYC_KEYS },
   quote: { table: salesQuotes, keys: QUOTE_KEYS },
   bom: { table: salesBom, keys: BOM_KEYS },
   so: { table: salesSo, keys: SO_KEYS },

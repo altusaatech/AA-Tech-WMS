@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { quotations, masterProduct, masterHardware, masterDoor, masterInstallation } from "@/db/schema";
+import { quotations, masterProduct, masterHardware, masterDoor, masterInstallation, salesKyc } from "@/db/schema";
 import { QuotationBuilder } from "@/components/quotation/quotation-builder";
 import { DEFAULT_NOTES, DEFAULT_SUBJECT, DEFAULT_PI_META, type DoorLine, type PiMeta } from "@/lib/quotation/types";
 
@@ -15,12 +15,19 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
   const [q] = await db.select().from(quotations).where(eq(quotations.id, id));
   if (!q) notFound();
 
-  const [products, hardware, doors, installations] = await Promise.all([
+  const [products, hardware, doors, installations, kyc] = await Promise.all([
     db.select().from(masterProduct),
     db.select().from(masterHardware),
     db.select().from(masterDoor),
     db.select().from(masterInstallation).orderBy(masterInstallation.srNo),
+    db.select({ enquiryNo: salesKyc.enquiryNo, companyName: salesKyc.companyName }).from(salesKyc),
   ]);
+
+  // Customer KYC lookup — the Working Specification auto-fills Company Name from
+  // here when its Enquiry No matches a KYC record. Newest wins on duplicates.
+  const kycOptions = kyc
+    .filter((k) => (k.enquiryNo ?? "").trim())
+    .map((k) => ({ enquiryNo: (k.enquiryNo as string).trim(), companyName: (k.companyName ?? "").trim() }));
 
   const productOptions = products
     .filter((p) => p.typeOfFinishedGood)
@@ -99,6 +106,7 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
       hardwareOptions={hardwareOptions}
       doorOptions={doorOptions}
       installationOptions={installationOptions}
+      kycOptions={kycOptions}
     />
   );
 }

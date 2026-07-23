@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Factory,
   ReceiptText,
+  IdCard,
   Plus,
   ArrowLeft,
   FilePlus2,
@@ -25,6 +26,7 @@ import { PageHero } from "@/components/layout/page-hero";
 import { SalesDataGrid } from "./sales-grid";
 import { SalesEntryModal } from "./sales-entry-modal";
 import {
+  KYC_COLUMNS,
   QUOTE_COLUMNS,
   BOM_COLUMNS,
   SO_COLUMNS,
@@ -35,7 +37,7 @@ import {
 import type { SaleKind, SalesRow } from "@/app/(app)/sales/actions";
 
 /** The five production-workflow kinds (subset of SaleKind, which also covers masters). */
-type Kind = Extract<SaleKind, "quote" | "bom" | "so" | "ga" | "wo" | "pi">;
+type Kind = Extract<SaleKind, "kyc" | "quote" | "bom" | "so" | "ga" | "wo" | "pi">;
 
 interface FormDef {
   key: Kind;
@@ -52,12 +54,23 @@ interface FormDef {
 
 const FORMS: FormDef[] = [
   {
+    key: "kyc",
+    label: "Customer KYC",
+    desc: "Company, contact & enquiry details — the sales entry point",
+    icon: IdCard,
+    from: "#63b81e",
+    to: "#0180cf",
+    steps: ["Enquiry", "Company", "Contact"],
+    columns: KYC_COLUMNS,
+    primaryKey: "enquiryNo",
+  },
+  {
     key: "quote",
     label: "Quote Status",
     desc: "Enquiries to quotations to PO received",
     icon: FileText,
-    from: "#0180cf",
-    to: "#63b81e",
+    from: "#63b81e",
+    to: "#0180cf",
     steps: ["Enquiry", "Quotation", "PO Received"],
     columns: QUOTE_COLUMNS,
     primaryKey: "enquiryNo",
@@ -67,8 +80,8 @@ const FORMS: FormDef[] = [
     label: "SO Status",
     desc: "PO to sales order, amendments & dispatch",
     icon: FileCheck2,
-    from: "#0180cf",
-    to: "#63b81e",
+    from: "#63b81e",
+    to: "#0180cf",
     steps: ["PO", "Sales Order", "Amendment", "Dispatch"],
     columns: SO_COLUMNS,
     primaryKey: "ourSoNo",
@@ -79,7 +92,7 @@ const FORMS: FormDef[] = [
     desc: "GA drawing submission to approval",
     icon: BadgeCheck,
     from: "#63b81e",
-    to: "#0069b3",
+    to: "#0180cf",
     steps: ["SO", "GA Submission", "GA Approval"],
     columns: GA_COLUMNS,
     primaryKey: "gaNo",
@@ -90,7 +103,7 @@ const FORMS: FormDef[] = [
     desc: "PO to sales orders to production & dispatch",
     icon: ClipboardList,
     from: "#63b81e",
-    to: "#0069b3",
+    to: "#0180cf",
     steps: ["PO", "Sales Order", "Production", "Dispatch"],
     columns: BOM_COLUMNS,
     primaryKey: "ourSoNo",
@@ -100,8 +113,8 @@ const FORMS: FormDef[] = [
     label: "Work Order Status",
     desc: "BOM to pre-production to work order",
     icon: Factory,
-    from: "#0180cf",
-    to: "#63b81e",
+    from: "#63b81e",
+    to: "#0180cf",
     steps: ["BOM", "Pre-Production", "Work Order"],
     columns: WO_COLUMNS,
     primaryKey: "workOrderNo",
@@ -111,6 +124,7 @@ const FORMS: FormDef[] = [
 type View = "hub" | "register";
 
 export function SalesWorkspace({
+  kycRows,
   quoteRows,
   bomRows,
   soRows,
@@ -119,6 +133,7 @@ export function SalesWorkspace({
   piRows,
   enquiryPiMap = {},
 }: {
+  kycRows: SalesRow[];
   quoteRows: SalesRow[];
   bomRows: SalesRow[];
   soRows: SalesRow[];
@@ -130,8 +145,9 @@ export function SalesWorkspace({
   enquiryPiMap?: Record<string, string>;
 }) {
   const [view, setView] = React.useState<View>("hub");
-  const [active, setActive] = React.useState<Kind>("quote");
+  const [active, setActive] = React.useState<Kind>("kyc");
   const [rowsByKind, setRowsByKind] = React.useState<Record<Kind, SalesRow[]>>({
+    kyc: kycRows,
     quote: quoteRows,
     so: soRows,
     ga: gaRows,
@@ -383,8 +399,8 @@ function WindowCard({
 
 /* ── Quotation launcher card (links into the Quotation builder) ── */
 function QuotationLinkCard() {
-  const from = "#0069b3";
-  const to = "#63b81e";
+  const from = "#63b81e";
+  const to = "#0180cf";
   const steps = ["Doors", "Hardware", "Print"];
   return (
     <Link href={"/quotation" as Route} className="group relative block">
@@ -445,7 +461,7 @@ function QuotationLinkCard() {
 
 /* ── PI launcher card (Proforma Invoice — made from a quotation) ── */
 function PiLinkCard() {
-  const from = "#0069b3";
+  const from = "#63b81e";
   const to = "#0180cf";
   const steps = ["Quote", "Fill", "Print"];
   return (

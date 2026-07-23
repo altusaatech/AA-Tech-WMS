@@ -95,6 +95,30 @@ export const salesQuotes = pgTable(
   (t) => [index("sales_quotes_enquiry_idx").on(t.enquiryNo)],
 );
 
+// Customer KYC — the entry point of the sales flow. Captured once per enquiry;
+// the Working Specification then auto-fetches company/enquiry details from here.
+export const salesKyc = pgTable(
+  "sales_kyc",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    srNo: integer("sr_no").generatedAlwaysAsIdentity(),
+    enquiryNo: text("enquiry_no"),
+    enquiryType: text("enquiry_type"), // Manufacturing / Trading / Job Work
+    enquirySource: text("enquiry_source"), // Email / Existing Customer / Reference / Online …
+    companyName: text("company_name"),
+    companyAddress: text("company_address"),
+    deliveryAddress: text("delivery_address"),
+    gstNo: text("gst_no"),
+    contactPerson: text("contact_person"),
+    mobileNo: text("mobile_no"),
+    email: text("email"),
+    productDetails: text("product_details"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("sales_kyc_enquiry_idx").on(t.enquiryNo)],
+);
+
 export const salesBom = pgTable(
   "sales_bom",
   {

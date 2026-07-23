@@ -21,6 +21,22 @@ export interface SalesColDef {
   allowCustom?: boolean;
 }
 
+// Customer KYC — captured once per enquiry; the entry point of the sales flow.
+export const KYC_COLUMNS: SalesColDef[] = [
+  { key: "srNo", label: "Sr No", type: "number", readOnly: true, width: 70 },
+  { key: "enquiryNo", label: "Enquiry No", type: "text", required: true, width: 120 },
+  { key: "enquiryType", label: "Enquiry Type", type: "select", options: ["Manufacturing", "Trading", "Job Work"], width: 150 },
+  { key: "enquirySource", label: "Enquiry Source", type: "select", dynamic: true, allowCustom: true, options: ["Email", "Existing Customer", "Reference", "Online", "Exhibition", "Cold Call", "Walk-in"], width: 160 },
+  { key: "companyName", label: "Company Name", type: "text", required: true, width: 190 },
+  { key: "companyAddress", label: "Company Address", type: "text", width: 240 },
+  { key: "deliveryAddress", label: "Delivery Address", type: "text", width: 240 },
+  { key: "gstNo", label: "GST Number", type: "text", width: 160 },
+  { key: "contactPerson", label: "Contact Person Name", type: "text", width: 170 },
+  { key: "mobileNo", label: "Mobile Number", type: "text", width: 140 },
+  { key: "email", label: "Email ID", type: "text", width: 200 },
+  { key: "productDetails", label: "Product Details", type: "text", width: 240 },
+];
+
 export const QUOTE_COLUMNS: SalesColDef[] = [
   { key: "enquiryNo", label: "Enquiry No", type: "text", width: 120 },
   { key: "scope", label: "Scope", type: "text", width: 130 },
@@ -250,6 +266,7 @@ export const DOOR_COLUMNS: SalesColDef[] = [
   { key: "installPerSqm", label: "Installation/Sqmt", type: "number", width: 130 },
 ];
 
+export const KYC_KEYS = KYC_COLUMNS.map((c) => c.key);
 export const QUOTE_KEYS = QUOTE_COLUMNS.map((c) => c.key);
 export const BOM_KEYS = BOM_COLUMNS.map((c) => c.key);
 export const SO_KEYS = SO_COLUMNS.map((c) => c.key);

@@ -71,6 +71,7 @@ export function QuotationBuilder({
   hardwareOptions,
   doorOptions,
   installationOptions,
+  kycOptions = [],
 }: {
   id: string;
   initial: QuotationData;
@@ -79,6 +80,8 @@ export function QuotationBuilder({
   hardwareOptions: HardwareOption[];
   doorOptions: DoorOption[];
   installationOptions: InstallationOption[];
+  /** Customer KYC records — the Enquiry No box fetches Company Name from here. */
+  kycOptions?: { enquiryNo: string; companyName: string }[];
 }) {
   const router = useRouter();
   const [enquiryNo, setEnquiryNo] = React.useState(initial.enquiryNo);
@@ -93,6 +96,18 @@ export function QuotationBuilder({
   // save doesn't wipe it.
   const [piMeta] = React.useState<PiMeta>(initialPiMeta);
   const [saving, setSaving] = React.useState(false);
+  // Customer KYC → Company Name lookup, keyed by trimmed/lower-cased Enquiry No.
+  const kycByEnquiry = React.useMemo(() => {
+    const m = new Map<string, string>();
+    for (const k of kycOptions) if (k.enquiryNo) m.set(k.enquiryNo.trim().toLowerCase(), k.companyName);
+    return m;
+  }, [kycOptions]);
+  // Typing/picking an Enquiry No that exists in KYC auto-fills the Customer.
+  function onEnquiryChange(v: string) {
+    setEnquiryNo(v);
+    const company = kycByEnquiry.get(v.trim().toLowerCase());
+    if (company) setCustomer(company);
+  }
 
   const totals = computeTotals(lines);
 
@@ -254,7 +269,16 @@ export function QuotationBuilder({
         {/* header card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="grid grid-cols-6 gap-3 max-lg:grid-cols-2 max-md:grid-cols-1">
-            <L label="Enquiry No"><input className={inp} value={enquiryNo} onChange={(e) => setEnquiryNo(e.target.value)} placeholder="ENQ-2025-001" /></L>
+            <L label="Enquiry No">
+              <input className={inp} list="kyc-enquiry-list" value={enquiryNo} onChange={(e) => onEnquiryChange(e.target.value)} placeholder="ENQ-2025-001" title="Pick a KYC enquiry to auto-fill Customer" />
+              {kycOptions.length > 0 && (
+                <datalist id="kyc-enquiry-list">
+                  {kycOptions.map((k) => (
+                    <option key={k.enquiryNo} value={k.enquiryNo}>{k.companyName}</option>
+                  ))}
+                </datalist>
+              )}
+            </L>
             <L label="Offer No"><input className={inp} value={offerNo} onChange={(e) => setOfferNo(e.target.value)} placeholder="170051" /></L>
             <L label="Date"><input type="date" className={inp} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} /></L>
             <L label="Project"><input className={inp} value={project} onChange={(e) => setProject(e.target.value)} placeholder="Project name" /></L>

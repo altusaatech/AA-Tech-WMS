@@ -1,8 +1,8 @@
 import { asc } from "drizzle-orm";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { salesQuotes, salesBom, salesSo, salesGa, salesWo, salesPi, quotations } from "@/db/schema";
-import { QUOTE_KEYS, BOM_KEYS, SO_KEYS, GA_KEYS, WO_KEYS, PI_KEYS } from "@/lib/sales/columns";
+import { salesKyc, salesQuotes, salesBom, salesSo, salesGa, salesWo, salesPi, quotations } from "@/db/schema";
+import { KYC_KEYS, QUOTE_KEYS, BOM_KEYS, SO_KEYS, GA_KEYS, WO_KEYS, PI_KEYS } from "@/lib/sales/columns";
 import { SalesWorkspace } from "@/components/sales/sales-workspace";
 import type { SalesRow } from "./actions";
 
@@ -16,7 +16,8 @@ function pick(row: Record<string, unknown>, keys: string[]): SalesRow {
 
 export default async function SalesPage() {
   await requireUser();
-  const [quotes, boms, sos, gas, wos, pis, quos] = await Promise.all([
+  const [kycs, quotes, boms, sos, gas, wos, pis, quos] = await Promise.all([
+    db.select().from(salesKyc).orderBy(asc(salesKyc.createdAt)),
     db.select().from(salesQuotes).orderBy(asc(salesQuotes.createdAt)),
     db.select().from(salesBom).orderBy(asc(salesBom.createdAt)),
     db.select().from(salesSo).orderBy(asc(salesSo.createdAt)),
@@ -41,6 +42,7 @@ export default async function SalesPage() {
   return (
     <SalesWorkspace
       enquiryPiMap={enquiryPiMap}
+      kycRows={kycs.map((r) => pick(r as Record<string, unknown>, KYC_KEYS))}
       quoteRows={quotes.map((r) => pick(r as Record<string, unknown>, QUOTE_KEYS))}
       bomRows={boms.map((r) => pick(r as Record<string, unknown>, BOM_KEYS))}
       soRows={sos.map((r) => pick(r as Record<string, unknown>, SO_KEYS))}
