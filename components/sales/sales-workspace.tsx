@@ -180,7 +180,7 @@ export function SalesWorkspace({
   }
 
   return (
-    <main className="relative mx-auto max-w-[1600px] px-8 pb-16 pt-8 max-md:px-4">
+    <main className="relative mx-auto max-w-[1600px] px-8 pb-8 pt-6 max-md:px-4">
       {/* subtle background pattern */}
       <div
         aria-hidden
@@ -220,7 +220,7 @@ export function SalesWorkspace({
                 No modules match “{hubQuery}”.
               </div>
             ) : (
-              <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
                 {forms.map((f) => (
                   <WindowCard key={f.key} form={f} count={countOf(f.key)} onForm={() => openForm(f.key)} onRegister={() => openRegister(f.key)} />
                 ))}
@@ -306,11 +306,11 @@ function WindowCard({
 
       {/* card */}
       <div
-        className="relative overflow-hidden rounded-[24px] border border-white/70 bg-white/80 p-5 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1.5"
+        className="relative overflow-hidden rounded-[20px] border border-white/70 bg-white/80 p-4 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1"
         style={{ boxShadow: "0 14px 36px -20px rgba(15,40,80,0.30), 0 1px 4px rgba(15,23,42,0.04)" }}
       >
         {/* top accent bar */}
-        <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${form.from}, ${form.to})` }} />
+        <div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${form.from}, ${form.to})` }} />
 
         {/* shine sweep on hover */}
         <span
@@ -319,24 +319,24 @@ function WindowCard({
         />
 
         {/* faint corner watermark icon */}
-        <Icon className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={120} strokeWidth={1.4} style={{ opacity: 0.04 }} />
+        <Icon className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={92} strokeWidth={1.4} style={{ opacity: 0.04 }} />
 
         {/* header */}
-        <div className="relative flex items-start gap-3.5">
+        <div className="relative flex items-start gap-3">
           <span
-            className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
             style={{ background: `linear-gradient(135deg, ${form.from}, ${form.to})`, boxShadow: `0 10px 22px -10px ${form.to}cc` }}
           >
-            <Icon size={24} strokeWidth={2.3} />
+            <Icon size={19} strokeWidth={2.3} />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[17px] font-black tracking-[-0.01em] text-slate-800">{form.label}</h3>
-            <p className="mt-0.5 line-clamp-1 text-[12px] text-slate-500">{form.desc}</p>
+            <h3 className="text-[15px] font-black tracking-[-0.01em] text-slate-800">{form.label}</h3>
+            <p className="mt-0.5 line-clamp-1 text-[11.5px] text-slate-500">{form.desc}</p>
           </div>
         </div>
 
         {/* workflow path */}
-        <div className="relative mt-3.5 flex flex-wrap items-center gap-1">
+        <div className="relative mt-2.5 flex flex-wrap items-center gap-1">
           {form.steps.map((s, i) => (
             <React.Fragment key={s}>
               <span
@@ -351,17 +351,17 @@ function WindowCard({
         </div>
 
         {/* count */}
-        <div className="relative mt-3 flex items-baseline gap-1.5">
-          <span className="text-[22px] font-black tabular-nums" style={{ color: form.to }}>{count}</span>
+        <div className="relative mt-2 flex items-baseline gap-1.5">
+          <span className="text-[18px] font-black tabular-nums" style={{ color: form.to }}>{count}</span>
           <span className="text-[12px] font-semibold text-slate-400">{count === 1 ? "entry" : "entries"} stored</span>
         </div>
 
         {/* actions */}
-        <div className="relative mt-4 grid grid-cols-2 gap-2.5">
+        <div className="relative mt-3 grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={onForm}
-            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border-2 text-[13.5px] font-extrabold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border-2 text-[13.5px] font-extrabold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
             style={{ borderColor: `color-mix(in srgb, ${form.to} 35%, transparent)`, color: form.to, background: `color-mix(in srgb, ${form.from} 6%, transparent)` }}
           >
             <FilePlus2 size={16} strokeWidth={2.4} /> Form
@@ -369,7 +369,7 @@ function WindowCard({
           <button
             type="button"
             onClick={onRegister}
-            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
             style={{ background: `linear-gradient(135deg, ${form.from}, ${form.to})`, boxShadow: `0 10px 22px -10px ${form.to}aa` }}
           >
             <Table2 size={16} strokeWidth={2.4} /> Register
@@ -394,27 +394,27 @@ function QuotationLinkCard() {
         style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
       />
       <div
-        className="relative overflow-hidden rounded-[24px] border border-white/70 bg-white/80 p-5 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1.5"
+        className="relative overflow-hidden rounded-[20px] border border-white/70 bg-white/80 p-4 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1"
         style={{ boxShadow: "0 14px 36px -20px rgba(15,40,80,0.30), 0 1px 4px rgba(15,23,42,0.04)" }}
       >
-        <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
+        <div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
         <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-2/3 -translate-x-[180%] -skew-x-12 bg-gradient-to-r from-transparent via-white/55 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
-        <Receipt className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={120} strokeWidth={1.4} style={{ opacity: 0.04 }} />
+        <Receipt className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={92} strokeWidth={1.4} style={{ opacity: 0.04 }} />
 
-        <div className="relative flex items-start gap-3.5">
+        <div className="relative flex items-start gap-3">
           <span
-            className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
             style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}cc` }}
           >
-            <Receipt size={24} strokeWidth={2.3} />
+            <Receipt size={19} strokeWidth={2.3} />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[17px] font-black tracking-[-0.01em] text-slate-800">Working Specification</h3>
-            <p className="mt-0.5 line-clamp-1 text-[12px] text-slate-500">Build & print door specifications from the masters</p>
+            <h3 className="text-[15px] font-black tracking-[-0.01em] text-slate-800">Working Specification</h3>
+            <p className="mt-0.5 line-clamp-1 text-[11.5px] text-slate-500">Build & print door specifications from the masters</p>
           </div>
         </div>
 
-        <div className="relative mt-3.5 flex flex-wrap items-center gap-1">
+        <div className="relative mt-2.5 flex flex-wrap items-center gap-1">
           {steps.map((s, i) => (
             <React.Fragment key={s}>
               <span className="rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.02em]" style={{ background: `color-mix(in srgb, ${to} 11%, transparent)`, color: from }}>
@@ -425,13 +425,13 @@ function QuotationLinkCard() {
           ))}
         </div>
 
-        <div className="relative mt-3 flex items-baseline gap-1.5">
+        <div className="relative mt-2 flex items-baseline gap-1.5">
           <span className="text-[13px] font-semibold text-slate-400">Looks up Product & Hardware</span>
         </div>
 
-        <div className="relative mt-4">
+        <div className="relative mt-3">
           <span
-            className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
+            className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
             style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}aa` }}
           >
             <Receipt size={16} strokeWidth={2.4} /> Open Working Specification
@@ -456,27 +456,27 @@ function PiLinkCard() {
         style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
       />
       <div
-        className="relative overflow-hidden rounded-[24px] border border-white/70 bg-white/80 p-5 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1.5"
+        className="relative overflow-hidden rounded-[20px] border border-white/70 bg-white/80 p-4 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1"
         style={{ boxShadow: "0 14px 36px -20px rgba(15,40,80,0.30), 0 1px 4px rgba(15,23,42,0.04)" }}
       >
-        <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
+        <div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
         <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-2/3 -translate-x-[180%] -skew-x-12 bg-gradient-to-r from-transparent via-white/55 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
-        <ReceiptText className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={120} strokeWidth={1.4} style={{ opacity: 0.04 }} />
+        <ReceiptText className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={92} strokeWidth={1.4} style={{ opacity: 0.04 }} />
 
-        <div className="relative flex items-start gap-3.5">
+        <div className="relative flex items-start gap-3">
           <span
-            className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
             style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}cc` }}
           >
-            <ReceiptText size={24} strokeWidth={2.3} />
+            <ReceiptText size={19} strokeWidth={2.3} />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[17px] font-black tracking-[-0.01em] text-slate-800">PI · Proforma Invoice</h3>
-            <p className="mt-0.5 line-clamp-1 text-[12px] text-slate-500">Made from a quotation — open a quote &amp; “Go to PI”</p>
+            <h3 className="text-[15px] font-black tracking-[-0.01em] text-slate-800">PI · Proforma Invoice</h3>
+            <p className="mt-0.5 line-clamp-1 text-[11.5px] text-slate-500">Made from a quotation — open a quote &amp; “Go to PI”</p>
           </div>
         </div>
 
-        <div className="relative mt-3.5 flex flex-wrap items-center gap-1">
+        <div className="relative mt-2.5 flex flex-wrap items-center gap-1">
           {steps.map((s, i) => (
             <React.Fragment key={s}>
               <span className="rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.02em]" style={{ background: `color-mix(in srgb, ${to} 11%, transparent)`, color: from }}>
@@ -487,13 +487,13 @@ function PiLinkCard() {
           ))}
         </div>
 
-        <div className="relative mt-3 flex items-baseline gap-1.5">
+        <div className="relative mt-2 flex items-baseline gap-1.5">
           <span className="text-[13px] font-semibold text-slate-400">Supply &amp; Installation invoice</span>
         </div>
 
-        <div className="relative mt-4">
+        <div className="relative mt-3">
           <span
-            className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
+            className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
             style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}aa` }}
           >
             <ReceiptText size={16} strokeWidth={2.4} /> Open PI
