@@ -157,6 +157,7 @@ export function SalesWorkspace({
   });
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalRow, setModalRow] = React.useState<SalesRow | null>(null);
+  const [prefill, setPrefill] = React.useState<Record<string, string> | null>(null);
   const [hubQuery, setHubQuery] = React.useState("");
 
   const current = FORMS.find((f) => f.key === active)!;
@@ -208,6 +209,7 @@ export function SalesWorkspace({
   function openForm(k: Kind) {
     setActive(k);
     setModalRow(null);
+    setPrefill(null);
     setModalOpen(true);
   }
   function openRegister(k: Kind) {
@@ -216,6 +218,15 @@ export function SalesWorkspace({
   }
   function openEdit(row: SalesRow) {
     setModalRow(row);
+    setPrefill(null);
+    setModalOpen(true);
+  }
+  // KYC "Next steps → Quote Status": open the Quote form pre-linked to this
+  // enquiry (its KYC auto-fetch then fills company/contact/etc.).
+  function goToQuoteFromKyc(enquiryNo: string) {
+    setActive("quote");
+    setModalRow(null);
+    setPrefill(enquiryNo ? { enquiryNo } : null);
     setModalOpen(true);
   }
   function onSaved(saved: SalesRow, opts: { close: boolean }) {
@@ -334,6 +345,8 @@ export function SalesWorkspace({
         onSaved={onSaved}
         kycByEnquiry={active === "kyc" ? undefined : kycByEnquiry}
         kycEnquiryOptions={active === "kyc" ? undefined : kycEnquiryOptions}
+        prefill={prefill}
+        onGoToQuote={goToQuoteFromKyc}
         from={current.from}
         to={current.to}
         Icon={current.icon}

@@ -24,10 +24,18 @@ import {
   Plus,
   Search,
   Check,
+  Receipt,
+  ReceiptText,
+  FileText,
+  ArrowRight,
   type LucideIcon,
   ClipboardList,
 } from "lucide-react";
+import Link from "next/link";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import { saveSalesRow, type SaleKind, type SalesRow } from "@/app/(app)/sales/actions";
+import { createQuotation } from "@/app/(app)/quotation/actions";
 import { fireToast } from "@/lib/toast";
 import type { SalesColDef } from "@/lib/sales/columns";
 
@@ -59,6 +67,8 @@ export function SalesEntryModal({
   onSaved,
   kycByEnquiry,
   kycEnquiryOptions,
+  prefill,
+  onGoToQuote,
   from = "#0069b3",
   to = "#0180cf",
   Icon = ClipboardList,
@@ -78,6 +88,10 @@ export function SalesEntryModal({
   kycByEnquiry?: Record<string, Record<string, string>>;
   /** Enquiry numbers (with company hint) for the Enquiry No picker. */
   kycEnquiryOptions?: { value: string; label: string }[];
+  /** Seed values for a NEW entry (e.g. opening Quote Status from a KYC record). */
+  prefill?: Record<string, string> | null;
+  /** KYC "Next steps" → open the Quote Status form pre-linked to this enquiry. */
+  onGoToQuote?: (enquiryNo: string) => void;
   from?: string;
   to?: string;
   Icon?: LucideIcon;
@@ -98,7 +112,7 @@ export function SalesEntryModal({
         >
           {open && (
             <FormBody
-              key={`${row?.id ?? "new"}-${nonce}`}
+              key={`${kind}-${row?.id ?? "new"}-${nonce}`}
               kind={kind}
               title={title}
               columns={columns}
@@ -107,6 +121,8 @@ export function SalesEntryModal({
               primaryKey={primaryKey}
               kycByEnquiry={kycByEnquiry}
               kycEnquiryOptions={kycEnquiryOptions}
+              prefill={prefill}
+              onGoToQuote={onGoToQuote}
               from={from}
               to={to}
               Icon={Icon}
@@ -134,6 +150,8 @@ function FormBody({
   primaryKey,
   kycByEnquiry,
   kycEnquiryOptions,
+  prefill,
+  onGoToQuote,
   from,
   to,
   Icon,
@@ -148,18 +166,29 @@ function FormBody({
   primaryKey?: string;
   kycByEnquiry?: Record<string, Record<string, string>>;
   kycEnquiryOptions?: { value: string; label: string }[];
+  prefill?: Record<string, string> | null;
+  onGoToQuote?: (enquiryNo: string) => void;
   from: string;
   to: string;
   Icon: LucideIcon;
   onSaved: (row: SalesRow, opts: { close: boolean }) => void;
   onCancel: () => void;
 }) {
+  const router = useRouter();
+  const [navPending, startNav] = React.useTransition();
   const editable = React.useMemo(() => columns.filter((c) => !c.readOnly), [columns]);
   const [vals, setVals] = React.useState<Record<string, FieldVal>>(() => {
     const o: Record<string, FieldVal> = {};
     for (const c of editable) {
       const v = row ? row[c.key] : null;
       o[c.key] = c.type === "bool" ? v === true || v === "true" : v == null ? "" : String(v);
+    }
+    // Seed a NEW entry with prefill values (e.g. Quote opened from a KYC), and
+    // auto-fill from KYC when the seeded Enquiry No matches.
+    if (!row && prefill) {
+      for (const [k, val] of Object.entries(prefill)) if (k in o) o[k] = val;
+      const kyc = prefill.enquiryNo && kycByEnquiry ? kycByEnquiry[prefill.enquiryNo.trim().toLowerCase()] : undefined;
+      if (kyc) for (const c of editable) { const f = kyc[c.key]; if (c.key !== "enquiryNo" && f != null) o[c.key] = f; }
     }
     return o;
   });
@@ -311,6 +340,47 @@ function FormBody({
           />
         ))}
       </div>
+
+      {/* ── Next steps (KYC only) — jump into the linked modules, carrying the
+          Enquiry No so the next screen is pre-filled from this KYC. ── */}
+      {kind === "kyc" && (
+        <div className="shrink-0 border-t border-slate-100 bg-[#f7fbff] px-6 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[12px] font-black uppercase tracking-[0.06em] text-slate-400">Next steps →</span>
+            <button
+              type="button"
+              disabled={navPending || !String(vals.enquiryNo ?? "").trim()}
+              onClick={() => {
+                const enquiryNo = String(vals.enquiryNo ?? "").trim();
+                const customer = String(vals.companyName ?? "").trim();
+                startNav(async () => {
+                  const { id } = await createQuotation({ enquiryNo, customer });
+                  router.push(`/quotation/${id}` as Route);
+                });
+              }}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[12.5px] font-extrabold text-white shadow-sm transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)" }}
+            >
+              {navPending ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />} Working Specification <ArrowRight size={13} strokeWidth={2.6} />
+            </button>
+            <button
+              type="button"
+              disabled={!String(vals.enquiryNo ?? "").trim()}
+              onClick={() => onGoToQuote?.(String(vals.enquiryNo ?? "").trim())}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#0180cf]/40 bg-[#0180cf]/8 px-3 text-[12.5px] font-extrabold text-[#0069b3] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <FileText size={14} /> Quote Status
+            </button>
+            <Link
+              href={"/quotation/pi" as Route}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[12.5px] font-extrabold text-slate-600 transition-all hover:-translate-y-0.5"
+            >
+              <ReceiptText size={14} /> PI
+            </Link>
+          </div>
+          <p className="mt-1 text-[11px] text-slate-400">Save the KYC first so it links across Quote, Offer &amp; PI.</p>
+        </div>
+      )}
 
       {/* ── footer (pinned — Submit / Save changes always reachable) ── */}
       <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-white px-6 py-4">
