@@ -220,7 +220,7 @@ export function SalesWorkspace({
                 No modules match “{hubQuery}”.
               </div>
             ) : (
-              <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
                 {forms.map((f) => (
                   <WindowCard key={f.key} form={f} count={countOf(f.key)} onForm={() => openForm(f.key)} onRegister={() => openRegister(f.key)} />
                 ))}
