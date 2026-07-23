@@ -107,6 +107,7 @@ export const salesKyc = pgTable(
     enquirySource: text("enquiry_source"), // Email / Existing Customer / Reference / Online …
     companyName: text("company_name"),
     companyAddress: text("company_address"),
+    billingAddress: text("billing_address"),
     deliveryAddress: text("delivery_address"),
     gstNo: text("gst_no"),
     contactPerson: text("contact_person"),

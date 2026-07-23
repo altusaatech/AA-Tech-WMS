@@ -29,6 +29,7 @@ export const KYC_COLUMNS: SalesColDef[] = [
   { key: "enquirySource", label: "Enquiry Source", type: "select", dynamic: true, allowCustom: true, options: ["Email", "Existing Customer", "Reference", "Online", "Exhibition", "Cold Call", "Walk-in"], width: 160 },
   { key: "companyName", label: "Company Name", type: "text", required: true, width: 190 },
   { key: "companyAddress", label: "Company Address", type: "text", width: 240 },
+  { key: "billingAddress", label: "Billing Address", type: "text", width: 240 },
   { key: "deliveryAddress", label: "Delivery Address", type: "text", width: 240 },
   { key: "gstNo", label: "GST Number", type: "text", width: 160 },
   { key: "contactPerson", label: "Contact Person Name", type: "text", width: 170 },

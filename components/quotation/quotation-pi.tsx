@@ -116,8 +116,15 @@ export function QuotationPi({
             <L label="Date"><input type="date" className={inp} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} /></L>
             <L label="Project"><input className={inp} value={project} onChange={(e) => setProject(e.target.value)} placeholder="Project" /></L>
             <L label="Customer (To)"><input className={inp} value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" /></L>
-            <L label="Customer Address"><textarea rows={2} className={`${inp} h-auto resize-y py-1.5`} value={piMeta.customerAddress} onChange={(e) => setPi("customerAddress", e.target.value)} placeholder="Plot, area, city - PIN" /></L>
-            <L label="Customer Contact"><input className={inp} value={piMeta.customerContact} onChange={(e) => setPi("customerContact", e.target.value)} placeholder="Mr. Name - 90000 00000" /></L>
+            <L label="Enquiry No (from KYC)"><input className={`${inp} bg-slate-50`} value={enquiryNo} readOnly title="Fetched from the linked enquiry / Customer KYC" placeholder="—" /></L>
+            <L label="Enquiry Source"><input className={inp} value={piMeta.enquirySource} onChange={(e) => setPi("enquirySource", e.target.value)} placeholder="Email / Reference…" /></L>
+            <L label="Company Address"><textarea rows={2} className={`${inp} h-auto resize-y py-1.5`} value={piMeta.customerAddress} onChange={(e) => setPi("customerAddress", e.target.value)} placeholder="Plot, area, city - PIN" /></L>
+            <L label="Billing Address"><textarea rows={2} className={`${inp} h-auto resize-y py-1.5`} value={piMeta.billingAddress} onChange={(e) => setPi("billingAddress", e.target.value)} placeholder="Billing address" /></L>
+            <L label="Delivery Address"><textarea rows={2} className={`${inp} h-auto resize-y py-1.5`} value={piMeta.deliveryAddress} onChange={(e) => setPi("deliveryAddress", e.target.value)} placeholder="Delivery address" /></L>
+            <L label="GST Number"><input className={inp} value={piMeta.customerGst} onChange={(e) => setPi("customerGst", e.target.value)} placeholder="27ABCDE1234F1Z5" /></L>
+            <L label="Contact Person"><input className={inp} value={piMeta.customerContactPerson} onChange={(e) => setPi("customerContactPerson", e.target.value)} placeholder="Mr. Name" /></L>
+            <L label="Mobile Number"><input className={inp} value={piMeta.customerMobile} onChange={(e) => setPi("customerMobile", e.target.value)} placeholder="90000 00000" /></L>
+            <L label="Email ID"><input className={inp} value={piMeta.customerEmail} onChange={(e) => setPi("customerEmail", e.target.value)} placeholder="name@company.com" /></L>
             <L label="Customer Ref Date"><input type="date" className={inp} value={piMeta.customerRefDate} onChange={(e) => setPi("customerRefDate", e.target.value)} /></L>
             <L label="HSN Code"><input className={inp} value={piMeta.hsnCode} onChange={(e) => setPi("hsnCode", e.target.value)} placeholder="73083000" /></L>
             <L label="Terms of Delivery"><input className={inp} value={piMeta.termsDelivery} onChange={(e) => setPi("termsDelivery", e.target.value)} /></L>
@@ -194,7 +201,7 @@ export function QuotationPi({
       </main>
 
       {/* ── print ── */}
-      <PiPrint header={{ offerNo, quoteDate, project, customer, subject }} piMeta={piMeta} lines={lines} totals={totals} />
+      <PiPrint header={{ enquiryNo, offerNo, quoteDate, project, customer, subject }} piMeta={piMeta} lines={lines} totals={totals} />
     </>
   );
 }
@@ -206,7 +213,7 @@ function PiPrint({
   lines,
   totals,
 }: {
-  header: { offerNo: string; quoteDate: string; project: string; customer: string; subject: string };
+  header: { enquiryNo: string; offerNo: string; quoteDate: string; project: string; customer: string; subject: string };
   piMeta: PiMeta;
   lines: DoorLine[];
   totals: ReturnType<typeof computePiTotals>;
@@ -244,15 +251,21 @@ function PiPrint({
             <td className={c} style={{ width: "52%" }}>
               <div style={{ fontSize: 8, color: "#64748b" }}>To,</div>
               <div style={{ fontWeight: 700 }}>{header.customer || "—"}</div>
-              <div style={{ whiteSpace: "pre-line" }}>{piMeta.customerAddress}</div>
-              {piMeta.customerContact && <div>Contact: {piMeta.customerContact}</div>}
+              {piMeta.customerAddress && <div style={{ whiteSpace: "pre-line" }}>{piMeta.customerAddress}</div>}
+              {piMeta.billingAddress && <div><b>Billing:</b> {piMeta.billingAddress}</div>}
+              {piMeta.deliveryAddress && <div><b>Delivery:</b> {piMeta.deliveryAddress}</div>}
+              {piMeta.customerGst && <div><b>GST:</b> {piMeta.customerGst}</div>}
+              {(piMeta.customerContactPerson || piMeta.customerMobile) && (
+                <div><b>Contact:</b> {[piMeta.customerContactPerson, piMeta.customerMobile].filter((v) => v && v.trim()).join(" - ")}</div>
+              )}
+              {piMeta.customerEmail && <div><b>Email:</b> {piMeta.customerEmail}</div>}
             </td>
             <td className={c} style={{ padding: 0 }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <tbody>
                   <tr><td className={c}>Offer Ref:</td><td className={c}><b>{header.offerNo || "—"}</b></td><td className={c}>Date:</td><td className={c}>{header.quoteDate || "—"}</td></tr>
-                  <tr><td className={c}>Customer Reference:</td><td className={c}>Email</td><td className={c}>Date:</td><td className={c}>{piMeta.customerRefDate || "—"}</td></tr>
-                  <tr><td className={c} colSpan={4}>Other Reference: -</td></tr>
+                  <tr><td className={c}>Enquiry No:</td><td className={c}><b>{header.enquiryNo || "—"}</b></td><td className={c}>Source:</td><td className={c}>{piMeta.enquirySource || "—"}</td></tr>
+                  <tr><td className={c}>Customer Ref Date:</td><td className={c} colSpan={3}>{piMeta.customerRefDate || "—"}</td></tr>
                 </tbody>
               </table>
             </td>

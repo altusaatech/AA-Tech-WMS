@@ -242,12 +242,27 @@ export interface PiMeta {
   termsPayment: string;
   hsnCode: string;
   freightNote: string;
+  // ── Auto-fetched from Customer KYC (by the quotation's Enquiry No) ──
+  enquirySource: string;
+  customerGst: string;
+  billingAddress: string;
+  deliveryAddress: string;
+  customerContactPerson: string;
+  customerMobile: string;
+  customerEmail: string;
 }
 
 export const DEFAULT_PI_META: PiMeta = {
   customerAddress: "",
   customerContact: "",
   customerRefDate: "",
+  enquirySource: "",
+  customerGst: "",
+  billingAddress: "",
+  deliveryAddress: "",
+  customerContactPerson: "",
+  customerMobile: "",
+  customerEmail: "",
   termsDelivery: "Within 3-4 weeks from the date of Technical & Commercial PO with Advance.",
   modeShipping: "By road",
   termsPayment: "60% Advance against Purchase Order, 40% against prior to dispatch.",

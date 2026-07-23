@@ -182,6 +182,7 @@ export function SalesWorkspace({
       set("enquiryType", k.enquiryType);
       set("gstNo", k.gstNo);
       set("companyAddress", k.companyAddress);
+      set("billingAddress", k.billingAddress);
       set("deliveryAddress", k.deliveryAddress);
       set("personName", k.contactPerson);
       set("contactPerson", k.contactPerson);

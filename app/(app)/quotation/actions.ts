@@ -8,7 +8,16 @@ import type { DoorLine, QuotationHeader, PiMeta } from "@/lib/quotation/types";
 
 export async function createQuotation(): Promise<{ id: string }> {
   await requireUser();
-  const [row] = await db.insert(quotations).values({ updatedAt: new Date() }).returning({ id: quotations.id });
+  // Auto-assign the next Offer No (continue the existing numeric sequence, else
+  // start at a base) so the Working Specification needs no manual offer entry.
+  const rows = await db.select({ offerNo: quotations.offerNo }).from(quotations);
+  let max = 0;
+  for (const r of rows) {
+    const m = String(r.offerNo ?? "").match(/\d+/);
+    if (m) max = Math.max(max, parseInt(m[0], 10));
+  }
+  const offerNo = String(max > 0 ? max + 1 : 1001);
+  const [row] = await db.insert(quotations).values({ offerNo, updatedAt: new Date() }).returning({ id: quotations.id });
   return { id: row!.id };
 }
 
