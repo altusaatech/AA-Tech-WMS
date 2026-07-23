@@ -57,6 +57,8 @@ export function SalesEntryModal({
   existingRows,
   primaryKey,
   onSaved,
+  kycByEnquiry,
+  kycEnquiryOptions,
   from = "#0069b3",
   to = "#0180cf",
   Icon = ClipboardList,
@@ -71,6 +73,11 @@ export function SalesEntryModal({
   primaryKey?: string;
   /** Update parent data; `close` true → plain Save (go to register), false → Save & New. */
   onSaved: (row: SalesRow, opts: { close: boolean }) => void;
+  /** Enquiry No (lower-cased) → KYC field values, keyed by register column. When
+   *  the form's Enquiry No matches, those columns auto-fill from Customer KYC. */
+  kycByEnquiry?: Record<string, Record<string, string>>;
+  /** Enquiry numbers (with company hint) for the Enquiry No picker. */
+  kycEnquiryOptions?: { value: string; label: string }[];
   from?: string;
   to?: string;
   Icon?: LucideIcon;
@@ -98,6 +105,8 @@ export function SalesEntryModal({
               row={row}
               existingRows={existingRows}
               primaryKey={primaryKey}
+              kycByEnquiry={kycByEnquiry}
+              kycEnquiryOptions={kycEnquiryOptions}
               from={from}
               to={to}
               Icon={Icon}
@@ -123,6 +132,8 @@ function FormBody({
   row,
   existingRows,
   primaryKey,
+  kycByEnquiry,
+  kycEnquiryOptions,
   from,
   to,
   Icon,
@@ -135,6 +146,8 @@ function FormBody({
   row: SalesRow | null;
   existingRows: SalesRow[];
   primaryKey?: string;
+  kycByEnquiry?: Record<string, Record<string, string>>;
+  kycEnquiryOptions?: { value: string; label: string }[];
   from: string;
   to: string;
   Icon: LucideIcon;
@@ -277,8 +290,22 @@ function FormBody({
             error={errors[c.key]}
             accent={to}
             options={c.type === "select" ? optionsFor(c) : undefined}
+            datalist={c.key === "enquiryNo" && kycEnquiryOptions?.length ? kycEnquiryOptions : undefined}
             onChange={(v) => {
-              setVals((s) => ({ ...s, [c.key]: v }));
+              setVals((s) => {
+                const next = { ...s, [c.key]: v };
+                // Fetch from Customer KYC: typing/picking an Enquiry No that
+                // exists in KYC fills every column this register shares with it.
+                if (c.key === "enquiryNo" && kycByEnquiry) {
+                  const kyc = kycByEnquiry[String(v).trim().toLowerCase()];
+                  if (kyc)
+                    for (const col of editable) {
+                      const filled = kyc[col.key];
+                      if (col.key !== "enquiryNo" && filled != null) next[col.key] = filled;
+                    }
+                }
+                return next;
+              });
               if (errors[c.key]) setErrors((e) => ({ ...e, [c.key]: "" }));
             }}
           />
@@ -375,6 +402,7 @@ function Field({
   error,
   accent,
   options,
+  datalist,
   onChange,
 }: {
   col: SalesColDef;
@@ -382,6 +410,8 @@ function Field({
   error?: string;
   accent: string;
   options?: string[];
+  /** Type-ahead suggestions (used for the KYC Enquiry No picker). */
+  datalist?: { value: string; label: string }[];
   onChange: (v: FieldVal) => void;
 }) {
   const id = `salesf-${col.key}`;
@@ -429,17 +459,27 @@ function Field({
             onOpenChange={(o) => setFocused(o)}
           />
         ) : (
-          <input
-            id={id}
-            type={col.type === "number" ? "number" : col.type === "date" ? "date" : col.type === "url" ? "url" : "text"}
-            value={typeof value === "string" ? value : ""}
-            placeholder={col.type === "url" ? "https://…" : col.type === "number" ? "0" : `Enter ${col.label.toLowerCase()}`}
-            onChange={(e) => onChange(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            className={inputBase}
-            style={ringStyle}
-          />
+          <>
+            <input
+              id={id}
+              list={datalist ? `${id}-kyc` : undefined}
+              type={col.type === "number" ? "number" : col.type === "date" ? "date" : col.type === "url" ? "url" : "text"}
+              value={typeof value === "string" ? value : ""}
+              placeholder={col.type === "url" ? "https://…" : col.type === "number" ? "0" : `Enter ${col.label.toLowerCase()}`}
+              onChange={(e) => onChange(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              className={inputBase}
+              style={ringStyle}
+            />
+            {datalist && (
+              <datalist id={`${id}-kyc`}>
+                {datalist.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </datalist>
+            )}
+          </>
         )}
       </div>
 

@@ -163,6 +163,47 @@ export function SalesWorkspace({
   const rows = rowsByKind[active];
   const countOf = (k: Kind) => rowsByKind[k].length;
 
+  // KYC → register auto-fill. Keyed by Enquiry No (trimmed/lower-cased); each
+  // entry maps a KYC record onto the column keys the registers actually use
+  // (e.g. KYC.contactPerson → personName, KYC.mobileNo → cellNo). A register
+  // entry form fills any of these columns it has when its Enquiry No matches.
+  const kycByEnquiry = React.useMemo(() => {
+    const out: Record<string, Record<string, string>> = {};
+    for (const k of rowsByKind.kyc) {
+      const key = String(k.enquiryNo ?? "").trim().toLowerCase();
+      if (!key) continue;
+      const f: Record<string, string> = {};
+      const set = (col: string, v: unknown) => {
+        const s = v == null ? "" : String(v).trim();
+        if (s) f[col] = s;
+      };
+      set("companyName", k.companyName);
+      set("enquirySource", k.enquirySource);
+      set("enquiryType", k.enquiryType);
+      set("gstNo", k.gstNo);
+      set("companyAddress", k.companyAddress);
+      set("deliveryAddress", k.deliveryAddress);
+      set("personName", k.contactPerson);
+      set("contactPerson", k.contactPerson);
+      set("cellNo", k.mobileNo);
+      set("mobileNo", k.mobileNo);
+      set("email", k.email);
+      set("product", k.productDetails);
+      set("productDetails", k.productDetails);
+      out[key] = f;
+    }
+    return out;
+  }, [rowsByKind.kyc]);
+  // Enquiry-number options (with company as the hint) for the register form's
+  // Enquiry No picker.
+  const kycEnquiryOptions = React.useMemo(
+    () =>
+      rowsByKind.kyc
+        .map((k) => ({ value: String(k.enquiryNo ?? "").trim(), label: String(k.companyName ?? "").trim() }))
+        .filter((o) => o.value),
+    [rowsByKind.kyc],
+  );
+
   function openForm(k: Kind) {
     setActive(k);
     setModalRow(null);
@@ -290,6 +331,8 @@ export function SalesWorkspace({
         existingRows={rows}
         primaryKey={current.primaryKey}
         onSaved={onSaved}
+        kycByEnquiry={active === "kyc" ? undefined : kycByEnquiry}
+        kycEnquiryOptions={active === "kyc" ? undefined : kycEnquiryOptions}
         from={current.from}
         to={current.to}
         Icon={current.icon}
