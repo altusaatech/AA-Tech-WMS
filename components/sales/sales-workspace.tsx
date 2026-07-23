@@ -236,7 +236,7 @@ export function SalesWorkspace({
                 No modules match “{hubQuery}”.
               </div>
             ) : (
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+              <div className="mt-4 grid auto-rows-fr grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
                 {forms.map((f) => (
                   <WindowCard key={f.key} form={f} count={countOf(f.key)} onForm={() => openForm(f.key)} onRegister={() => openRegister(f.key)} />
                 ))}
@@ -311,43 +311,39 @@ function WindowCard({
   onRegister: () => void;
 }) {
   const Icon = form.icon;
+  const grad = `linear-gradient(135deg, ${form.from}, ${form.to})`;
   return (
-    <div className="group relative">
+    <div className="group relative h-full">
       {/* glow halo (fades in on hover) */}
       <div
         aria-hidden
-        className="absolute -inset-0.5 rounded-[26px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-50"
-        style={{ background: `linear-gradient(135deg, ${form.from}, ${form.to})` }}
+        className="absolute -inset-0.5 rounded-[24px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-60"
+        style={{ background: grad }}
       />
 
-      {/* card */}
+      {/* card — solid green→blue gradient, flex-col so the buttons pin to the bottom */}
       <div
-        className="relative overflow-hidden rounded-[20px] border border-white/70 bg-white/80 p-4 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1"
-        style={{ boxShadow: "0 14px 36px -20px rgba(15,40,80,0.30), 0 1px 4px rgba(15,23,42,0.04)" }}
+        className="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-white/25 p-4 text-white transition-all duration-300 group-hover:-translate-y-1"
+        style={{ background: grad, boxShadow: "0 16px 34px -18px rgba(1,128,207,0.55)" }}
       >
-        {/* top accent bar */}
-        <div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${form.from}, ${form.to})` }} />
-
+        {/* glossy top sheen */}
+        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 46%)" }} />
         {/* shine sweep on hover */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-0 w-2/3 -translate-x-[180%] -skew-x-12 bg-gradient-to-r from-transparent via-white/55 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]"
+          className="pointer-events-none absolute inset-y-0 left-0 w-2/3 -translate-x-[180%] -skew-x-12 bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]"
         />
-
         {/* faint corner watermark icon */}
-        <Icon className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={92} strokeWidth={1.4} style={{ opacity: 0.04 }} />
+        <Icon className="pointer-events-none absolute -bottom-5 -right-5 text-white" size={92} strokeWidth={1.4} style={{ opacity: 0.1 }} />
 
         {/* header */}
         <div className="relative flex items-start gap-3">
-          <span
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
-            style={{ background: `linear-gradient(135deg, ${form.from}, ${form.to})`, boxShadow: `0 10px 22px -10px ${form.to}cc` }}
-          >
+          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white ring-1 ring-white/30 transition-transform duration-300 group-hover:scale-105">
             <Icon size={19} strokeWidth={2.3} />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-black tracking-[-0.01em] text-slate-800">{form.label}</h3>
-            <p className="mt-0.5 line-clamp-1 text-[11.5px] text-slate-500">{form.desc}</p>
+            <h3 className="text-[15px] font-black tracking-[-0.01em] text-white">{form.label}</h3>
+            <p className="mt-0.5 line-clamp-1 text-[11.5px] text-white/80">{form.desc}</p>
           </div>
         </div>
 
@@ -355,38 +351,31 @@ function WindowCard({
         <div className="relative mt-2.5 flex flex-wrap items-center gap-1">
           {form.steps.map((s, i) => (
             <React.Fragment key={s}>
-              <span
-                className="rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.02em]"
-                style={{ background: `color-mix(in srgb, ${form.to} 11%, transparent)`, color: form.to }}
-              >
-                {s}
-              </span>
-              {i < form.steps.length - 1 && <ChevronRight size={11} className="text-slate-300" strokeWidth={3} />}
+              <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.02em] text-white">{s}</span>
+              {i < form.steps.length - 1 && <ChevronRight size={11} className="text-white/50" strokeWidth={3} />}
             </React.Fragment>
           ))}
         </div>
 
         {/* count */}
         <div className="relative mt-2 flex items-baseline gap-1.5">
-          <span className="text-[18px] font-black tabular-nums" style={{ color: form.to }}>{count}</span>
-          <span className="text-[12px] font-semibold text-slate-400">{count === 1 ? "entry" : "entries"} stored</span>
+          <span className="text-[18px] font-black tabular-nums text-white">{count}</span>
+          <span className="text-[12px] font-semibold text-white/70">{count === 1 ? "entry" : "entries"} stored</span>
         </div>
 
-        {/* actions */}
-        <div className="relative mt-3 grid grid-cols-2 gap-2">
+        {/* actions — mt-auto pins them to the bottom so every card lines up */}
+        <div className="relative mt-auto grid grid-cols-2 gap-2 pt-3">
           <button
             type="button"
             onClick={onForm}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border-2 text-[13.5px] font-extrabold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
-            style={{ borderColor: `color-mix(in srgb, ${form.to} 35%, transparent)`, color: form.to, background: `color-mix(in srgb, ${form.from} 6%, transparent)` }}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-white/40 bg-white/15 text-[13.5px] font-extrabold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/25 active:translate-y-0"
           >
             <FilePlus2 size={16} strokeWidth={2.4} /> Form
           </button>
           <button
             type="button"
             onClick={onRegister}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
-            style={{ background: `linear-gradient(135deg, ${form.from}, ${form.to})`, boxShadow: `0 10px 22px -10px ${form.to}aa` }}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-white text-[13.5px] font-extrabold text-[#0069b3] shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
           >
             <Table2 size={16} strokeWidth={2.4} /> Register
             <ArrowRight size={14} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -399,57 +388,46 @@ function WindowCard({
 
 /* ── Quotation launcher card (links into the Quotation builder) ── */
 function QuotationLinkCard() {
-  const from = "#63b81e";
-  const to = "#0180cf";
+  const grad = "linear-gradient(135deg, #63b81e, #0180cf)";
   const steps = ["Doors", "Hardware", "Print"];
   return (
-    <Link href={"/quotation" as Route} className="group relative block">
+    <Link href={"/quotation" as Route} className="group relative block h-full">
       <div
         aria-hidden
-        className="absolute -inset-0.5 rounded-[26px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-50"
-        style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+        className="absolute -inset-0.5 rounded-[24px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-60"
+        style={{ background: grad }}
       />
       <div
-        className="relative overflow-hidden rounded-[20px] border border-white/70 bg-white/80 p-4 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1"
-        style={{ boxShadow: "0 14px 36px -20px rgba(15,40,80,0.30), 0 1px 4px rgba(15,23,42,0.04)" }}
+        className="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-white/25 p-4 text-white transition-all duration-300 group-hover:-translate-y-1"
+        style={{ background: grad, boxShadow: "0 16px 34px -18px rgba(1,128,207,0.55)" }}
       >
-        <div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
-        <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-2/3 -translate-x-[180%] -skew-x-12 bg-gradient-to-r from-transparent via-white/55 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
-        <Receipt className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={92} strokeWidth={1.4} style={{ opacity: 0.04 }} />
+        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 46%)" }} />
+        <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-2/3 -translate-x-[180%] -skew-x-12 bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
+        <Receipt className="pointer-events-none absolute -bottom-5 -right-5 text-white" size={92} strokeWidth={1.4} style={{ opacity: 0.1 }} />
 
         <div className="relative flex items-start gap-3">
-          <span
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
-            style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}cc` }}
-          >
+          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white ring-1 ring-white/30 transition-transform duration-300 group-hover:scale-105">
             <Receipt size={19} strokeWidth={2.3} />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-black tracking-[-0.01em] text-slate-800">Working Specification</h3>
-            <p className="mt-0.5 line-clamp-1 text-[11.5px] text-slate-500">Build & print door specifications from the masters</p>
+            <h3 className="text-[15px] font-black tracking-[-0.01em] text-white">Working Specification</h3>
+            <p className="mt-0.5 line-clamp-1 text-[11.5px] text-white/80">Build &amp; print door specifications from the masters</p>
           </div>
         </div>
 
         <div className="relative mt-2.5 flex flex-wrap items-center gap-1">
           {steps.map((s, i) => (
             <React.Fragment key={s}>
-              <span className="rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.02em]" style={{ background: `color-mix(in srgb, ${to} 11%, transparent)`, color: from }}>
-                {s}
-              </span>
-              {i < steps.length - 1 && <ChevronRight size={11} className="text-slate-300" strokeWidth={3} />}
+              <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.02em] text-white">{s}</span>
+              {i < steps.length - 1 && <ChevronRight size={11} className="text-white/50" strokeWidth={3} />}
             </React.Fragment>
           ))}
         </div>
 
-        <div className="relative mt-2 flex items-baseline gap-1.5">
-          <span className="text-[13px] font-semibold text-slate-400">Looks up Product & Hardware</span>
-        </div>
+        <div className="relative mt-2 text-[12px] font-semibold text-white/70">Looks up Product &amp; Hardware</div>
 
-        <div className="relative mt-3">
-          <span
-            className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
-            style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}aa` }}
-          >
+        <div className="relative mt-auto pt-3">
+          <span className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-white text-[13.5px] font-extrabold text-[#0069b3] shadow-md transition-all duration-200 group-hover:-translate-y-0.5">
             <Receipt size={16} strokeWidth={2.4} /> Open Working Specification
             <ArrowRight size={14} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-0.5" />
           </span>
@@ -461,57 +439,46 @@ function QuotationLinkCard() {
 
 /* ── PI launcher card (Proforma Invoice — made from a quotation) ── */
 function PiLinkCard() {
-  const from = "#63b81e";
-  const to = "#0180cf";
+  const grad = "linear-gradient(135deg, #63b81e, #0180cf)";
   const steps = ["Quote", "Fill", "Print"];
   return (
-    <Link href={"/quotation/pi" as Route} className="group relative block">
+    <Link href={"/quotation/pi" as Route} className="group relative block h-full">
       <div
         aria-hidden
-        className="absolute -inset-0.5 rounded-[26px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-50"
-        style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+        className="absolute -inset-0.5 rounded-[24px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-60"
+        style={{ background: grad }}
       />
       <div
-        className="relative overflow-hidden rounded-[20px] border border-white/70 bg-white/80 p-4 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1"
-        style={{ boxShadow: "0 14px 36px -20px rgba(15,40,80,0.30), 0 1px 4px rgba(15,23,42,0.04)" }}
+        className="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-white/25 p-4 text-white transition-all duration-300 group-hover:-translate-y-1"
+        style={{ background: grad, boxShadow: "0 16px 34px -18px rgba(1,128,207,0.55)" }}
       >
-        <div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${from}, ${to})` }} />
-        <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-2/3 -translate-x-[180%] -skew-x-12 bg-gradient-to-r from-transparent via-white/55 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
-        <ReceiptText className="pointer-events-none absolute -bottom-5 -right-5 text-slate-900" size={92} strokeWidth={1.4} style={{ opacity: 0.04 }} />
+        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 46%)" }} />
+        <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-2/3 -translate-x-[180%] -skew-x-12 bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[260%]" />
+        <ReceiptText className="pointer-events-none absolute -bottom-5 -right-5 text-white" size={92} strokeWidth={1.4} style={{ opacity: 0.1 }} />
 
         <div className="relative flex items-start gap-3">
-          <span
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
-            style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}cc` }}
-          >
+          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white ring-1 ring-white/30 transition-transform duration-300 group-hover:scale-105">
             <ReceiptText size={19} strokeWidth={2.3} />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-black tracking-[-0.01em] text-slate-800">PI · Proforma Invoice</h3>
-            <p className="mt-0.5 line-clamp-1 text-[11.5px] text-slate-500">Made from a quotation — open a quote &amp; “Go to PI”</p>
+            <h3 className="text-[15px] font-black tracking-[-0.01em] text-white">PI · Proforma Invoice</h3>
+            <p className="mt-0.5 line-clamp-1 text-[11.5px] text-white/80">Made from a quotation — open a quote &amp; “Go to PI”</p>
           </div>
         </div>
 
         <div className="relative mt-2.5 flex flex-wrap items-center gap-1">
           {steps.map((s, i) => (
             <React.Fragment key={s}>
-              <span className="rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.02em]" style={{ background: `color-mix(in srgb, ${to} 11%, transparent)`, color: from }}>
-                {s}
-              </span>
-              {i < steps.length - 1 && <ChevronRight size={11} className="text-slate-300" strokeWidth={3} />}
+              <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.02em] text-white">{s}</span>
+              {i < steps.length - 1 && <ChevronRight size={11} className="text-white/50" strokeWidth={3} />}
             </React.Fragment>
           ))}
         </div>
 
-        <div className="relative mt-2 flex items-baseline gap-1.5">
-          <span className="text-[13px] font-semibold text-slate-400">Supply &amp; Installation invoice</span>
-        </div>
+        <div className="relative mt-2 text-[12px] font-semibold text-white/70">Supply &amp; Installation invoice</div>
 
-        <div className="relative mt-3">
-          <span
-            className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg text-[13.5px] font-extrabold text-white shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
-            style={{ background: `linear-gradient(135deg, ${from}, ${to})`, boxShadow: `0 10px 22px -10px ${to}aa` }}
-          >
+        <div className="relative mt-auto pt-3">
+          <span className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-white text-[13.5px] font-extrabold text-[#0069b3] shadow-md transition-all duration-200 group-hover:-translate-y-0.5">
             <ReceiptText size={16} strokeWidth={2.4} /> Open PI
             <ArrowRight size={14} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-0.5" />
           </span>

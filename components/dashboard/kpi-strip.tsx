@@ -35,7 +35,7 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
   return (
     <section className="mt-8 mx-auto max-w-[1600px] px-12 max-md:px-4" aria-label="Task summary">
       <div
-        className="grid grid-cols-6 gap-3 max-md:grid-cols-3 max-sm:grid-cols-2"
+        className="grid auto-rows-fr grid-cols-6 gap-3 max-md:grid-cols-3 max-sm:grid-cols-2"
         role="list"
       >
         {ITEMS.map((item) => {
@@ -47,9 +47,9 @@ export function KpiStrip({ kpis, summary }: { kpis: KpiSet; summary: WmsSummary 
           const isOpen = expanded === item.key;
 
           return (
-            <div role="listitem" key={item.key}>
+            <div role="listitem" key={item.key} className="h-full">
               <div
-                className="group relative overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1"
+                className="group relative flex h-full flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1"
                 style={{
                   background: "linear-gradient(135deg, #63b81e, #0180cf)",
                   border: "1px solid rgba(255,255,255,0.25)",
