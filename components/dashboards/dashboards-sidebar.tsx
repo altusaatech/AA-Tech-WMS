@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { Inbox, FileText, FileCheck2, Factory, HeartPulse, LayoutGrid, Headset, ArrowRight, type LucideIcon } from "lucide-react";
+import { Inbox, FileText, FileCheck2, Factory, HeartPulse, LayoutGrid, Headset, ArrowRight, Target, Gauge, type LucideIcon } from "lucide-react";
 
 interface Item {
   href: string;
@@ -12,6 +12,8 @@ interface Item {
 }
 
 const ITEMS: Item[] = [
+  { href: "/dashboards/dashboard-1", label: "Dashboard 1 · Quote Status", Icon: Target },
+  { href: "/dashboards/dashboard-2", label: "Dashboard 2 · SO Status", Icon: Gauge },
   { href: "/dashboards/enquiry", label: "Enquiry Dashboard", Icon: Inbox },
   { href: "/dashboards/quotation", label: "Quotation Dashboard", Icon: FileText },
   { href: "/dashboards/sales-order", label: "Sales Order Dashboard", Icon: FileCheck2 },

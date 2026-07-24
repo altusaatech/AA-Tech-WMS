@@ -3,7 +3,7 @@ import type { Route } from "next";
 
 export const dynamic = "force-dynamic";
 
-// The dashboards section now opens on the Enquiry dashboard (left-nav shell).
+// The dashboards section opens on Dashboard 1 (Quote Status) — the top item.
 export default function DashboardsIndex() {
-  redirect("/dashboards/enquiry" as Route);
+  redirect("/dashboards/dashboard-1" as Route);
 }
