@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { Inbox, FileText, FileCheck2, Factory, HeartPulse, LayoutGrid, Headset, ArrowRight, LayoutDashboard, Gauge, type LucideIcon } from "lucide-react";
+import { LayoutGrid, Headset, ArrowRight, LayoutDashboard, Gauge, type LucideIcon } from "lucide-react";
 
 interface Item {
   href: string;
@@ -11,14 +11,10 @@ interface Item {
   Icon: LucideIcon;
 }
 
+// Only the dashboards created for this build remain.
 const ITEMS: Item[] = [
   { href: "/dashboards/dashboard-1", label: "New Dashboard", Icon: LayoutDashboard },
   { href: "/dashboards/dashboard-2", label: "Dashboard 2", Icon: Gauge },
-  { href: "/dashboards/enquiry", label: "Enquiry Dashboard", Icon: Inbox },
-  { href: "/dashboards/quotation", label: "Quotation Dashboard", Icon: FileText },
-  { href: "/dashboards/sales-order", label: "Sales Order Dashboard", Icon: FileCheck2 },
-  { href: "/dashboards/production", label: "Production Dashboard", Icon: Factory },
-  { href: "/dashboards/hygiene", label: "Hygiene Dashboard", Icon: HeartPulse },
 ];
 
 // Exact header nav gradient — the green→blue mix used across the app.
