@@ -67,6 +67,7 @@ export function SalesDataGrid({
   columns,
   rows,
   onEdit,
+  onEditKyc,
   onDeleted,
   onImported,
   from = "#0069b3",
@@ -79,6 +80,8 @@ export function SalesDataGrid({
   columns: SalesColDef[];
   rows: SalesRow[];
   onEdit: (row: SalesRow) => void;
+  /** Edit the linked Customer KYC record (second pen) — shown when a row has one. */
+  onEditKyc?: (row: SalesRow) => void;
   onDeleted: (id: string) => void;
   onImported: (rows: SalesRow[]) => void;
   from?: string;
@@ -553,10 +556,23 @@ export function SalesDataGrid({
                             onEdit(row);
                           }}
                           className="rounded-lg p-1.5 text-slate-400 transition-all hover:-translate-y-0.5 hover:bg-[#0180cf]/10 hover:text-[#0069b3]"
-                          title="Edit"
+                          title={onEditKyc ? "Edit Quote Status" : "Edit"}
                         >
                           <Pencil size={14} />
                         </button>
+                        {onEditKyc && row.__kycId != null && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditKyc(row);
+                            }}
+                            className="rounded-lg p-1.5 text-[#63b81e] transition-all hover:-translate-y-0.5 hover:bg-[#63b81e]/12 hover:text-[#3f7a14]"
+                            title="Edit Customer KYC"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={(e) => del(e, row.id)}

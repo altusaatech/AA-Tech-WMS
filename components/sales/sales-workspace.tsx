@@ -161,10 +161,14 @@ export function SalesWorkspace({
   });
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalRow, setModalRow] = React.useState<SalesRow | null>(null);
+  // The modal can edit a DIFFERENT kind than the active register (e.g. edit the
+  // linked Customer KYC record from the Quote Status register).
+  const [modalKind, setModalKind] = React.useState<Kind>("kyc");
   const [prefill, setPrefill] = React.useState<Record<string, string> | null>(null);
   const [hubQuery, setHubQuery] = React.useState("");
 
   const current = FORMS.find((f) => f.key === active)!;
+  const modalCfg = FORMS.find((f) => f.key === modalKind)!;
   const rows = rowsByKind[active];
   const countOf = (k: Kind) => rowsByKind[k].length;
 
@@ -224,6 +228,7 @@ export function SalesWorkspace({
       if (!kyc) return qr;
       const merged: SalesRow = { ...qr };
       for (const c of KYC_EXTRA_FOR_QUOTE) merged[c.key] = (kyc[c.key] ?? null) as string | number | boolean | null;
+      merged.__kycId = kyc.id; // link back to the KYC record for its edit pen
       return merged;
     });
     const columns: SalesColDef[] = [...QUOTE_COLUMNS, QUOTE_GAP_COL, ...KYC_EXTRA_FOR_QUOTE];
@@ -237,6 +242,7 @@ export function SalesWorkspace({
 
   function openForm(k: Kind) {
     setActive(k);
+    setModalKind(k);
     setModalRow(null);
     setPrefill(null);
     setModalOpen(true);
@@ -246,7 +252,18 @@ export function SalesWorkspace({
     setView("register");
   }
   function openEdit(row: SalesRow) {
+    setModalKind(active);
     setModalRow(row);
+    setPrefill(null);
+    setModalOpen(true);
+  }
+  // Edit the linked Customer KYC record straight from the Quote Status register.
+  function openEditKyc(quoteRow: SalesRow) {
+    const kycId = quoteRow.__kycId;
+    const kyc = kycId ? rowsByKind.kyc.find((k) => k.id === kycId) : undefined;
+    if (!kyc) return;
+    setModalKind("kyc");
+    setModalRow(kyc);
     setPrefill(null);
     setModalOpen(true);
   }
@@ -254,20 +271,23 @@ export function SalesWorkspace({
   // enquiry (its KYC auto-fetch then fills company/contact/etc.).
   function goToQuoteFromKyc(enquiryNo: string) {
     setActive("quote");
+    setModalKind("quote");
     setModalRow(null);
     setPrefill(enquiryNo ? { enquiryNo } : null);
     setModalOpen(true);
   }
   function onSaved(saved: SalesRow, opts: { close: boolean }) {
+    // Save into the kind the modal is editing (which may differ from `active`
+    // when editing the linked KYC from the Quote register).
     setRowsByKind((prev) => {
-      const list = prev[active];
+      const list = prev[modalKind];
       const i = list.findIndex((r) => r.id === saved.id);
       const next = i >= 0 ? list.map((r) => (r.id === saved.id ? saved : r)) : [...list, saved];
-      return { ...prev, [active]: next };
+      return { ...prev, [modalKind]: next };
     });
     if (opts.close) {
       setModalOpen(false);
-      setView("register");
+      if (modalKind === active) setView("register");
     }
   }
   function onDeleted(id: string) {
@@ -365,6 +385,7 @@ export function SalesWorkspace({
             rows={active === "quote" ? quoteView.rows : rows}
             groups={active === "quote" ? quoteView.groups : undefined}
             onEdit={openEdit}
+            onEditKyc={active === "quote" ? openEditKyc : undefined}
             onDeleted={onDeleted}
             onImported={onImported}
             from={current.from}
@@ -377,20 +398,20 @@ export function SalesWorkspace({
       <SalesEntryModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        kind={active}
-        title={current.label}
-        columns={current.columns}
+        kind={modalKind}
+        title={modalCfg.label}
+        columns={modalCfg.columns}
         row={modalRow}
-        existingRows={rows}
-        primaryKey={current.primaryKey}
+        existingRows={rowsByKind[modalKind]}
+        primaryKey={modalCfg.primaryKey}
         onSaved={onSaved}
-        kycByEnquiry={active === "kyc" ? undefined : kycByEnquiry}
-        kycEnquiryOptions={active === "kyc" ? undefined : kycEnquiryOptions}
+        kycByEnquiry={modalKind === "kyc" ? undefined : kycByEnquiry}
+        kycEnquiryOptions={modalKind === "kyc" ? undefined : kycEnquiryOptions}
         prefill={prefill}
         onGoToQuote={goToQuoteFromKyc}
-        from={current.from}
-        to={current.to}
-        Icon={current.icon}
+        from={modalCfg.from}
+        to={modalCfg.to}
+        Icon={modalCfg.icon}
       />
     </main>
   );
