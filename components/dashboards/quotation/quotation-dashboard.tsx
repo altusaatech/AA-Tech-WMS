@@ -4,7 +4,7 @@ import * as React from "react";
 import {
   Inbox, Send, RefreshCcw, FileStack, BadgeCheck, Clock3, TrendingUp, Filter, Search, X,
   Building2, Users, GitBranch, ListChecks, MessagesSquare, FileText, ReceiptText, PartyPopper, FileCheck2,
-  Sparkles, Target, AlertTriangle, Rocket, IndianRupee,
+  Sparkles, Target, AlertTriangle, Rocket, IndianRupee, type LucideIcon,
 } from "lucide-react";
 import {
   Section, TrendBars, InsightsPanel, DetailModal, Funnel, ProgressStat,
@@ -135,6 +135,9 @@ export function QuotationDashboard({ rows }: { rows: QuoteRow[] }) {
           <ExportButtons filename="quotations" headers={["Enquiry", "Quote No", "PI No", "Customer", "Executive", "Status", "PI Status", "Value", "Created", "Updated", "Revisions"]} rows={filtered.map((r) => [r.enquiryNo, r.quoteNo, r.piNo ?? "", r.company, r.executive, r.status, r.piStatus, r.value, r.created, r.updated, r.revisions])} />
         </span>
       </div>
+
+      {/* ── Detailed Quote Status panel (skeleton spec) — pinned at the top ── */}
+      <QuoteStatusPanel rows={filtered} />
 
       {/* hero stat cards */}
       <div className="grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
@@ -299,5 +302,91 @@ function SalesForecast({ rows }: { rows: QuoteRow[] }) {
         </div>
       </div>
     </section>
+  );
+}
+
+/* ── Detailed "Quote Status" panel (dashboard skeleton) — KPI grid + Pending
+   Quotes table, computed from the currently-filtered quote rows. ── */
+function QuoteStatusPanel({ rows }: { rows: QuoteRow[] }) {
+  const isWon = (r: QuoteRow) => r.converted || /won|order|po\b|received|accept/i.test(r.status);
+  const isLost = (r: QuoteRow) => /lost|regret|cancel|reject|drop|dead/i.test(r.status);
+  const received = rows.length;
+  const sent = rows.filter((r) => r.sent).length;
+  const won = rows.filter(isWon).length;
+  const lost = rows.filter(isLost).length;
+  const pending = Math.max(0, received - won - lost);
+  const conversion = received ? Math.round((won / received) * 100) : 0;
+  const quoteValue = rows.reduce((a, r) => a + (r.value || 0), 0);
+  const avgQuote = received ? quoteValue / received : 0;
+  const sentValue = rows.filter((r) => r.sent).reduce((a, r) => a + (r.value || 0), 0);
+
+  const daysPending = (d: string) => {
+    if (!d) return 0;
+    const t = new Date(d + (d.length <= 10 ? "T00:00:00Z" : "")).getTime();
+    return Number.isNaN(t) ? 0 : Math.max(0, Math.round((Date.now() - t) / 86_400_000));
+  };
+  const pendingRows = rows
+    .filter((r) => !isWon(r) && !isLost(r))
+    .map((r) => ({ ...r, days: daysPending(r.date) }))
+    .sort((a, b) => b.days - a.days)
+    .slice(0, 12);
+
+  const tiles: { label: string; value: string; sub?: string; from: string; to: string; Icon: LucideIcon }[] = [
+    { label: "Enquiry Received", value: String(received), sub: "Nos", from: "#2a78d6", to: "#185fa5", Icon: Inbox },
+    { label: "Quotes Sent", value: String(sent), sub: "Nos", from: "#0180cf", to: "#0069b3", Icon: Send },
+    { label: "Quotes Won", value: String(won), sub: "Nos", from: "#63b81e", to: "#4a9616", Icon: BadgeCheck },
+    { label: "Quotes Lost", value: String(lost), sub: "Nos", from: "#ef4444", to: "#b91c1c", Icon: X },
+    { label: "Pending", value: String(pending), sub: "Nos", from: "#f59e0b", to: "#d97706", Icon: Clock3 },
+    { label: "Conversion", value: conversion + "%", from: "#7c3aed", to: "#6d28d9", Icon: Target },
+    { label: "Quote Value", value: compactInr(quoteValue), from: "#0a7d8a", to: "#0069b3", Icon: IndianRupee },
+    { label: "Avg Quote", value: compactInr(avgQuote), from: "#63b81e", to: "#0180cf", Icon: IndianRupee },
+    { label: "Enquiry Value", value: compactInr(quoteValue), from: "#2a78d6", to: "#0a7d8a", Icon: IndianRupee },
+    { label: "Quotes Sent Value", value: compactInr(sentValue), from: "#0180cf", to: "#63b81e", Icon: IndianRupee },
+  ];
+
+  return (
+    <Section title="Quote Status" Icon={FileText}>
+      <div className="grid grid-cols-5 gap-3 max-xl:grid-cols-4 max-lg:grid-cols-3 max-sm:grid-cols-2">
+        {tiles.map((t) => (
+          <div key={t.label} className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-[#f6fafd] p-3.5 shadow-[0_10px_26px_-20px_rgba(1,128,207,0.4)]">
+            <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${t.from}, ${t.to})` }} />
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-[10.5px] font-black uppercase tracking-[0.05em] text-slate-400">{t.label}</div>
+              <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-white shadow-sm" style={{ background: `linear-gradient(140deg, ${t.from}, ${t.to})` }}><t.Icon size={13} strokeWidth={2.4} /></span>
+            </div>
+            <div className="mt-1.5 flex items-baseline gap-1">
+              <span className="tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 22, letterSpacing: "-0.02em", lineHeight: 1 }}>{t.value}</span>
+              {t.sub && <span className="text-[10.5px] font-bold text-slate-400">{t.sub}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200">
+        <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2 text-[12px] font-black uppercase tracking-[0.06em] text-slate-500"><Clock3 size={14} className="text-[#d97706]" /> Pending Quotes ({pendingRows.length})</div>
+        <table className="w-full min-w-[720px] text-[12.5px]">
+          <thead>
+            <tr className="text-left text-[10.5px] font-extrabold uppercase tracking-[0.04em] text-white" style={{ background: "linear-gradient(180deg, #0069b3, #00598f)" }}>
+              <th className="px-3 py-2">Quote No</th><th className="px-3 py-2">Customer</th><th className="px-3 py-2">Quote Date</th><th className="px-3 py-2 text-right">Value</th><th className="px-3 py-2 text-center">Days Pending</th><th className="px-3 py-2">Status</th><th className="px-3 py-2">Salesperson</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pendingRows.length === 0 ? (
+              <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-400">No pending quotes in range.</td></tr>
+            ) : pendingRows.map((r, i) => (
+              <tr key={r.enquiryNo + i} className={i % 2 ? "bg-[#f5fafe]" : "bg-white"}>
+                <td className="border-b border-[#e7eff6] px-3 py-1.5 font-bold text-slate-700">{r.quoteNo}</td>
+                <td className="border-b border-[#e7eff6] px-3 py-1.5 text-slate-600">{r.company || "—"}</td>
+                <td className="border-b border-[#e7eff6] px-3 py-1.5 tabular-nums text-slate-500">{r.date || "—"}</td>
+                <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right font-black tabular-nums text-[#0069b3]">{compactInr(r.value)}</td>
+                <td className="border-b border-[#e7eff6] px-3 py-1.5 text-center"><span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-black tabular-nums ${r.days > 14 ? "bg-red-100 text-red-700" : r.days > 7 ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"}`}>{r.days}d</span></td>
+                <td className="border-b border-[#e7eff6] px-3 py-1.5"><span className="inline-flex items-center rounded-full bg-[#0180cf]/10 px-2 py-0.5 text-[11px] font-bold text-[#0069b3]">{r.status}</span></td>
+                <td className="border-b border-[#e7eff6] px-3 py-1.5 text-slate-600">{r.executive}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Section>
   );
 }
