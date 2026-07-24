@@ -38,6 +38,12 @@ export const KYC_COLUMNS: SalesColDef[] = [
   { key: "productDetails", label: "Product Details", type: "text", width: 240 },
 ];
 
+// KYC columns surfaced (read-only) in the Quote Status register — only those
+// NOT already present in Quote Status (no duplicates), joined by Enquiry No.
+export const KYC_EXTRA_FOR_QUOTE: SalesColDef[] = KYC_COLUMNS.filter((c) =>
+  ["enquiryType", "companyAddress", "billingAddress", "deliveryAddress", "gstNo"].includes(c.key),
+).map((c) => ({ ...c, readOnly: true }));
+
 export const QUOTE_COLUMNS: SalesColDef[] = [
   { key: "enquiryNo", label: "Enquiry No", type: "text", width: 120 },
   { key: "scope", label: "Scope", type: "text", width: 130 },

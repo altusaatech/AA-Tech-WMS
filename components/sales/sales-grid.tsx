@@ -72,6 +72,7 @@ export function SalesDataGrid({
   from = "#0069b3",
   to = "#0180cf",
   enquiryPiMap,
+  groups,
 }: {
   kind: SaleKind;
   title?: string;
@@ -85,6 +86,9 @@ export function SalesDataGrid({
   /** Enquiry No (trimmed, lower-cased) → quotation id. When set, the Enquiry No
    *  cell links to that quotation's PI. */
   enquiryPiMap?: Record<string, string>;
+  /** Ordered header groups spanning the columns (labels frozen above the column
+   *  headers). A `spacer` segment renders an empty gutter between groups. */
+  groups?: { label: string; span: number; spacer?: boolean }[];
 }) {
   const [q, setQ] = React.useState("");
   const [sortKey, setSortKey] = React.useState<string | null>(null);
@@ -415,8 +419,34 @@ export function SalesDataGrid({
         <div className="overflow-auto" style={{ maxHeight: "60vh" }}>
           <table className="w-max border-collapse text-[13px]">
             <thead className="sticky top-0 z-10">
+              {/* group heading row (frozen) — e.g. QUOTE STATUS | CUSTOMER KYC */}
+              {groups && groups.length > 0 && (
+                <tr>
+                  {groups.map((g, gi) =>
+                    g.spacer ? (
+                      <th key={`g-${gi}`} colSpan={g.span} className="bg-slate-100" style={{ borderBottom: "1px solid #e2e8f0" }} />
+                    ) : (
+                      <th
+                        key={`g-${gi}`}
+                        colSpan={g.span}
+                        className="whitespace-nowrap px-3.5 py-2 text-left font-black uppercase tracking-[0.1em] text-white"
+                        style={{
+                          fontSize: 11.5,
+                          background: `linear-gradient(135deg, #63b81e, #0180cf)`,
+                          borderRight: "2px solid rgba(255,255,255,0.35)",
+                          borderBottom: "1px solid rgba(255,255,255,0.25)",
+                        }}
+                      >
+                        {g.label}
+                      </th>
+                    ),
+                  )}
+                  <th className="sticky right-0" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)" }} />
+                </tr>
+              )}
               <tr>
                 {columns.map((c) => {
+                  if (c.key === "__gap__") return <th key={c.key} className="bg-slate-100" style={{ minWidth: c.width ?? 24 }} />;
                   const sorted = sortKey === c.key;
                   return (
                     <th
@@ -451,16 +481,20 @@ export function SalesDataGrid({
               {/* per-column filter row */}
               {showFilters && (
                 <tr>
-                  {columns.map((c) => (
-                    <th key={c.key} className="bg-[#eef6fc] px-2 py-1.5" style={{ borderRight: "1px solid #dceaf5" }}>
-                      <input
-                        value={colFilters[c.key] ?? ""}
-                        onChange={(e) => setColFilters((s) => ({ ...s, [c.key]: e.target.value }))}
-                        placeholder="Filter…"
-                        className="h-7 w-full min-w-[80px] rounded-md border border-slate-200 bg-white px-2 text-[12px] font-normal normal-case tracking-normal text-slate-700 outline-none focus:border-[#0180cf]"
-                      />
-                    </th>
-                  ))}
+                  {columns.map((c) =>
+                    c.key === "__gap__" ? (
+                      <th key={c.key} className="bg-slate-100" />
+                    ) : (
+                      <th key={c.key} className="bg-[#eef6fc] px-2 py-1.5" style={{ borderRight: "1px solid #dceaf5" }}>
+                        <input
+                          value={colFilters[c.key] ?? ""}
+                          onChange={(e) => setColFilters((s) => ({ ...s, [c.key]: e.target.value }))}
+                          placeholder="Filter…"
+                          className="h-7 w-full min-w-[80px] rounded-md border border-slate-200 bg-white px-2 text-[12px] font-normal normal-case tracking-normal text-slate-700 outline-none focus:border-[#0180cf]"
+                        />
+                      </th>
+                    ),
+                  )}
                   <th className="sticky right-0 bg-[#eef6fc]" />
                 </tr>
               )}
@@ -481,6 +515,7 @@ export function SalesDataGrid({
                     className={`group cursor-pointer transition-colors hover:bg-[#e4f2fc] ${i % 2 ? "bg-[#f5fafe]" : "bg-white"}`}
                   >
                     {columns.map((c) => {
+                      if (c.key === "__gap__") return <td key={c.key} className="border-b border-[#e7eff6] bg-slate-100/60" style={{ minWidth: c.width ?? 24 }} />;
                       const piId =
                         enquiryPiMap && c.key === "enquiryNo"
                           ? enquiryPiMap[String(row[c.key] ?? "").trim().toLowerCase()]

@@ -27,6 +27,7 @@ import { SalesDataGrid } from "./sales-grid";
 import { SalesEntryModal } from "./sales-entry-modal";
 import {
   KYC_COLUMNS,
+  KYC_EXTRA_FOR_QUOTE,
   QUOTE_COLUMNS,
   BOM_COLUMNS,
   SO_COLUMNS,
@@ -121,6 +122,9 @@ const FORMS: FormDef[] = [
   },
 ];
 
+// A narrow read-only gutter between the Quote Status and Customer KYC groups.
+const QUOTE_GAP_COL: SalesColDef = { key: "__gap__", label: "", type: "text", width: 28, readOnly: true };
+
 type View = "hub" | "register";
 
 export function SalesWorkspace({
@@ -205,6 +209,31 @@ export function SalesWorkspace({
         .filter((o) => o.value),
     [rowsByKind.kyc],
   );
+
+  // Quote Status register joined with Customer KYC by Enquiry No: the extra KYC
+  // columns (no duplicates) are appended read-only after a gutter, grouped under
+  // a frozen "Customer KYC" heading beside "Quote Status".
+  const quoteView = React.useMemo(() => {
+    const kycMap = new Map<string, SalesRow>();
+    for (const k of rowsByKind.kyc) {
+      const key = String(k.enquiryNo ?? "").trim().toLowerCase();
+      if (key) kycMap.set(key, k);
+    }
+    const rows = rowsByKind.quote.map((qr) => {
+      const kyc = kycMap.get(String(qr.enquiryNo ?? "").trim().toLowerCase());
+      if (!kyc) return qr;
+      const merged: SalesRow = { ...qr };
+      for (const c of KYC_EXTRA_FOR_QUOTE) merged[c.key] = (kyc[c.key] ?? null) as string | number | boolean | null;
+      return merged;
+    });
+    const columns: SalesColDef[] = [...QUOTE_COLUMNS, QUOTE_GAP_COL, ...KYC_EXTRA_FOR_QUOTE];
+    const groups = [
+      { label: "Quote Status", span: QUOTE_COLUMNS.length },
+      { label: "", span: 1, spacer: true },
+      { label: "Customer KYC", span: KYC_EXTRA_FOR_QUOTE.length },
+    ];
+    return { rows, columns, groups };
+  }, [rowsByKind.quote, rowsByKind.kyc]);
 
   function openForm(k: Kind) {
     setActive(k);
@@ -315,8 +344,8 @@ export function SalesWorkspace({
                 <current.icon size={20} strokeWidth={2.3} />
               </span>
               <div>
-                <h2 className="text-[19px] font-black text-slate-800">{current.label} · Register</h2>
-                <p className="text-[12.5px] text-slate-500">{current.desc}</p>
+                <h2 className="text-[19px] font-black text-slate-800">{active === "quote" ? "Quote Status & Customer KYC" : current.label} · Register</h2>
+                <p className="text-[12.5px] text-slate-500">{active === "quote" ? "Quote entries joined with their Customer KYC by Enquiry No" : current.desc}</p>
               </div>
             </div>
             <button
@@ -329,7 +358,19 @@ export function SalesWorkspace({
             </button>
           </div>
 
-          <SalesDataGrid kind={active} title={current.label} columns={current.columns} rows={rows} onEdit={openEdit} onDeleted={onDeleted} onImported={onImported} from={current.from} to={current.to} enquiryPiMap={active === "quote" ? enquiryPiMap : undefined} />
+          <SalesDataGrid
+            kind={active}
+            title={active === "quote" ? "Quote Status & Customer KYC" : current.label}
+            columns={active === "quote" ? quoteView.columns : current.columns}
+            rows={active === "quote" ? quoteView.rows : rows}
+            groups={active === "quote" ? quoteView.groups : undefined}
+            onEdit={openEdit}
+            onDeleted={onDeleted}
+            onImported={onImported}
+            from={current.from}
+            to={current.to}
+            enquiryPiMap={active === "quote" ? enquiryPiMap : undefined}
+          />
         </div>
       )}
 
