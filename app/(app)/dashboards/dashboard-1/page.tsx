@@ -1,9 +1,10 @@
-import { FileText } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
 import { salesQuotes, salesSo } from "@/db/schema";
+import { QUOTE_COLUMNS } from "@/lib/sales/columns";
 import { DashboardCanvas } from "@/components/dashboards/dashboard-canvas";
-import { QuoteStatusDashboard, type QsRow } from "@/components/dashboards/dashboard1/quote-status-dashboard";
+import { QuoteStatusDashboard, type QsRow, type HygieneRow } from "@/components/dashboards/dashboard1/quote-status-dashboard";
 
 export const dynamic = "force-dynamic";
 
@@ -47,9 +48,17 @@ export default async function QuoteStatusDashboardPage() {
     };
   });
 
+  // Data hygiene — % of quote-register rows with each field filled.
+  const total = quotes.length;
+  const isBlank = (v: unknown) => v == null || (typeof v === "string" && v.trim() === "");
+  const hygiene: HygieneRow[] = QUOTE_COLUMNS.filter((c) => c.key !== "srNo").map((c) => {
+    const blanks = quotes.filter((qt) => isBlank((qt as Record<string, unknown>)[c.key])).length;
+    return { field: c.label, blanks, fillPct: total ? Math.round(((total - blanks) / total) * 100) : 0 };
+  });
+
   return (
-    <DashboardCanvas eyebrow="Live · Sales" title="Dashboard 1 — Quote Status" subtitle="Enquiry → quotation → PO conversion, pending & values" Icon={FileText}>
-      <QuoteStatusDashboard rows={rows} />
+    <DashboardCanvas eyebrow="Live · Sales" title="New Dashboard" subtitle="Quote Status — enquiries, conversion, pending quotes & data hygiene" Icon={LayoutDashboard}>
+      <QuoteStatusDashboard rows={rows} hygiene={hygiene} />
     </DashboardCanvas>
   );
 }

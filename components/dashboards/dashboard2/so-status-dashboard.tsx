@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { ClipboardList, Activity, CheckCircle2, XCircle, Clock3, Target, IndianRupee, RefreshCcw, Search, Filter, X, Users, Trophy, Hourglass, type LucideIcon } from "lucide-react";
-import { Section, compactInr, ExportButtons } from "@/components/dashboards/shared/kit";
+import { ClipboardList, Activity, CheckCircle2, XCircle, Clock3, Target, IndianRupee, RefreshCcw, Search, Filter, X, Users, Trophy, Hourglass, ShieldCheck, CalendarClock, type LucideIcon } from "lucide-react";
+import { Section, compactInr, ExportButtons, DetailModal } from "@/components/dashboards/shared/kit";
 
 export interface SoRow {
   soNo: string;
@@ -22,7 +22,14 @@ export interface SoRow {
   ageDays: number; // days since SO date (for undispatched)
 }
 
-export function SalesOrderStatusDashboard({ rows }: { rows: SoRow[] }) {
+export interface HygieneRow {
+  field: string;
+  blanks: number;
+  fillPct: number;
+}
+
+export function SalesOrderStatusDashboard({ rows, hygiene = [] }: { rows: SoRow[]; hygiene?: HygieneRow[] }) {
+  const [agingBucket, setAgingBucket] = React.useState<number | null>(null);
   const [q, setQ] = React.useState("");
   const [from, setFrom] = React.useState("");
   const [to, setTo] = React.useState("");
@@ -91,25 +98,36 @@ export function SalesOrderStatusDashboard({ rows }: { rows: SoRow[] }) {
     return Array.from(m.entries()).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.count - a.count).slice(0, 5);
   }, [f]);
 
-  // Aging buckets (undispatched SOs by days since SO date)
+  // Aging buckets (undispatched SOs by days since SO date) — rows kept so the
+  // bar is click-through to a popup with the orders in that bucket.
   const aging = React.useMemo(() => {
-    const b = [
-      { label: "0–7 days", count: 0 },
-      { label: "8–15 days", count: 0 },
-      { label: "16–30 days", count: 0 },
-      { label: "30+ days", count: 0 },
+    const b: { label: string; rows: SoRow[] }[] = [
+      { label: "0–7 days", rows: [] },
+      { label: "8–15 days", rows: [] },
+      { label: "16–30 days", rows: [] },
+      { label: "30+ days", rows: [] },
     ];
     for (const r of f) {
       if (r.dispatched) continue;
       const d = r.ageDays;
-      if (d <= 7) b[0]!.count++;
-      else if (d <= 15) b[1]!.count++;
-      else if (d <= 30) b[2]!.count++;
-      else b[3]!.count++;
+      const i = d <= 7 ? 0 : d <= 15 ? 1 : d <= 30 ? 2 : 3;
+      b[i]!.rows.push(r);
     }
     return b;
   }, [f]);
-  const agingMax = Math.max(1, ...aging.map((a) => a.count));
+  const agingMax = Math.max(1, ...aging.map((a) => a.rows.length));
+
+  // Target vs Actual dispatch performance.
+  const tva = React.useMemo(() => {
+    let onTime = 0, delayed = 0, pending = 0;
+    for (const r of f) {
+      if (!r.dispatched) { pending++; continue; }
+      const late = (r.targetDate && r.actualDate && r.actualDate > r.targetDate) || r.delayDays > 0;
+      if (late) delayed++; else onTime++;
+    }
+    const done = onTime + delayed;
+    return { onTime, delayed, pending, onTimePct: done ? Math.round((onTime / done) * 100) : 0 };
+  }, [f]);
 
   const reset = () => { setQ(""); setFrom(""); setTo(""); setCustomer(""); setStat(""); };
   const anyFilter = q || from || to || customer || stat;
@@ -183,17 +201,82 @@ export function SalesOrderStatusDashboard({ rows }: { rows: SoRow[] }) {
 
         <Section title="Order Aging (undispatched)" Icon={Hourglass}>
           <div className="space-y-3.5 pt-1">
-            {aging.map((a) => (
-              <div key={a.label}>
-                <div className="mb-1 flex items-center justify-between text-[12.5px] font-bold text-slate-600"><span>{a.label}</span><span className="tabular-nums font-black text-slate-800">{a.count}</span></div>
+            {aging.map((a, i) => (
+              <button key={a.label} type="button" onClick={() => a.rows.length && setAgingBucket(i)} className="w-full text-left transition-transform hover:-translate-y-0.5 disabled:cursor-default" disabled={a.rows.length === 0}>
+                <div className="mb-1 flex items-center justify-between text-[12.5px] font-bold text-slate-600"><span>{a.label}</span><span className="tabular-nums font-black text-slate-800">{a.rows.length}</span></div>
                 <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.09)" }}>
-                  <div className="relative h-full rounded-full transition-[width] duration-700" style={{ width: `${Math.max(4, (a.count / agingMax) * 100)}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)", boxShadow: "0 1px 6px -1px rgba(239,68,68,0.5)" }}><span aria-hidden className="absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/30" /></div>
+                  <div className="relative h-full rounded-full transition-[width] duration-700" style={{ width: `${Math.max(4, (a.rows.length / agingMax) * 100)}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)", boxShadow: "0 1px 6px -1px rgba(239,68,68,0.5)" }}><span aria-hidden className="absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/30" /></div>
                 </div>
-              </div>
+              </button>
             ))}
+            <p className="pt-1 text-[10.5px] font-semibold text-slate-400">Click a bar to see the orders in that aging bucket.</p>
           </div>
         </Section>
       </div>
+
+      {/* Target vs Actual + Data Hygiene */}
+      <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
+        <Section title="Target vs Actual Dispatch" Icon={CalendarClock}>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "On Time", value: tva.onTime, from: "#63b81e", to: "#4a9616" },
+              { label: "Delayed", value: tva.delayed, from: "#ef4444", to: "#b91c1c" },
+              { label: "Pending", value: tva.pending, from: "#f59e0b", to: "#d97706" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-3 text-center">
+                <div className="tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 24, lineHeight: 1, color: s.to }}>{s.value}</div>
+                <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.04em] text-slate-400">{s.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4">
+            <div className="mb-1 flex items-center justify-between text-[12px] font-bold text-slate-600"><span>On-time rate (dispatched)</span><span className="tabular-nums font-black text-slate-800">{tva.onTimePct}%</span></div>
+            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.09)" }}><div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${tva.onTimePct}%`, background: "linear-gradient(90deg, #63b81e, #0180cf)" }} /></div>
+          </div>
+        </Section>
+
+        {hygiene.length > 0 && (
+          <div className="col-span-2 max-lg:col-span-1">
+            <Section title="Data Hygiene — Field Fill %" Icon={ShieldCheck}>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 max-md:grid-cols-1">
+                {hygiene.map((h) => (
+                  <div key={h.field} className="flex items-center gap-3">
+                    <span className="w-40 shrink-0 truncate text-[12px] font-semibold text-slate-600" title={h.field}>{h.field}</span>
+                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.08)" }}>
+                      <div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${h.fillPct}%`, background: h.fillPct >= 90 ? "linear-gradient(90deg, #63b81e, #0180cf)" : h.fillPct >= 70 ? "linear-gradient(90deg, #f59e0b, #d97706)" : "linear-gradient(90deg, #ef4444, #b91c1c)" }} />
+                    </div>
+                    <span className="w-14 shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{h.fillPct}%</span>
+                  </div>
+                ))}
+              </div>
+            </Section>
+          </div>
+        )}
+      </div>
+
+      {/* Aging bucket popup */}
+      {agingBucket != null && aging[agingBucket] && (
+        <DetailModal title={`Orders aging ${aging[agingBucket]!.label}`} subtitle={`${aging[agingBucket]!.rows.length} undispatched order${aging[agingBucket]!.rows.length === 1 ? "" : "s"}`} Icon={Hourglass} from="#f59e0b" to="#d97706" onClose={() => setAgingBucket(null)}>
+          <table className="w-full text-[12.5px]">
+            <thead>
+              <tr className="text-left text-[10.5px] font-extrabold uppercase tracking-[0.04em] text-slate-400">
+                <th className="px-2 py-1.5">SO No</th><th className="px-2 py-1.5">Customer</th><th className="px-2 py-1.5 text-center">Age</th><th className="px-2 py-1.5 text-right">Value</th><th className="px-2 py-1.5">Salesperson</th>
+              </tr>
+            </thead>
+            <tbody>
+              {aging[agingBucket]!.rows.sort((a, b) => b.ageDays - a.ageDays).map((r, i) => (
+                <tr key={r.soNo + i} className="border-t border-slate-100">
+                  <td className="px-2 py-1.5 font-bold text-slate-700">{r.soNo || "—"}</td>
+                  <td className="px-2 py-1.5 text-slate-600">{r.company || "—"}</td>
+                  <td className="px-2 py-1.5 text-center tabular-nums font-black text-[#b45309]">{r.ageDays}d</td>
+                  <td className="px-2 py-1.5 text-right font-black tabular-nums text-[#0069b3]">{compactInr(r.value)}</td>
+                  <td className="px-2 py-1.5 text-slate-600">{r.salesperson || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DetailModal>
+      )}
     </div>
   );
 }

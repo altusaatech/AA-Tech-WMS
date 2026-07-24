@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Inbox, Send, BadgeCheck, X, Clock3, Target, IndianRupee, Search, Filter, type LucideIcon } from "lucide-react";
+import { Inbox, Send, BadgeCheck, X, Clock3, Target, IndianRupee, Search, Filter, ShieldCheck, type LucideIcon } from "lucide-react";
 import { Section, compactInr, ExportButtons } from "@/components/dashboards/shared/kit";
 
 export interface QsRow {
@@ -19,13 +19,19 @@ export interface QsRow {
   date: string; // yyyy-mm-dd
 }
 
+export interface HygieneRow {
+  field: string;
+  blanks: number;
+  fillPct: number;
+}
+
 function daysBetween(d: string): number {
   if (!d) return 0;
   const t = new Date(d + (d.length <= 10 ? "T00:00:00Z" : "")).getTime();
   return Number.isNaN(t) ? 0 : Math.max(0, Math.round((Date.now() - t) / 86_400_000));
 }
 
-export function QuoteStatusDashboard({ rows }: { rows: QsRow[] }) {
+export function QuoteStatusDashboard({ rows, hygiene = [] }: { rows: QsRow[]; hygiene?: HygieneRow[] }) {
   const [q, setQ] = React.useState("");
   const [from, setFrom] = React.useState("");
   const [to, setTo] = React.useState("");
@@ -147,6 +153,24 @@ export function QuoteStatusDashboard({ rows }: { rows: QsRow[] }) {
           </table>
         </div>
       </Section>
+
+      {/* Data hygiene — fill % per quote-register field */}
+      {hygiene.length > 0 && (
+        <Section title="Data Hygiene — Field Fill %" Icon={ShieldCheck}>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 max-md:grid-cols-1">
+            {hygiene.map((h) => (
+              <div key={h.field} className="flex items-center gap-3">
+                <span className="w-40 shrink-0 truncate text-[12px] font-semibold text-slate-600" title={h.field}>{h.field}</span>
+                <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.08)" }}>
+                  <div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${h.fillPct}%`, background: h.fillPct >= 90 ? "linear-gradient(90deg, #63b81e, #0180cf)" : h.fillPct >= 70 ? "linear-gradient(90deg, #f59e0b, #d97706)" : "linear-gradient(90deg, #ef4444, #b91c1c)" }} />
+                </div>
+                <span className="w-16 shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{h.fillPct}%</span>
+                <span className="w-14 shrink-0 text-right text-[11px] font-semibold text-slate-400">{h.blanks} blank</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
     </div>
   );
 }

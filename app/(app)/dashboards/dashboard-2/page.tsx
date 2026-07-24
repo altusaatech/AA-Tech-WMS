@@ -1,9 +1,10 @@
-import { FileCheck2 } from "lucide-react";
+import { Gauge } from "lucide-react";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
 import { salesSo } from "@/db/schema";
+import { SO_COLUMNS } from "@/lib/sales/columns";
 import { DashboardCanvas } from "@/components/dashboards/dashboard-canvas";
-import { SalesOrderStatusDashboard, type SoRow } from "@/components/dashboards/dashboard2/so-status-dashboard";
+import { SalesOrderStatusDashboard, type SoRow, type HygieneRow } from "@/components/dashboards/dashboard2/so-status-dashboard";
 
 export const dynamic = "force-dynamic";
 
@@ -55,9 +56,17 @@ export default async function SoStatusDashboardPage() {
     };
   });
 
+  // Data hygiene — % of SO-register rows with each field filled.
+  const total = so.length;
+  const isBlank = (v: unknown) => v == null || (typeof v === "string" && v.trim() === "");
+  const hygiene: HygieneRow[] = SO_COLUMNS.filter((c) => c.key !== "srNo").map((c) => {
+    const blanks = so.filter((s) => isBlank((s as Record<string, unknown>)[c.key])).length;
+    return { field: c.label, blanks, fillPct: total ? Math.round(((total - blanks) / total) * 100) : 0 };
+  });
+
   return (
-    <DashboardCanvas eyebrow="Live · Production" title="Dashboard 2 — Sales Order Status" subtitle="PO → sales order → dispatch, aging, top customers & leaderboard" Icon={FileCheck2}>
-      <SalesOrderStatusDashboard rows={rows} />
+    <DashboardCanvas eyebrow="Live · Production" title="Dashboard 2" subtitle="Sales Order Status — aging, target vs actual, top customers, leaderboard & data hygiene" Icon={Gauge}>
+      <SalesOrderStatusDashboard rows={rows} hygiene={hygiene} />
     </DashboardCanvas>
   );
 }
