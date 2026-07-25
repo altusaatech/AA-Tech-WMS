@@ -3,7 +3,7 @@
 import * as React from "react";
 import {
   ClipboardList, Activity, CheckCircle2, XCircle, Clock3, Target, IndianRupee, RefreshCcw, Search, Filter, X,
-  Hourglass, ShieldCheck, BadgeCheck, Rocket, CalendarClock, TrendingUp, PieChart, type LucideIcon,
+  Hourglass, BadgeCheck, Rocket, CalendarClock, TrendingUp, PieChart, type LucideIcon,
 } from "lucide-react";
 import { Section, compactInr, ExportButtons, DetailModal, Gauge, DonutBreakdown, AreaChart, InsightBanner } from "@/components/dashboards/shared/kit";
 
@@ -100,7 +100,7 @@ function buildTiles(kind: StatusKind, r: DashRow[]): Tile[] {
 
 const NO_LABEL: Record<StatusKind, string> = { ga: "GA No", bom: "BOM No", wo: "WO No" };
 
-export function RegisterStatusDashboard({ kind, rows, hygiene = [] }: { kind: StatusKind; rows: DashRow[]; hygiene?: HygieneRow[] }) {
+export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows: DashRow[] }) {
   const [q, setQ] = React.useState("");
   const [from, setFrom] = React.useState("");
   const [to, setTo] = React.useState("");
@@ -223,40 +223,20 @@ export function RegisterStatusDashboard({ kind, rows, hygiene = [] }: { kind: St
         </Section>
       </div>
 
-      {/* Aging + Hygiene */}
-      <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
-        <Section title="Aging (open items)" Icon={Hourglass}>
-          <div className="space-y-3.5 pt-1">
-            {aging.map((a, i) => (
-              <button key={a.label} type="button" onClick={() => a.rows.length && setAgingBucket(i)} disabled={a.rows.length === 0} className="w-full text-left transition-transform hover:-translate-y-0.5 disabled:cursor-default">
-                <div className="mb-1 flex items-center justify-between text-[12.5px] font-bold text-slate-600"><span>{a.label}</span><span className="tabular-nums font-black text-slate-800">{a.rows.length}</span></div>
-                <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.09)" }}>
-                  <div className="relative h-full rounded-full transition-[width] duration-700" style={{ width: `${Math.max(4, (a.rows.length / agingMax) * 100)}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)" }}><span aria-hidden className="absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/30" /></div>
-                </div>
-              </button>
-            ))}
-            <p className="pt-1 text-[10.5px] font-semibold text-slate-400">Click a bar for the orders in that aging bucket.</p>
-          </div>
-        </Section>
-
-        {hygiene.length > 0 && (
-          <div className="col-span-2 max-lg:col-span-1">
-            <Section title="Data Hygiene — Field Fill %" Icon={ShieldCheck}>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 max-md:grid-cols-1">
-                {hygiene.map((h) => (
-                  <div key={h.field} className="flex items-center gap-3">
-                    <span className="w-40 shrink-0 truncate text-[12px] font-semibold text-slate-600" title={h.field}>{h.field}</span>
-                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.08)" }}>
-                      <div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${h.fillPct}%`, background: h.fillPct >= 90 ? "linear-gradient(90deg, #63b81e, #0180cf)" : h.fillPct >= 70 ? "linear-gradient(90deg, #f59e0b, #d97706)" : "linear-gradient(90deg, #ef4444, #b91c1c)" }} />
-                    </div>
-                    <span className="w-14 shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{h.fillPct}%</span>
-                  </div>
-                ))}
+      {/* Aging (open items) */}
+      <Section title="Aging (open items)" Icon={Hourglass}>
+        <div className="grid grid-cols-2 gap-x-8 gap-y-3.5 pt-1 max-md:grid-cols-1">
+          {aging.map((a, i) => (
+            <button key={a.label} type="button" onClick={() => a.rows.length && setAgingBucket(i)} disabled={a.rows.length === 0} className="w-full text-left transition-transform hover:-translate-y-0.5 disabled:cursor-default">
+              <div className="mb-1 flex items-center justify-between text-[12.5px] font-bold text-slate-600"><span>{a.label}</span><span className="tabular-nums font-black text-slate-800">{a.rows.length}</span></div>
+              <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.09)" }}>
+                <div className="relative h-full rounded-full transition-[width] duration-700" style={{ width: `${Math.max(4, (a.rows.length / agingMax) * 100)}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)" }}><span aria-hidden className="absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/30" /></div>
               </div>
-            </Section>
-          </div>
-        )}
-      </div>
+            </button>
+          ))}
+        </div>
+        <p className="pt-3 text-[10.5px] font-semibold text-slate-400">Click a bar for the items in that aging bucket.</p>
+      </Section>
 
       {/* Aging popup */}
       {agingBucket != null && aging[agingBucket] && (

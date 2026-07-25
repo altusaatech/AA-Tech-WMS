@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ClipboardList, Activity, CheckCircle2, XCircle, Clock3, Target, IndianRupee, RefreshCcw, Search, Filter, X, Users, Trophy, Hourglass, ShieldCheck, CalendarClock, PieChart, type LucideIcon } from "lucide-react";
+import { ClipboardList, Activity, CheckCircle2, XCircle, Clock3, Target, IndianRupee, RefreshCcw, Search, Filter, X, Users, Trophy, Hourglass, CalendarClock, PieChart, type LucideIcon } from "lucide-react";
 import { Section, compactInr, ExportButtons, DetailModal, DonutBreakdown } from "@/components/dashboards/shared/kit";
 
 export interface SoRow {
@@ -49,7 +49,7 @@ function BucketSelect({ value, onChange, label = "Show top", total }: { value: n
   );
 }
 
-export function SalesOrderStatusDashboard({ rows, hygiene = [] }: { rows: SoRow[]; hygiene?: HygieneRow[] }) {
+export function SalesOrderStatusDashboard({ rows }: { rows: SoRow[] }) {
   const [agingBucket, setAgingBucket] = React.useState<number | null>(null);
   const [agingRowsN, setAgingRowsN] = React.useState(10);
   const [topCustN, setTopCustN] = React.useState(5);
@@ -201,19 +201,19 @@ export function SalesOrderStatusDashboard({ rows, hygiene = [] }: { rows: SoRow[
         </span>
       </div>
 
-      {/* KPI grid */}
+      {/* KPI grid — all eight tiles in one straight line */}
       <Section title="Sales Order Status — Overview" Icon={Target}>
-        <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-2">
+        <div className="grid grid-cols-8 gap-2.5 max-2xl:grid-cols-4 max-sm:grid-cols-2">
           {tiles.map((t) => (
-            <div key={t.label} className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-[#f6fafd] p-3.5 shadow-[0_10px_26px_-20px_rgba(1,128,207,0.4)]">
+            <div key={t.label} className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-[#f6fafd] p-3 shadow-[0_10px_26px_-20px_rgba(1,128,207,0.4)]">
               <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${t.from}, ${t.to})` }} />
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-[10.5px] font-black uppercase tracking-[0.05em] text-slate-400">{t.label}</div>
-                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-white shadow-sm" style={{ background: `linear-gradient(140deg, ${t.from}, ${t.to})` }}><t.Icon size={13} strokeWidth={2.4} /></span>
+              <div className="flex items-center justify-between gap-1.5">
+                <div className="min-w-0 truncate text-[10px] font-black uppercase tracking-[0.04em] text-slate-400" title={t.label}>{t.label}</div>
+                <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-lg text-white shadow-sm" style={{ background: `linear-gradient(140deg, ${t.from}, ${t.to})` }}><t.Icon size={12} strokeWidth={2.4} /></span>
               </div>
               <div className="mt-1.5 flex items-baseline gap-1">
-                <span className="tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 22, letterSpacing: "-0.02em", lineHeight: 1 }}>{t.value}</span>
-                {t.sub && <span className="text-[10.5px] font-bold text-slate-400">{t.sub}</span>}
+                <span className="truncate tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 18, letterSpacing: "-0.02em", lineHeight: 1 }}>{t.value}</span>
+                {t.sub && <span className="text-[10px] font-bold text-slate-400">{t.sub}</span>}
               </div>
             </div>
           ))}
@@ -340,23 +340,6 @@ export function SalesOrderStatusDashboard({ rows, hygiene = [] }: { rows: SoRow[
           </table>
         </div>
       </Section>
-
-      {/* Data Hygiene */}
-      {hygiene.length > 0 && (
-        <Section title="Data Hygiene — Field Fill %" Icon={ShieldCheck}>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2 max-md:grid-cols-1">
-            {hygiene.map((h) => (
-              <div key={h.field} className="flex items-center gap-3">
-                <span className="w-40 shrink-0 truncate text-[12px] font-semibold text-slate-600" title={h.field}>{h.field}</span>
-                <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.08)" }}>
-                  <div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${h.fillPct}%`, background: h.fillPct >= 90 ? "linear-gradient(90deg, #63b81e, #0180cf)" : h.fillPct >= 70 ? "linear-gradient(90deg, #f59e0b, #d97706)" : "linear-gradient(90deg, #ef4444, #b91c1c)" }} />
-                </div>
-                <span className="w-14 shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{h.fillPct}%</span>
-              </div>
-            ))}
-          </div>
-        </Section>
-      )}
 
       {/* Aging bucket popup — header fixed, scrollable, with a top-N bucket */}
       {agingBucket != null && aging[agingBucket] && (

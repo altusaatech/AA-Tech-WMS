@@ -2,9 +2,8 @@ import { ClipboardList } from "lucide-react";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
 import { salesBom } from "@/db/schema";
-import { BOM_COLUMNS } from "@/lib/sales/columns";
 import { DashboardCanvas } from "@/components/dashboards/dashboard-canvas";
-import { RegisterStatusDashboard, type DashRow, type HygieneRow } from "@/components/dashboards/status/register-status-dashboard";
+import { RegisterStatusDashboard, type DashRow } from "@/components/dashboards/status/register-status-dashboard";
 
 export const dynamic = "force-dynamic";
 
@@ -39,16 +38,9 @@ export default async function BomStatusDashboardPage() {
     };
   });
 
-  const total = bom.length;
-  const isBlank = (v: unknown) => v == null || (typeof v === "string" && v.trim() === "");
-  const hygiene: HygieneRow[] = BOM_COLUMNS.filter((c) => c.key !== "srNo").map((c) => {
-    const blanks = bom.filter((b) => isBlank((b as Record<string, unknown>)[c.key])).length;
-    return { field: c.label, blanks, fillPct: total ? Math.round(((total - blanks) / total) * 100) : 0 };
-  });
-
   return (
-    <DashboardCanvas eyebrow="Live · Production" title="BOM Status" subtitle="Created, completed, revised, aging & data hygiene" Icon={ClipboardList}>
-      <RegisterStatusDashboard kind="bom" rows={rows} hygiene={hygiene} />
+    <DashboardCanvas eyebrow="Live · Production" title="BOM Status" subtitle="Created, completed, revised & aging" Icon={ClipboardList}>
+      <RegisterStatusDashboard kind="bom" rows={rows} />
     </DashboardCanvas>
   );
 }

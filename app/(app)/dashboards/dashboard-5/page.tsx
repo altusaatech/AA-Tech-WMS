@@ -2,9 +2,8 @@ import { Factory } from "lucide-react";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
 import { salesWo } from "@/db/schema";
-import { WO_COLUMNS } from "@/lib/sales/columns";
 import { DashboardCanvas } from "@/components/dashboards/dashboard-canvas";
-import { RegisterStatusDashboard, type DashRow, type HygieneRow } from "@/components/dashboards/status/register-status-dashboard";
+import { RegisterStatusDashboard, type DashRow } from "@/components/dashboards/status/register-status-dashboard";
 
 export const dynamic = "force-dynamic";
 
@@ -38,16 +37,9 @@ export default async function WoStatusDashboardPage() {
     };
   });
 
-  const total = wo.length;
-  const isBlank = (v: unknown) => v == null || (typeof v === "string" && v.trim() === "");
-  const hygiene: HygieneRow[] = WO_COLUMNS.filter((c) => c.key !== "srNo").map((c) => {
-    const blanks = wo.filter((w) => isBlank((w as Record<string, unknown>)[c.key])).length;
-    return { field: c.label, blanks, fillPct: total ? Math.round(((total - blanks) / total) * 100) : 0 };
-  });
-
   return (
-    <DashboardCanvas eyebrow="Live · Production" title="Work Order Status" subtitle="Production, on-time %, ready to dispatch, aging & hygiene" Icon={Factory}>
-      <RegisterStatusDashboard kind="wo" rows={rows} hygiene={hygiene} />
+    <DashboardCanvas eyebrow="Live · Production" title="Work Order Status" subtitle="Production, on-time %, ready to dispatch & aging" Icon={Factory}>
+      <RegisterStatusDashboard kind="wo" rows={rows} />
     </DashboardCanvas>
   );
 }
