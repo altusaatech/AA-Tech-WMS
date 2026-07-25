@@ -28,7 +28,16 @@ function daysBetween(d: string): number {
 
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-/** Two-series bar chart — grouped columns per label (e.g. Prev vs This year). */
+function Legend({ labelA, labelB, colorA, colorB }: { labelA: string; labelB: string; colorA: string; colorB: string }) {
+  return (
+    <div className="mb-2.5 flex items-center gap-4 text-[11px] font-bold text-slate-500">
+      <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-sm" style={{ background: colorA }} />{labelA}</span>
+      <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-sm" style={{ background: colorB }} />{labelB}</span>
+    </div>
+  );
+}
+
+/** Two-series bar chart — grouped columns per label (e.g. Enquiry vs Quote). */
 function GroupedBars({ data, labelA, labelB, colorA, colorB }: {
   data: { label: string; a: number; b: number }[];
   labelA: string; labelB: string; colorA: string; colorB: string;
@@ -38,16 +47,39 @@ function GroupedBars({ data, labelA, labelB, colorA, colorB }: {
   if (!hasData) return <p className="py-10 text-center text-[13px] text-slate-400">No data in range.</p>;
   return (
     <div>
-      <div className="mb-2.5 flex items-center gap-4 text-[11px] font-bold text-slate-500">
-        <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-sm" style={{ background: colorA }} />{labelA}</span>
-        <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-sm" style={{ background: colorB }} />{labelB}</span>
-      </div>
+      <Legend labelA={labelA} labelB={labelB} colorA={colorA} colorB={colorB} />
       <div className="flex h-36 items-end gap-1.5">
         {data.map((d) => (
           <div key={d.label} className="flex flex-1 flex-col items-center gap-1">
             <div className="flex h-28 w-full items-end justify-center gap-[3px]">
               <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.a / max) * 100}%`, minHeight: d.a ? 3 : 0, background: colorA }} title={`${labelA}: ${d.a}`} />
               <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.b / max) * 100}%`, minHeight: d.b ? 3 : 0, background: colorB }} title={`${labelB}: ${d.b}`} />
+            </div>
+            <span className="text-[10px] font-semibold text-slate-400">{d.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Two-series stacked bar chart — one bar per label, split into A (bottom) + B (top). */
+function StackedBars({ data, labelA, labelB, colorA, colorB }: {
+  data: { label: string; a: number; b: number }[];
+  labelA: string; labelB: string; colorA: string; colorB: string;
+}) {
+  const max = Math.max(1, ...data.map((d) => d.a + d.b));
+  const hasData = data.some((d) => d.a || d.b);
+  if (!hasData) return <p className="py-10 text-center text-[13px] text-slate-400">No data in range.</p>;
+  return (
+    <div>
+      <Legend labelA={labelA} labelB={labelB} colorA={colorA} colorB={colorB} />
+      <div className="flex h-36 items-end gap-1.5">
+        {data.map((d) => (
+          <div key={d.label} className="flex flex-1 flex-col items-center gap-1">
+            <div className="mx-auto flex h-28 w-full max-w-[22px] flex-col justify-end" title={`${labelB}: ${d.b} · ${labelA}: ${d.a}`}>
+              <div className="rounded-t transition-[height] duration-700" style={{ height: `${(d.b / max) * 100}%`, minHeight: d.b ? 3 : 0, background: colorB }} />
+              <div className={`transition-[height] duration-700 ${d.b ? "" : "rounded-t"}`} style={{ height: `${(d.a / max) * 100}%`, minHeight: d.a ? 3 : 0, background: colorA }} />
             </div>
             <span className="text-[10px] font-semibold text-slate-400">{d.label}</span>
           </div>
@@ -228,7 +260,7 @@ export function QuoteStatusDashboard({ rows }: { rows: QsRow[] }) {
           <DonutBreakdown data={statusDist} centerLabel="Quotes" />
         </Section>
         <Section title={`Monthly Trend · ${yoy.prevYear} vs ${yoy.thisYear}`} Icon={TrendingUp}>
-          <GroupedBars data={yoy.data} labelA={String(yoy.prevYear)} labelB={String(yoy.thisYear)} colorA="#c7d2e0" colorB="#0180cf" />
+          <StackedBars data={yoy.data} labelA={String(yoy.prevYear)} labelB={String(yoy.thisYear)} colorA="#c7d2e0" colorB="#0180cf" />
         </Section>
         <Section title="Enquiry vs Quote Trend" Icon={BarChart3}>
           <GroupedBars data={enqVsQuote} labelA="Enquiries" labelB="Quotes" colorA="#63b81e" colorB="#0180cf" />
