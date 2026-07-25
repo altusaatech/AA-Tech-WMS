@@ -39,13 +39,13 @@ export function DashboardCanvas({
               {eyebrow}
             </div>
             <h1 className="text-[20px] font-black leading-tight tracking-[-0.03em] text-slate-800" style={{ fontFamily: "var(--font-display), system-ui, sans-serif" }}>{title}</h1>
-            <p className="text-[12px] font-medium text-slate-500">{subtitle}</p>
+            {subtitle && <p className="text-[12px] font-medium text-slate-500">{subtitle}</p>}
           </div>
         </div>
       </header>
 
       {/* Header spans full width above; the left panel + body sit below it. */}
-      <div className="mt-3 flex items-start gap-5 max-md:flex-col">
+      <div className="mt-2 flex items-start gap-5 max-md:flex-col">
         <DashboardsSidebar />
         <main className="min-w-0 flex-1">
           {children ?? (

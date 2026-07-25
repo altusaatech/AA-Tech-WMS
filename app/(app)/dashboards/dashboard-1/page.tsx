@@ -49,7 +49,7 @@ export default async function QuoteStatusDashboardPage() {
   });
 
   return (
-    <DashboardCanvas eyebrow="Live · Sales" title="Quote Status" subtitle="Enquiries, quotes, pending & salesperson performance" Icon={LayoutDashboard}>
+    <DashboardCanvas eyebrow="Live · Sales" title="Quote Status" subtitle="" Icon={LayoutDashboard}>
       <QuoteStatusDashboard rows={rows} />
     </DashboardCanvas>
   );

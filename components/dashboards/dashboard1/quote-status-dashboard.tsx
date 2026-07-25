@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Inbox, Send, BadgeCheck, X, Clock3, Target, IndianRupee, Search, Filter, TrendingUp, PieChart, Trophy, BarChart3, type LucideIcon } from "lucide-react";
-import { Section, compactInr, ExportButtons, DonutBreakdown, InsightBanner } from "@/components/dashboards/shared/kit";
+import { Section, compactInr, ExportButtons, DonutBreakdown, InsightBanner, TrendBars } from "@/components/dashboards/shared/kit";
 
 export interface QsRow {
   quoteNo: string;
@@ -67,36 +67,6 @@ function GroupedBars({ data, labelA, labelB, colorA, colorB }: {
   );
 }
 
-/** Two-series stacked bar chart — one bar per label, split into A (bottom) + B (top). */
-function StackedBars({ data, labelA, labelB, colorA, colorB }: {
-  data: { label: string; a: number; b: number }[];
-  labelA: string; labelB: string; colorA: string; colorB: string;
-}) {
-  const max = Math.max(1, ...data.map((d) => d.a + d.b));
-  const hasData = data.some((d) => d.a || d.b);
-  if (!hasData) return <p className="py-10 text-center text-[13px] text-slate-400">No data in range.</p>;
-  return (
-    <div>
-      <Legend labelA={labelA} labelB={labelB} colorA={colorA} colorB={colorB} />
-      <div className="flex h-36 items-end gap-1.5">
-        {data.map((d) => {
-          const delta = d.b - d.a;
-          const tip = `${d.label}\n${labelB}: ${d.b}\n${labelA}: ${d.a}\nChange: ${delta >= 0 ? "+" : ""}${delta} vs ${labelA}\nTotal: ${d.a + d.b}`;
-          return (
-            <div key={d.label} title={tip} className="flex flex-1 cursor-help flex-col items-center gap-1 rounded-md hover:bg-slate-50">
-              <div className="mx-auto flex h-28 w-full max-w-[22px] flex-col justify-end">
-                <div className="rounded-t transition-[height] duration-700" style={{ height: `${(d.b / max) * 100}%`, minHeight: d.b ? 3 : 0, background: colorB }} />
-                <div className={`transition-[height] duration-700 ${d.b ? "" : "rounded-t"}`} style={{ height: `${(d.a / max) * 100}%`, minHeight: d.a ? 3 : 0, background: colorA }} />
-              </div>
-              <span className="text-[10px] font-semibold text-slate-400">{d.label}</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 export function QuoteStatusDashboard({ rows }: { rows: QsRow[] }) {
   const [q, setQ] = React.useState("");
   const [from, setFrom] = React.useState("");
@@ -106,6 +76,7 @@ export function QuoteStatusDashboard({ rows }: { rows: QsRow[] }) {
   const [customer, setCustomer] = React.useState("");
   const [product, setProduct] = React.useState("");
   const [scope, setScope] = React.useState("");
+  const [monthlyYear, setMonthlyYear] = React.useState("");
 
   const statuses = React.useMemo(() => Array.from(new Set(rows.map((r) => r.status).filter(Boolean))).sort(), [rows]);
   const sources = React.useMemo(() => Array.from(new Set(rows.map((r) => r.source).filter(Boolean))).sort(), [rows]);
@@ -158,22 +129,19 @@ export function QuoteStatusDashboard({ rows }: { rows: QsRow[] }) {
     return Array.from(m.entries()).map(([label, value]) => ({ label, value }));
   }, [f]);
 
-  // Monthly trend — this year vs previous year, per calendar month.
-  const yoy = React.useMemo(() => {
-    const thisYear = new Date().getFullYear();
-    const prevYear = thisYear - 1;
-    const cur = new Array(12).fill(0);
-    const prv = new Array(12).fill(0);
-    for (const r of f) {
-      if (!r.date || r.date.length < 7) continue;
-      const yr = Number(r.date.slice(0, 4));
-      const mo = Number(r.date.slice(5, 7)) - 1;
-      if (mo < 0 || mo > 11) continue;
-      if (yr === thisYear) cur[mo]++;
-      else if (yr === prevYear) prv[mo]++;
+  // Monthly quotes per calendar month — for a chosen year, else recent months.
+  const monthlyYears = React.useMemo(() => Array.from(new Set(rows.map((r) => r.date?.slice(0, 4)).filter(Boolean))).sort((a, b) => b!.localeCompare(a!)), [rows]);
+  const monthly = React.useMemo(() => {
+    if (monthlyYear) {
+      const counts = new Array(12).fill(0);
+      for (const r of f) if (r.date && r.date.slice(0, 4) === monthlyYear) { const mo = Number(r.date.slice(5, 7)) - 1; if (mo >= 0 && mo < 12) counts[mo]++; }
+      return MON.map((label, i) => ({ label, value: counts[i] }));
     }
-    return { thisYear, prevYear, data: MON.map((label, i) => ({ label, a: prv[i], b: cur[i] })) };
-  }, [f]);
+    const m = new Map<string, number>();
+    for (const r of f) if (r.date) m.set(r.date.slice(0, 7), (m.get(r.date.slice(0, 7)) ?? 0) + 1);
+    return Array.from(m.entries()).sort(([a], [b]) => a.localeCompare(b)).slice(-8).map(([key, v]) => ({ label: MON[Number(key.slice(5, 7)) - 1] ?? key, value: v }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [f, monthlyYear]);
 
   // Enquiry vs Quote trend — last 8 month buckets.
   const enqVsQuote = React.useMemo(() => {
@@ -267,8 +235,15 @@ export function QuoteStatusDashboard({ rows }: { rows: QsRow[] }) {
         <Section title="Status Distribution" Icon={PieChart}>
           <DonutBreakdown data={statusDist} centerLabel="Quotes" />
         </Section>
-        <Section title={`Monthly Trend · ${yoy.prevYear} vs ${yoy.thisYear}`} Icon={TrendingUp}>
-          <StackedBars data={yoy.data} labelA={String(yoy.prevYear)} labelB={String(yoy.thisYear)} colorA="#c7d2e0" colorB="#0180cf" />
+        <Section title="Monthly Quote Trend" Icon={TrendingUp}>
+          <div className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-slate-500">
+            <span>Year</span>
+            <select value={monthlyYear} onChange={(e) => setMonthlyYear(e.target.value)} className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-[12px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]">
+              <option value="">Recent (last 8 mo)</option>
+              {monthlyYears.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+          <TrendBars data={monthly} />
         </Section>
         <Section title="Enquiry vs Quote Trend" Icon={BarChart3}>
           <GroupedBars data={enqVsQuote} labelA="Enquiries" labelB="Quotes" colorA="#63b81e" colorB="#0180cf" />
