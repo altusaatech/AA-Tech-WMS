@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { quotations, masterProduct, masterHardware, masterDoor, masterInstallation, salesKyc } from "@/db/schema";
+import { quotations, masterProduct, masterHardware, masterDoor, masterInstallation, salesQuotes } from "@/db/schema";
 import { QuotationBuilder } from "@/components/quotation/quotation-builder";
 import { DEFAULT_NOTES, DEFAULT_SUBJECT, DEFAULT_PI_META, type DoorLine, type PiMeta } from "@/lib/quotation/types";
 
@@ -15,19 +15,32 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
   const [q] = await db.select().from(quotations).where(eq(quotations.id, id));
   if (!q) notFound();
 
-  const [products, hardware, doors, installations, kyc] = await Promise.all([
+  const [products, hardware, doors, installations, quoteRows] = await Promise.all([
     db.select().from(masterProduct),
     db.select().from(masterHardware),
     db.select().from(masterDoor),
     db.select().from(masterInstallation).orderBy(masterInstallation.srNo),
-    db.select({ enquiryNo: salesKyc.enquiryNo, companyName: salesKyc.companyName }).from(salesKyc),
+    db
+      .select({ enquiryNo: salesQuotes.enquiryNo, companyName: salesQuotes.companyName, updatedAt: salesQuotes.updatedAt })
+      .from(salesQuotes),
   ]);
 
-  // Customer KYC lookup — the Working Specification auto-fills Company Name from
-  // here when its Enquiry No matches a KYC record. Newest wins on duplicates.
-  const kycOptions = kyc
-    .filter((k) => (k.enquiryNo ?? "").trim())
-    .map((k) => ({ enquiryNo: (k.enquiryNo as string).trim(), companyName: (k.companyName ?? "").trim() }));
+  // Enquiry No picker + Customer auto-fill are sourced from the Quote Status
+  // register — pick an Enquiry No and the Customer fills from that quote. One
+  // entry per Enquiry No (newest row with a Company Name wins). Enquiry No and
+  // Offer No are the same number in AA Tech's flow, so the builder mirrors them.
+  const byEnquiry = new Map<string, { companyName: string; at: number }>();
+  for (const r of quoteRows) {
+    const enquiryNo = (r.enquiryNo ?? "").trim();
+    if (!enquiryNo) continue;
+    const companyName = (r.companyName ?? "").trim();
+    const at = r.updatedAt ? new Date(r.updatedAt).getTime() : 0;
+    const prev = byEnquiry.get(enquiryNo);
+    if (!prev || at >= prev.at) byEnquiry.set(enquiryNo, { companyName: companyName || prev?.companyName || "", at });
+  }
+  const kycOptions = Array.from(byEnquiry.entries())
+    .map(([enquiryNo, v]) => ({ enquiryNo, companyName: v.companyName }))
+    .sort((a, b) => a.enquiryNo.localeCompare(b.enquiryNo));
 
   const productOptions = products
     .filter((p) => p.typeOfFinishedGood)

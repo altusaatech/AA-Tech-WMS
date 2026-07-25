@@ -96,7 +96,7 @@ export function QuotationBuilder({
   // save doesn't wipe it.
   const [piMeta] = React.useState<PiMeta>(initialPiMeta);
   const [saving, setSaving] = React.useState(false);
-  // Customer KYC → Company Name lookup, keyed by trimmed/lower-cased Enquiry No.
+  // Quote Status → Customer lookup, keyed by trimmed/lower-cased Enquiry No.
   const kycByEnquiry = React.useMemo(() => {
     const m = new Map<string, string>();
     for (const k of kycOptions) if (k.enquiryNo) m.set(k.enquiryNo.trim().toLowerCase(), k.companyName);
@@ -105,7 +105,7 @@ export function QuotationBuilder({
   // Offer No mirrors Enquiry No (they're the same in AA Tech's flow) until the
   // user deliberately types a different Offer No — then mirroring stops.
   const offerTouched = React.useRef(Boolean(initial.offerNo) && initial.offerNo !== initial.enquiryNo);
-  // Typing/picking an Enquiry No that exists in KYC auto-fills the Customer.
+  // Picking an Enquiry No that exists in Quote Status auto-fills the Customer.
   function onEnquiryChange(v: string) {
     setEnquiryNo(v);
     if (!offerTouched.current) setOfferNo(v);
@@ -287,7 +287,7 @@ export function QuotationBuilder({
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="grid grid-cols-6 gap-3 max-lg:grid-cols-2 max-md:grid-cols-1">
             <L label="Enquiry No">
-              <input className={inp} list="kyc-enquiry-list" value={enquiryNo} onChange={(e) => onEnquiryChange(e.target.value)} placeholder="ENQ-2025-001" title="Pick a KYC enquiry to auto-fill Customer" />
+              <input className={inp} list="kyc-enquiry-list" value={enquiryNo} onChange={(e) => onEnquiryChange(e.target.value)} placeholder="180034" title="Pick an Enquiry No from Quote Status — Customer & Offer No fill automatically" />
               {kycOptions.length > 0 && (
                 <datalist id="kyc-enquiry-list">
                   {kycOptions.map((k) => (
