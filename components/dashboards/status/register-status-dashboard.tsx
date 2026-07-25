@@ -17,6 +17,8 @@ export interface DashRow {
   soNo: string;
   company: string;
   item: string;
+  scope?: string; // enriched from the linked Quote (by Enquiry No)
+  enquiryNo?: string; // enriched from the linked SO (by SO No)
   status: string;
   date: string; // primary date (yyyy-mm-dd)
   value: number;
@@ -107,6 +109,8 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
   const [customer, setCustomer] = React.useState("");
   const [item, setItem] = React.useState("");
   const [stat, setStat] = React.useState("");
+  const [scope, setScope] = React.useState("");
+  const [enquiry, setEnquiry] = React.useState("");
   const [trendYear, setTrendYear] = React.useState("");
   const [agingBucket, setAgingBucket] = React.useState<number | null>(null);
 
@@ -115,6 +119,8 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
   const customers = React.useMemo(() => Array.from(new Set(rows.map((r) => r.company).filter(Boolean))).sort(), [rows]);
   const items = React.useMemo(() => Array.from(new Set(rows.map((r) => r.item).filter(Boolean))).sort(), [rows]);
   const statuses = React.useMemo(() => Array.from(new Set(rows.map((r) => r.status).filter(Boolean))).sort(), [rows]);
+  const scopes = React.useMemo(() => Array.from(new Set(rows.map((r) => r.scope ?? "").filter(Boolean))).sort(), [rows]);
+  const enquiries = React.useMemo(() => Array.from(new Set(rows.map((r) => r.enquiryNo ?? "").filter(Boolean))).sort(), [rows]);
 
   const f = React.useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -124,10 +130,12 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
       if (customer && r.company !== customer) return false;
       if (item && r.item !== item) return false;
       if (stat && r.status !== stat) return false;
+      if (scope && (r.scope ?? "") !== scope) return false;
+      if (enquiry && (r.enquiryNo ?? "") !== enquiry) return false;
       if (needle && !r.search.includes(needle)) return false;
       return true;
     });
-  }, [rows, q, from, to, customer, item, stat]);
+  }, [rows, q, from, to, customer, item, stat, scope, enquiry]);
 
   const tiles = React.useMemo(() => buildTiles(kind, f), [kind, f]);
 
@@ -179,8 +187,8 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
   }, [f]);
   const agingMax = Math.max(1, ...aging.map((a) => a.rows.length));
 
-  const reset = () => { setQ(""); setFrom(""); setTo(""); setCustomer(""); setItem(""); setStat(""); };
-  const anyFilter = q || from || to || customer || item || stat;
+  const reset = () => { setQ(""); setFrom(""); setTo(""); setCustomer(""); setItem(""); setStat(""); setScope(""); setEnquiry(""); };
+  const anyFilter = q || from || to || customer || item || stat || scope || enquiry;
   const statusLabel = kind === "bom" ? "BOM statuses" : kind === "ga" ? "GA statuses" : kind === "wo" ? "WO statuses" : "statuses";
   const searchPlaceholder = kind === "bom" ? "Search SO No / BOM No…" : kind === "wo" ? "Search WO No / SO No…" : "Search…";
 
@@ -197,6 +205,8 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
         {statuses.length > 0 && <select value={stat} onChange={(e) => setStat(e.target.value)} className="h-9 max-w-[170px] rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"><option value="">All {statusLabel}</option>{statuses.map((s) => <option key={s} value={s}>{s}</option>)}</select>}
         {customers.length > 0 && <select value={customer} onChange={(e) => setCustomer(e.target.value)} className="h-9 max-w-[180px] rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"><option value="">All customers</option>{customers.map((c) => <option key={c} value={c}>{c}</option>)}</select>}
         {items.length > 0 && <select value={item} onChange={(e) => setItem(e.target.value)} className="h-9 max-w-[170px] rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"><option value="">All items</option>{items.map((it) => <option key={it} value={it}>{it}</option>)}</select>}
+        {scopes.length > 0 && <select value={scope} onChange={(e) => setScope(e.target.value)} className="h-9 max-w-[160px] rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"><option value="">All scopes</option>{scopes.map((s) => <option key={s} value={s}>{s}</option>)}</select>}
+        {enquiries.length > 0 && <select value={enquiry} onChange={(e) => setEnquiry(e.target.value)} className="h-9 max-w-[150px] rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"><option value="">All enquiry no</option>{enquiries.map((en) => <option key={en} value={en}>{en}</option>)}</select>}
         {anyFilter && <button type="button" onClick={reset} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 text-[12.5px] font-bold text-slate-500 hover:text-[#0069b3]"><X size={13} /> Clear</button>}
         <span className="ml-auto flex items-center gap-2 text-[12px] font-semibold text-slate-400"><Filter size={13} /> {f.length} of {rows.length}
           <ExportButtons filename={`${kind}-status`} headers={[NO_LABEL[kind], "SO No", "Customer", "Item", "Status", "Date", "Days", "Value"]} rows={f.map((r) => [r.no, r.soNo, r.company, r.item, r.status, r.date, r.days, r.value])} />
