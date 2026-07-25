@@ -81,29 +81,34 @@ export function TrendBars({ data, format }: { data: { label: string; value: numb
   const max = Math.max(1, ...data.map((d) => d.value));
   if (data.length === 0) return <p className="py-8 text-center text-[13px] text-slate-400">No data in range.</p>;
   return (
-    <div className="relative pt-1">
-      <div className="relative flex h-48 items-end gap-3">
+    <div className="relative">
+      {/* plot area — a definite height so the bars scale against it */}
+      <div className="relative flex h-48 items-end gap-3 pt-6">
         {/* recessive gridlines */}
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 bottom-[24px] flex flex-col justify-between">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-6 bottom-0 flex flex-col justify-between">
           {[0, 1, 2, 3, 4].map((i) => <div key={i} className="h-px w-full bg-slate-100" />)}
         </div>
         {data.map((d, i) => (
-          <div key={i} className="group/bar relative z-[1] flex flex-1 flex-col items-center justify-end gap-1.5">
-            <span className="rounded-md bg-slate-900/[0.05] px-1.5 py-0.5 text-[11.5px] font-black tabular-nums text-slate-700 transition-transform group-hover/bar:-translate-y-0.5">{format ? format(d.value) : d.value}</span>
+          <div key={i} className="group/bar relative z-[1] flex h-full flex-1 flex-col justify-end">
             <div
-              className="relative w-full max-w-[44px] overflow-hidden rounded-t-[6px] transition-all duration-500 group-hover/bar:brightness-105"
+              className="relative mx-auto w-full max-w-[46px] rounded-t-[6px] transition-all duration-500 group-hover/bar:brightness-105"
               style={{
-                height: `${(d.value / max) * 100}%`,
-                minHeight: 8,
-                background: "linear-gradient(180deg, #7ed957 0%, #63b81e 34%, #0180cf 100%)",
+                height: `${Math.max(2, (d.value / max) * 100)}%`,
+                minHeight: 4,
+                background: "linear-gradient(180deg, #4f9df5 0%, #2f8be8 55%, #0180cf 100%)",
                 boxShadow: "0 -3px 14px -3px rgba(1,128,207,0.45), inset 0 1px 0 rgba(255,255,255,0.55)",
               }}
             >
-              <span aria-hidden className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/45 to-transparent" />
+              <span aria-hidden className="absolute inset-x-0 top-0 h-1/3 rounded-t-[6px] bg-gradient-to-b from-white/45 to-transparent" />
+              {/* value badge floats just above the bar */}
+              <span className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 rounded-md bg-slate-900/[0.05] px-1.5 py-0.5 text-[11.5px] font-black tabular-nums text-slate-700 transition-transform group-hover/bar:-translate-y-0.5">{format ? format(d.value) : d.value}</span>
             </div>
-            <span className="text-[10.5px] font-bold text-slate-400">{d.label}</span>
           </div>
         ))}
+      </div>
+      {/* month labels row */}
+      <div className="mt-1.5 flex gap-3">
+        {data.map((d, i) => <div key={i} className="flex-1 text-center text-[10.5px] font-bold text-slate-400">{d.label}</div>)}
       </div>
     </div>
   );
