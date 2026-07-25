@@ -59,10 +59,19 @@ export default async function HygieneDashboardPage() {
   const registers: RegisterHygiene[] = [
     hygieneFor("quote", "Quote Status", QUOTE_COLUMNS, quotes),
     hygieneFor("so", "SO Status", SO_COLUMNS, so),
-    hygieneFor("ga", "GA Approval", GA_COLUMNS, ga),
+    hygieneFor("ga", "GA Approval Status", GA_COLUMNS, ga),
     hygieneFor("bom", "BOM Status", BOM_COLUMNS, bom),
-    hygieneFor("wo", "Work Order", WO_COLUMNS, wo),
+    hygieneFor("wo", "Work Order Status", WO_COLUMNS, wo),
   ];
+
+  const lastUpdated = new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Kolkata",
+  }).format(new Date());
+
+  // Registers in the reference sheet that don't exist as tables in the system yet.
+  const missing = ["Press Shop", "Fabrication", "BO Purchase"];
 
   return (
     <DashboardCanvas
@@ -71,7 +80,7 @@ export default async function HygieneDashboardPage() {
       subtitle="Field completeness across every register — spot missing data at a glance"
       Icon={HeartPulse}
     >
-      <HygieneDashboard registers={registers} />
+      <HygieneDashboard registers={registers} lastUpdated={lastUpdated} missing={missing} />
     </DashboardCanvas>
   );
 }
