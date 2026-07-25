@@ -237,8 +237,8 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
         </div>
       </Section>
 
-      {/* advanced charts row */}
-      <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
+      {/* circular charts side by side — Completion gauge + Status donut */}
+      <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
         <Section title={primary.label} Icon={Target}>
           <div className="flex flex-col items-center py-2">
             <Gauge pct={primary.pct} label={primary.label} sub={primary.sub} />
@@ -247,6 +247,24 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
         <Section title={kind === "bom" ? "BOM Status" : "Status Distribution"} Icon={PieChart}>
           <DonutBreakdown data={statusDist} centerLabel={kind === "bom" ? "BOM" : "Total"} />
         </Section>
+      </div>
+
+      {/* aging + monthly BOM side by side */}
+      <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
+        <Section title="Aging (open items)" Icon={Hourglass}>
+          <div className="space-y-3.5 pt-1">
+            {aging.map((a, i) => (
+              <button key={a.label} type="button" onClick={() => a.rows.length && setAgingBucket(i)} disabled={a.rows.length === 0} className="w-full text-left transition-transform hover:-translate-y-0.5 disabled:cursor-default">
+                <div className="mb-1 flex items-center justify-between text-[12.5px] font-bold text-slate-600"><span>{a.label}</span><span className="tabular-nums font-black text-slate-800">{a.rows.length}</span></div>
+                <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.09)" }}>
+                  <div className="relative h-full rounded-full transition-[width] duration-700" style={{ width: `${Math.max(4, (a.rows.length / agingMax) * 100)}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)" }}><span aria-hidden className="absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/30" /></div>
+                </div>
+              </button>
+            ))}
+            <p className="pt-1 text-[10.5px] font-semibold text-slate-400">Click a bar for the items in that aging bucket.</p>
+          </div>
+        </Section>
+
         <Section title={kind === "bom" ? "Monthly BOM Completion" : "Monthly Trend"} Icon={TrendingUp}>
           <div className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-slate-500">
             <span>Year</span>
@@ -258,21 +276,6 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
           <TrendBars data={trend} />
         </Section>
       </div>
-
-      {/* Aging (open items) */}
-      <Section title="Aging (open items)" Icon={Hourglass}>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-3.5 pt-1 max-md:grid-cols-1">
-          {aging.map((a, i) => (
-            <button key={a.label} type="button" onClick={() => a.rows.length && setAgingBucket(i)} disabled={a.rows.length === 0} className="w-full text-left transition-transform hover:-translate-y-0.5 disabled:cursor-default">
-              <div className="mb-1 flex items-center justify-between text-[12.5px] font-bold text-slate-600"><span>{a.label}</span><span className="tabular-nums font-black text-slate-800">{a.rows.length}</span></div>
-              <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100" style={{ boxShadow: "inset 0 1px 2px rgba(15,23,42,0.09)" }}>
-                <div className="relative h-full rounded-full transition-[width] duration-700" style={{ width: `${Math.max(4, (a.rows.length / agingMax) * 100)}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)" }}><span aria-hidden className="absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/30" /></div>
-              </div>
-            </button>
-          ))}
-        </div>
-        <p className="pt-3 text-[10.5px] font-semibold text-slate-400">Click a bar for the items in that aging bucket.</p>
-      </Section>
 
       {/* Aging popup */}
       {agingBucket != null && aging[agingBucket] && (
