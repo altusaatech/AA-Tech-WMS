@@ -1,11 +1,7 @@
 import type { ReactNode } from "react";
-import { DashboardsSidebar } from "@/components/dashboards/dashboards-sidebar";
 
+// The DashboardCanvas now owns the shell: a full-width header on top, with the
+// left panel and body below it. The layout is just a centered container.
 export default function DashboardsLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="mx-auto flex max-w-[1600px] items-start gap-5 px-6 pb-8 pt-3 max-md:flex-col max-md:px-4">
-      <DashboardsSidebar />
-      <main className="min-w-0 flex-1">{children}</main>
-    </div>
-  );
+  return <div className="mx-auto max-w-[1600px] px-6 pb-8 pt-3 max-md:px-4">{children}</div>;
 }

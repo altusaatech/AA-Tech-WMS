@@ -210,7 +210,7 @@ export function QuoteStatusDashboard({ rows }: { rows: QsRow[] }) {
   const selCls = "h-9 rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]";
 
   return (
-    <div className="mt-3 space-y-3">
+    <div className="space-y-3">
       {/* filter bar */}
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
         <div className="relative">

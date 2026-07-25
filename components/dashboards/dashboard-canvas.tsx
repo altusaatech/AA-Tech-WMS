@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Sparkles } from "lucide-react";
+import { DashboardsSidebar } from "@/components/dashboards/dashboards-sidebar";
 
 /** Themed shell for a single dashboard — green→blue gradient header with the
  *  dotted pattern, matching the app's nav buttons. Body is passed in. */
@@ -43,21 +44,27 @@ export function DashboardCanvas({
         </div>
       </header>
 
-      {children ?? (
-        <div
-          className="relative mt-6 flex flex-col items-center justify-center overflow-hidden rounded-[24px] border-2 border-dashed border-[#0180cf]/25 px-6 py-16 text-center"
-          style={{ background: "linear-gradient(135deg, #eef6ec, #f4fbf6)" }}
-        >
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.5]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(1,128,207,0.06) 1px, transparent 0)", backgroundSize: "22px 22px" }} />
-          <span className="relative inline-flex size-14 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)" }}>
-            <Sparkles size={26} strokeWidth={2.2} />
-          </span>
-          <p className="relative mt-4 text-[16px] font-black text-slate-700">Ready to build</p>
-          <p className="relative mt-1 max-w-md text-[13.5px] text-slate-500">
-            Tell me the numbers, charts and lists you want on the {title} — I&apos;ll build it here in this exact theme.
-          </p>
-        </div>
-      )}
+      {/* Header spans full width above; the left panel + body sit below it. */}
+      <div className="mt-3 flex items-start gap-5 max-md:flex-col">
+        <DashboardsSidebar />
+        <main className="min-w-0 flex-1">
+          {children ?? (
+            <div
+              className="relative flex flex-col items-center justify-center overflow-hidden rounded-[24px] border-2 border-dashed border-[#0180cf]/25 px-6 py-16 text-center"
+              style={{ background: "linear-gradient(135deg, #eef6ec, #f4fbf6)" }}
+            >
+              <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.5]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(1,128,207,0.06) 1px, transparent 0)", backgroundSize: "22px 22px" }} />
+              <span className="relative inline-flex size-14 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)" }}>
+                <Sparkles size={26} strokeWidth={2.2} />
+              </span>
+              <p className="relative mt-4 text-[16px] font-black text-slate-700">Ready to build</p>
+              <p className="relative mt-1 max-w-md text-[13.5px] text-slate-500">
+                Tell me the numbers, charts and lists you want on the {title} — I&apos;ll build it here in this exact theme.
+              </p>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
