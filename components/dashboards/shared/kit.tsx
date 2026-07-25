@@ -547,11 +547,11 @@ export function DonutBreakdown({ data, centerLabel = "Total" }: { data: { label:
 /** Celebratory summary banner used at the top/bottom of a dashboard. */
 export function InsightBanner({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
   return (
-    <div className="relative flex flex-wrap items-center justify-between gap-3 overflow-hidden rounded-[22px] border border-[#63b81e]/25 px-5 py-4 shadow-sm" style={{ background: "linear-gradient(120deg, #eef6ec, #ffffff 60%, #eaf3fd)" }}>
+    <div className="relative flex flex-wrap items-center justify-between gap-2.5 overflow-hidden rounded-2xl border border-[#63b81e]/25 px-4 py-2.5 shadow-sm" style={{ background: "linear-gradient(120deg, #eef6ec, #ffffff 60%, #eaf3fd)" }}>
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(99,184,30,0.10) 1px, transparent 0)", backgroundSize: "20px 20px" }} />
-      <div className="relative flex items-center gap-3">
-        <span className="inline-flex size-11 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)", boxShadow: "0 12px 26px -12px #0069b3" }}><Star size={20} strokeWidth={2.3} /></span>
-        <p className="text-[14px] font-bold text-slate-700">{children}</p>
+      <div className="relative flex items-center gap-2.5">
+        <span className="inline-flex size-9 items-center justify-center rounded-xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)", boxShadow: "0 12px 26px -12px #0069b3" }}><Star size={17} strokeWidth={2.3} /></span>
+        <p className="text-[13px] font-bold text-slate-700">{children}</p>
       </div>
       {right && <span className="relative text-[13px] font-black tabular-nums text-[#0069b3]">{right}</span>}
     </div>
