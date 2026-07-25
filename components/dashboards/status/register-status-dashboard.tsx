@@ -5,7 +5,7 @@ import {
   ClipboardList, Activity, CheckCircle2, XCircle, Clock3, Target, IndianRupee, RefreshCcw, Search, Filter, X,
   Hourglass, BadgeCheck, Rocket, CalendarClock, TrendingUp, PieChart, type LucideIcon,
 } from "lucide-react";
-import { Section, compactInr, ExportButtons, DetailModal, Gauge, DonutBreakdown, AreaChart, InsightBanner } from "@/components/dashboards/shared/kit";
+import { Section, compactInr, ExportButtons, DetailModal, Gauge, DonutBreakdown, TrendBars, InsightBanner } from "@/components/dashboards/shared/kit";
 
 export type StatusKind = "ga" | "bom" | "wo";
 
@@ -234,10 +234,10 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
             <Gauge pct={primary.pct} label={primary.label} sub={primary.sub} />
           </div>
         </Section>
-        <Section title="Status Distribution" Icon={PieChart}>
-          <DonutBreakdown data={statusDist} centerLabel="Total" />
+        <Section title={kind === "bom" ? "BOM Status" : "Status Distribution"} Icon={PieChart}>
+          <DonutBreakdown data={statusDist} centerLabel={kind === "bom" ? "BOM" : "Total"} />
         </Section>
-        <Section title="Monthly Trend" Icon={TrendingUp}>
+        <Section title={kind === "bom" ? "Monthly BOM Completion" : "Monthly Trend"} Icon={TrendingUp}>
           <div className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-slate-500">
             <span>Year</span>
             <select value={trendYear} onChange={(e) => setTrendYear(e.target.value)} className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-[12px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]">
@@ -245,7 +245,7 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
               {trendYears.map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
-          <AreaChart data={trend} />
+          <TrendBars data={trend} />
         </Section>
       </div>
 
