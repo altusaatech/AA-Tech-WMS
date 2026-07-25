@@ -108,17 +108,27 @@ export function QuotationBuilder({
   // Subject follows the picked quote's Product ("Supply of <Product>") until the
   // user deliberately edits the Subject — then it stops auto-following.
   const subjectTouched = React.useRef(Boolean(initial.subject) && initial.subject !== DEFAULT_SUBJECT);
-  // Picking an Enquiry No that exists in Quote Status auto-fills Customer & Subject.
+  // Project follows the Company Name of the picked quote until the user edits it.
+  const projectTouched = React.useRef(Boolean(initial.project));
+  // Picking an Enquiry No that exists in Quote Status auto-fills Customer,
+  // Project (Company Name) & Subject (from Product).
   function onEnquiryChange(v: string) {
     setEnquiryNo(v);
     setOfferNo(v); // Offer No always equals Enquiry No.
     const hit = kycByEnquiry.get(v.trim().toLowerCase());
-    if (hit?.companyName) setCustomer(hit.companyName);
+    if (hit?.companyName) {
+      setCustomer(hit.companyName);
+      if (!projectTouched.current) setProject(hit.companyName);
+    }
     if (hit?.product && !subjectTouched.current) setSubject(`Supply of ${hit.product}`);
   }
   function onSubjectChange(v: string) {
     subjectTouched.current = true;
     setSubject(v);
+  }
+  function onProjectChange(v: string) {
+    projectTouched.current = true;
+    setProject(v);
   }
 
   React.useEffect(() => {
@@ -306,7 +316,7 @@ export function QuotationBuilder({
             </L>
             <L label="Offer No"><input className={`${inp} bg-slate-50 text-slate-500`} value={offerNo} readOnly title="Same as Enquiry No" placeholder="Same as Enquiry No" /></L>
             <L label="Date"><input type="date" className={inp} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} /></L>
-            <L label="Project"><input className={inp} value={project} onChange={(e) => setProject(e.target.value)} placeholder="Project name" /></L>
+            <L label="Project"><input className={inp} value={project} onChange={(e) => onProjectChange(e.target.value)} placeholder="Project name" /></L>
             <L label="Customer"><input className={inp} value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" /></L>
             <L label="Subject"><input className={inp} value={subject} onChange={(e) => onSubjectChange(e.target.value)} /></L>
           </div>
