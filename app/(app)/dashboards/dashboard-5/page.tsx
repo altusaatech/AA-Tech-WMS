@@ -46,7 +46,7 @@ export default async function WoStatusDashboardPage() {
   });
 
   return (
-    <DashboardCanvas eyebrow="Live · Production" title="Dashboard 5" subtitle="Work Order Status — production, on-time %, ready to dispatch, aging & hygiene" Icon={Factory}>
+    <DashboardCanvas eyebrow="Live · Production" title="Work Order Status" subtitle="Production, on-time %, ready to dispatch, aging & hygiene" Icon={Factory}>
       <RegisterStatusDashboard kind="wo" rows={rows} hygiene={hygiene} />
     </DashboardCanvas>
   );

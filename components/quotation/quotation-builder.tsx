@@ -102,12 +102,29 @@ export function QuotationBuilder({
     for (const k of kycOptions) if (k.enquiryNo) m.set(k.enquiryNo.trim().toLowerCase(), k.companyName);
     return m;
   }, [kycOptions]);
+  // Offer No mirrors Enquiry No (they're the same in AA Tech's flow) until the
+  // user deliberately types a different Offer No — then mirroring stops.
+  const offerTouched = React.useRef(Boolean(initial.offerNo) && initial.offerNo !== initial.enquiryNo);
   // Typing/picking an Enquiry No that exists in KYC auto-fills the Customer.
   function onEnquiryChange(v: string) {
     setEnquiryNo(v);
+    if (!offerTouched.current) setOfferNo(v);
     const company = kycByEnquiry.get(v.trim().toLowerCase());
     if (company) setCustomer(company);
   }
+  function onOfferChange(v: string) {
+    offerTouched.current = true;
+    setOfferNo(v);
+  }
+
+  // New quotations open with today's date pre-filled in the Date box.
+  React.useEffect(() => {
+    if (!initial.quoteDate) {
+      const t = new Date();
+      setQuoteDate(`${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const totals = computeTotals(lines);
 
@@ -279,7 +296,7 @@ export function QuotationBuilder({
                 </datalist>
               )}
             </L>
-            <L label="Offer No"><input className={inp} value={offerNo} onChange={(e) => setOfferNo(e.target.value)} placeholder="170051" /></L>
+            <L label="Offer No"><input className={inp} value={offerNo} onChange={(e) => onOfferChange(e.target.value)} placeholder="170051" /></L>
             <L label="Date"><input type="date" className={inp} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} /></L>
             <L label="Project"><input className={inp} value={project} onChange={(e) => setProject(e.target.value)} placeholder="Project name" /></L>
             <L label="Customer"><input className={inp} value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" /></L>

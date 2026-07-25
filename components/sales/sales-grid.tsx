@@ -432,9 +432,9 @@ export function SalesDataGrid({
                       <th
                         key={`g-${gi}`}
                         colSpan={g.span}
-                        className="whitespace-nowrap px-3.5 py-2 text-left font-black uppercase tracking-[0.1em] text-white"
+                        className="whitespace-nowrap px-3.5 py-2 text-center font-black uppercase tracking-[0.1em] text-white"
                         style={{
-                          fontSize: 11.5,
+                          fontSize: 14,
                           background: `linear-gradient(135deg, #63b81e, #0180cf)`,
                           borderRight: "2px solid rgba(255,255,255,0.35)",
                           borderBottom: "1px solid rgba(255,255,255,0.25)",

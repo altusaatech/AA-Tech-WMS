@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Inbox, Send, BadgeCheck, X, Clock3, Target, IndianRupee, Search, Filter, ShieldCheck, type LucideIcon } from "lucide-react";
-import { Section, compactInr, ExportButtons } from "@/components/dashboards/shared/kit";
+import { Inbox, Send, BadgeCheck, X, Clock3, Target, IndianRupee, Search, Filter, ShieldCheck, TrendingUp, PieChart, type LucideIcon } from "lucide-react";
+import { Section, compactInr, ExportButtons, Gauge, DonutBreakdown, AreaChart, InsightBanner } from "@/components/dashboards/shared/kit";
 
 export interface QsRow {
   quoteNo: string;
@@ -85,6 +85,18 @@ export function QuoteStatusDashboard({ rows, hygiene = [] }: { rows: QsRow[]; hy
     { label: "Quotes Sent Value", value: compactInr(sentValue), from: "#0180cf", to: "#63b81e", Icon: IndianRupee },
   ];
 
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const statusDist = React.useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of f) m.set(r.status || "—", (m.get(r.status || "—") ?? 0) + 1);
+    return Array.from(m.entries()).map(([label, value]) => ({ label, value }));
+  }, [f]);
+  const trend = React.useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of f) if (r.date) m.set(r.date.slice(0, 7), (m.get(r.date.slice(0, 7)) ?? 0) + 1);
+    return Array.from(m.entries()).sort(([a], [b]) => a.localeCompare(b)).slice(-8).map(([key, v]) => ({ label: MON[Number(key.slice(5, 7)) - 1] ?? key, value: v }));
+  }, [f]);
+
   const reset = () => { setQ(""); setFrom(""); setTo(""); setStatus(""); setSource(""); setCustomer(""); };
   const anyFilter = q || from || to || status || source || customer;
 
@@ -107,6 +119,11 @@ export function QuoteStatusDashboard({ rows, hygiene = [] }: { rows: QsRow[]; hy
         </span>
       </div>
 
+      {/* headline insight */}
+      <InsightBanner right={`${conversion}% Conversion`}>
+        {received} enquir{received === 1 ? "y" : "ies"} · <b>{won}</b> won · <b className="text-[#b45309]">{pending}</b> pending · {compactInr(quoteValue)} quoted
+      </InsightBanner>
+
       {/* KPI grid */}
       <Section title="Quote Status — Overview" Icon={Target}>
         <div className="grid grid-cols-5 gap-3 max-xl:grid-cols-4 max-lg:grid-cols-3 max-sm:grid-cols-2">
@@ -125,6 +142,19 @@ export function QuoteStatusDashboard({ rows, hygiene = [] }: { rows: QsRow[]; hy
           ))}
         </div>
       </Section>
+
+      {/* advanced charts row */}
+      <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
+        <Section title="Conversion" Icon={Target}>
+          <div className="flex flex-col items-center py-2"><Gauge pct={conversion} label="Won / Received" sub={`${won}/${received}`} /></div>
+        </Section>
+        <Section title="Status Distribution" Icon={PieChart}>
+          <DonutBreakdown data={statusDist} centerLabel="Quotes" />
+        </Section>
+        <Section title="Monthly Trend" Icon={TrendingUp}>
+          <AreaChart data={trend} />
+        </Section>
+      </div>
 
       {/* Pending Quotes table */}
       <Section title="Pending Quotes" Icon={Clock3}>

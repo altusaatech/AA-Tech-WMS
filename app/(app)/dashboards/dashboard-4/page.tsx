@@ -47,7 +47,7 @@ export default async function BomStatusDashboardPage() {
   });
 
   return (
-    <DashboardCanvas eyebrow="Live · Production" title="Dashboard 4" subtitle="BOM Status — created, completed, revised, aging & data hygiene" Icon={ClipboardList}>
+    <DashboardCanvas eyebrow="Live · Production" title="BOM Status" subtitle="Created, completed, revised, aging & data hygiene" Icon={ClipboardList}>
       <RegisterStatusDashboard kind="bom" rows={rows} hygiene={hygiene} />
     </DashboardCanvas>
   );

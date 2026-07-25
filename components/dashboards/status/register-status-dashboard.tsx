@@ -3,9 +3,9 @@
 import * as React from "react";
 import {
   ClipboardList, Activity, CheckCircle2, XCircle, Clock3, Target, IndianRupee, RefreshCcw, Search, Filter, X,
-  Hourglass, ShieldCheck, BadgeCheck, Rocket, CalendarClock, type LucideIcon,
+  Hourglass, ShieldCheck, BadgeCheck, Rocket, CalendarClock, TrendingUp, PieChart, type LucideIcon,
 } from "lucide-react";
-import { Section, compactInr, ExportButtons, DetailModal } from "@/components/dashboards/shared/kit";
+import { Section, compactInr, ExportButtons, DetailModal, Gauge, DonutBreakdown, AreaChart, InsightBanner } from "@/components/dashboards/shared/kit";
 
 export type StatusKind = "ga" | "bom" | "wo";
 
@@ -122,6 +122,31 @@ export function RegisterStatusDashboard({ kind, rows, hygiene = [] }: { kind: St
 
   const tiles = React.useMemo(() => buildTiles(kind, f), [kind, f]);
 
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const primary = React.useMemo(() => {
+    const total = f.length;
+    if (kind === "ga") return { pct: total ? Math.round((f.filter((x) => x.approved).length / total) * 100) : 0, label: "Approval Rate", sub: `${f.filter((x) => x.approved).length}/${total} approved` };
+    if (kind === "bom") return { pct: total ? Math.round((f.filter((x) => x.completed).length / total) * 100) : 0, label: "Completion", sub: `${f.filter((x) => x.completed).length}/${total} completed` };
+    const done = f.filter((x) => x.completed).length;
+    const ot = f.filter((x) => x.completed && x.onTime).length;
+    return { pct: done ? Math.round((ot / done) * 100) : 0, label: "On-time Rate", sub: `${ot}/${done} on time` };
+  }, [kind, f]);
+
+  const statusDist = React.useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of f) m.set(r.status || "—", (m.get(r.status || "—") ?? 0) + 1);
+    return Array.from(m.entries()).map(([label, value]) => ({ label, value }));
+  }, [f]);
+
+  const trend = React.useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of f) if (r.date) m.set(r.date.slice(0, 7), (m.get(r.date.slice(0, 7)) ?? 0) + 1);
+    return Array.from(m.entries()).sort(([a], [b]) => a.localeCompare(b)).slice(-8).map(([key, v]) => ({ label: MON[Number(key.slice(5, 7)) - 1] ?? key, value: v }));
+  }, [f]);
+
+  const openCount = f.filter((x) => x.open).length;
+  const overdueCount = f.filter((x) => x.open && x.overdue).length;
+
   const aging = React.useMemo(() => {
     const b: { label: string; rows: DashRow[] }[] = [
       { label: "0–7 days", rows: [] },
@@ -159,6 +184,11 @@ export function RegisterStatusDashboard({ kind, rows, hygiene = [] }: { kind: St
         </span>
       </div>
 
+      {/* headline insight */}
+      <InsightBanner right={`${primary.pct}% ${primary.label}`}>
+        {f.length} record{f.length === 1 ? "" : "s"} in view · <b>{openCount}</b> open{overdueCount > 0 ? <> · <b className="text-[#b45309]">{overdueCount} overdue</b></> : null}
+      </InsightBanner>
+
       {/* KPI grid */}
       <Section title="Overview" Icon={Target}>
         <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-2">
@@ -177,6 +207,21 @@ export function RegisterStatusDashboard({ kind, rows, hygiene = [] }: { kind: St
           ))}
         </div>
       </Section>
+
+      {/* advanced charts row */}
+      <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
+        <Section title={primary.label} Icon={Target}>
+          <div className="flex flex-col items-center py-2">
+            <Gauge pct={primary.pct} label={primary.label} sub={primary.sub} />
+          </div>
+        </Section>
+        <Section title="Status Distribution" Icon={PieChart}>
+          <DonutBreakdown data={statusDist} centerLabel="Total" />
+        </Section>
+        <Section title="Monthly Trend" Icon={TrendingUp}>
+          <AreaChart data={trend} />
+        </Section>
+      </div>
 
       {/* Aging + Hygiene */}
       <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-1">

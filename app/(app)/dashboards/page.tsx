@@ -15,11 +15,11 @@ interface DashCard {
 
 // The dashboards created for this build.
 const CARDS: DashCard[] = [
-  { href: "/dashboards/dashboard-1", title: "New Dashboard", desc: "Quote Status — enquiries, conversion, pending quotes & data hygiene", Icon: LayoutDashboard, featured: true },
-  { href: "/dashboards/dashboard-2", title: "Dashboard 2", desc: "Sales Order Status — aging, target vs actual, top customers & leaderboard", Icon: Gauge },
-  { href: "/dashboards/dashboard-3", title: "Dashboard 3", desc: "GA Approval Status — submission, approvals, aging & data hygiene", Icon: BadgeCheck },
-  { href: "/dashboards/dashboard-4", title: "Dashboard 4", desc: "BOM Status — created, completed, revised, aging & data hygiene", Icon: ClipboardList },
-  { href: "/dashboards/dashboard-5", title: "Dashboard 5", desc: "Work Order Status — production, on-time %, ready to dispatch & hygiene", Icon: Factory },
+  { href: "/dashboards/dashboard-1", title: "Quote Status", desc: "Enquiries, conversion, pending quotes & data hygiene", Icon: LayoutDashboard, featured: true },
+  { href: "/dashboards/dashboard-2", title: "Sales Order Status", desc: "Aging, target vs actual, top customers & leaderboard", Icon: Gauge },
+  { href: "/dashboards/dashboard-3", title: "GA Approval Status", desc: "Submission, approvals, aging & data hygiene", Icon: BadgeCheck },
+  { href: "/dashboards/dashboard-4", title: "BOM Status", desc: "Created, completed, revised, aging & data hygiene", Icon: ClipboardList },
+  { href: "/dashboards/dashboard-5", title: "Work Order Status", desc: "Production, on-time %, ready to dispatch & hygiene", Icon: Factory },
 ];
 
 export default function DashboardsHub() {

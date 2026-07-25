@@ -13,11 +13,11 @@ interface Item {
 
 // Only the dashboards created for this build remain.
 const ITEMS: Item[] = [
-  { href: "/dashboards/dashboard-1", label: "New Dashboard", Icon: LayoutDashboard },
-  { href: "/dashboards/dashboard-2", label: "Dashboard 2", Icon: Gauge },
-  { href: "/dashboards/dashboard-3", label: "Dashboard 3", Icon: BadgeCheck },
-  { href: "/dashboards/dashboard-4", label: "Dashboard 4", Icon: ClipboardList },
-  { href: "/dashboards/dashboard-5", label: "Dashboard 5", Icon: Factory },
+  { href: "/dashboards/dashboard-1", label: "Quote Status", Icon: LayoutDashboard },
+  { href: "/dashboards/dashboard-2", label: "Sales Order Status", Icon: Gauge },
+  { href: "/dashboards/dashboard-3", label: "GA Approval Status", Icon: BadgeCheck },
+  { href: "/dashboards/dashboard-4", label: "BOM Status", Icon: ClipboardList },
+  { href: "/dashboards/dashboard-5", label: "Work Order Status", Icon: Factory },
 ];
 
 // Exact header nav gradient — the green→blue mix used across the app.

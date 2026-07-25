@@ -65,7 +65,7 @@ export default async function SoStatusDashboardPage() {
   });
 
   return (
-    <DashboardCanvas eyebrow="Live · Production" title="Dashboard 2" subtitle="Sales Order Status — aging, target vs actual, top customers, leaderboard & data hygiene" Icon={Gauge}>
+    <DashboardCanvas eyebrow="Live · Production" title="Sales Order Status" subtitle="Aging, target vs actual, top customers, leaderboard & data hygiene" Icon={Gauge}>
       <SalesOrderStatusDashboard rows={rows} hygiene={hygiene} />
     </DashboardCanvas>
   );

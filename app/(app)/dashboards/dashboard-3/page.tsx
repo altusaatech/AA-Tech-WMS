@@ -48,7 +48,7 @@ export default async function GaStatusDashboardPage() {
   });
 
   return (
-    <DashboardCanvas eyebrow="Live · Production" title="Dashboard 3" subtitle="GA Approval Status — submission, approvals, aging & data hygiene" Icon={BadgeCheck}>
+    <DashboardCanvas eyebrow="Live · Production" title="GA Approval Status" subtitle="Submission, approvals, aging & data hygiene" Icon={BadgeCheck}>
       <RegisterStatusDashboard kind="ga" rows={rows} hygiene={hygiene} />
     </DashboardCanvas>
   );
