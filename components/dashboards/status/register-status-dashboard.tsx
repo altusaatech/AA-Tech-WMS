@@ -105,9 +105,16 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
   const [from, setFrom] = React.useState("");
   const [to, setTo] = React.useState("");
   const [customer, setCustomer] = React.useState("");
+  const [item, setItem] = React.useState("");
+  const [stat, setStat] = React.useState("");
+  const [trendYear, setTrendYear] = React.useState("");
   const [agingBucket, setAgingBucket] = React.useState<number | null>(null);
 
+  const trendYears = React.useMemo(() => Array.from(new Set(rows.map((r) => r.date?.slice(0, 4)).filter(Boolean))).sort((a, b) => b!.localeCompare(a!)), [rows]);
+
   const customers = React.useMemo(() => Array.from(new Set(rows.map((r) => r.company).filter(Boolean))).sort(), [rows]);
+  const items = React.useMemo(() => Array.from(new Set(rows.map((r) => r.item).filter(Boolean))).sort(), [rows]);
+  const statuses = React.useMemo(() => Array.from(new Set(rows.map((r) => r.status).filter(Boolean))).sort(), [rows]);
 
   const f = React.useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -115,10 +122,12 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
       if (from && r.date < from) return false;
       if (to && r.date > to) return false;
       if (customer && r.company !== customer) return false;
+      if (item && r.item !== item) return false;
+      if (stat && r.status !== stat) return false;
       if (needle && !r.search.includes(needle)) return false;
       return true;
     });
-  }, [rows, q, from, to, customer]);
+  }, [rows, q, from, to, customer, item, stat]);
 
   const tiles = React.useMemo(() => buildTiles(kind, f), [kind, f]);
 
@@ -139,10 +148,16 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
   }, [f]);
 
   const trend = React.useMemo(() => {
+    if (trendYear) {
+      const counts = new Array(12).fill(0);
+      for (const r of f) if (r.date && r.date.slice(0, 4) === trendYear) { const mo = Number(r.date.slice(5, 7)) - 1; if (mo >= 0 && mo < 12) counts[mo]++; }
+      return MON.map((label, i) => ({ label, value: counts[i] }));
+    }
     const m = new Map<string, number>();
     for (const r of f) if (r.date) m.set(r.date.slice(0, 7), (m.get(r.date.slice(0, 7)) ?? 0) + 1);
     return Array.from(m.entries()).sort(([a], [b]) => a.localeCompare(b)).slice(-8).map(([key, v]) => ({ label: MON[Number(key.slice(5, 7)) - 1] ?? key, value: v }));
-  }, [f]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [f, trendYear]);
 
   const openCount = f.filter((x) => x.open).length;
   const overdueCount = f.filter((x) => x.open && x.overdue).length;
@@ -164,8 +179,10 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
   }, [f]);
   const agingMax = Math.max(1, ...aging.map((a) => a.rows.length));
 
-  const reset = () => { setQ(""); setFrom(""); setTo(""); setCustomer(""); };
-  const anyFilter = q || from || to || customer;
+  const reset = () => { setQ(""); setFrom(""); setTo(""); setCustomer(""); setItem(""); setStat(""); };
+  const anyFilter = q || from || to || customer || item || stat;
+  const statusLabel = kind === "bom" ? "BOM statuses" : kind === "ga" ? "GA statuses" : kind === "wo" ? "WO statuses" : "statuses";
+  const searchPlaceholder = kind === "bom" ? "Search SO No / BOM No…" : kind === "wo" ? "Search WO No / SO No…" : "Search…";
 
   return (
     <div className="mt-4 space-y-4">
@@ -173,11 +190,13 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
         <div className="relative">
           <Search size={15} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="h-9 w-[220px] max-w-[52vw] rounded-lg border border-slate-200 bg-white pl-8 pr-2.5 text-[13px] outline-none focus:border-[#0180cf]" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchPlaceholder} className="h-9 w-[220px] max-w-[52vw] rounded-lg border border-slate-200 bg-white pl-8 pr-2.5 text-[13px] outline-none focus:border-[#0180cf]" />
         </div>
         <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} title="Start date" className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] outline-none focus:border-[#0180cf]" />
         <input type="date" value={to} onChange={(e) => setTo(e.target.value)} title="End date" className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] outline-none focus:border-[#0180cf]" />
-        <select value={customer} onChange={(e) => setCustomer(e.target.value)} className="h-9 max-w-[180px] rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"><option value="">All customers</option>{customers.map((c) => <option key={c} value={c}>{c}</option>)}</select>
+        {statuses.length > 0 && <select value={stat} onChange={(e) => setStat(e.target.value)} className="h-9 max-w-[170px] rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"><option value="">All {statusLabel}</option>{statuses.map((s) => <option key={s} value={s}>{s}</option>)}</select>}
+        {customers.length > 0 && <select value={customer} onChange={(e) => setCustomer(e.target.value)} className="h-9 max-w-[180px] rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"><option value="">All customers</option>{customers.map((c) => <option key={c} value={c}>{c}</option>)}</select>}
+        {items.length > 0 && <select value={item} onChange={(e) => setItem(e.target.value)} className="h-9 max-w-[170px] rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"><option value="">All items</option>{items.map((it) => <option key={it} value={it}>{it}</option>)}</select>}
         {anyFilter && <button type="button" onClick={reset} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 text-[12.5px] font-bold text-slate-500 hover:text-[#0069b3]"><X size={13} /> Clear</button>}
         <span className="ml-auto flex items-center gap-2 text-[12px] font-semibold text-slate-400"><Filter size={13} /> {f.length} of {rows.length}
           <ExportButtons filename={`${kind}-status`} headers={[NO_LABEL[kind], "SO No", "Customer", "Item", "Status", "Date", "Days", "Value"]} rows={f.map((r) => [r.no, r.soNo, r.company, r.item, r.status, r.date, r.days, r.value])} />
@@ -219,6 +238,13 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
           <DonutBreakdown data={statusDist} centerLabel="Total" />
         </Section>
         <Section title="Monthly Trend" Icon={TrendingUp}>
+          <div className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-slate-500">
+            <span>Year</span>
+            <select value={trendYear} onChange={(e) => setTrendYear(e.target.value)} className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-[12px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]">
+              <option value="">Recent (last 8 mo)</option>
+              {trendYears.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
           <AreaChart data={trend} />
         </Section>
       </div>
