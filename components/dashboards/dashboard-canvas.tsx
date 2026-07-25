@@ -20,7 +20,7 @@ export function DashboardCanvas({
   return (
     <div>
       <header
-        className="relative overflow-hidden rounded-[20px] border border-white/80 px-6 py-4 max-md:px-4"
+        className="relative overflow-hidden rounded-[18px] border border-white/80 px-5 py-3 max-md:px-4"
         style={{
           background: "linear-gradient(120deg, #e9f3fd 0%, #ffffff 46%, #edf7e3 100%)",
           boxShadow: "0 26px 60px -38px rgba(15,60,100,0.30), inset 0 1px 0 rgba(255,255,255,0.9)",

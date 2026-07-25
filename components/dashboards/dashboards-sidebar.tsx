@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Headset, ArrowRight, LayoutDashboard, Gauge, BadgeCheck, ClipboardList, Factory, type LucideIcon } from "lucide-react";
+import { LayoutGrid, LayoutDashboard, Gauge, BadgeCheck, ClipboardList, Factory, type LucideIcon } from "lucide-react";
 
 interface Item {
   href: string;
@@ -66,21 +66,7 @@ export function DashboardsSidebar() {
           })}
         </nav>
 
-        {/* Need Help? support card */}
-        <div className="relative mt-1 overflow-hidden rounded-2xl border border-[#0180cf]/20 p-4 max-md:hidden" style={{ background: "linear-gradient(135deg, #eef6ec, #eaf3fd)" }}>
-          <span aria-hidden className="pointer-events-none absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(1,128,207,0.08) 1px, transparent 0)", backgroundSize: "18px 18px" }} />
-          <span className="relative inline-flex size-10 items-center justify-center overflow-hidden rounded-xl text-white shadow-lg" style={{ background: GRAD }}>
-            <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />
-            <Headset size={19} strokeWidth={2.2} className="relative" />
-          </span>
-          <div className="relative mt-2.5 text-[13.5px] font-black text-slate-800">Need Help?</div>
-          <p className="relative mt-0.5 text-[11.5px] font-medium leading-snug text-slate-500">We&apos;re here to support you.</p>
-          <Link href={"/user-manual" as Route} className="relative mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl text-[12.5px] font-extrabold text-white shadow-md transition-transform hover:-translate-y-0.5" style={{ background: GRAD, boxShadow: "0 10px 22px -10px rgba(1,128,207,0.6)" }}>
-            Contact Support <ArrowRight size={13} strokeWidth={2.7} />
-          </Link>
-        </div>
-
-        {/* Powered by Altus */}
+        {/* Powered by Altus — moved up directly under the nav */}
         <div className="mt-1 flex flex-col items-center gap-1 border-t border-slate-100 pt-3 max-md:hidden">
           <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Powered By</span>
           <img src="/altus-corp-logo.png?v=2" alt="Altus Corp" className="h-8 w-auto opacity-90" />
