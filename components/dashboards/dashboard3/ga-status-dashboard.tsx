@@ -69,15 +69,19 @@ function GroupedBars({ data, labelA, labelB, colorA, colorB }: {
         <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-sm" style={{ background: colorB }} />{labelB}</span>
       </div>
       <div className="flex h-36 items-end gap-1.5 overflow-x-auto">
-        {data.map((d, idx) => (
-          <div key={d.label + idx} className="flex min-w-[34px] flex-1 flex-col items-center gap-1">
-            <div className="flex h-28 w-full items-end justify-center gap-[3px]">
-              <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.a / max) * 100}%`, minHeight: d.a ? 3 : 0, background: colorA }} title={`${labelA}: ${d.a}`} />
-              <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.b / max) * 100}%`, minHeight: d.b ? 3 : 0, background: colorB }} title={`${labelB}: ${d.b}`} />
+        {data.map((d, idx) => {
+          const delta = d.b - d.a;
+          const tip = `GA ${d.label}\n${labelA}: ${d.a} days\n${labelB}: ${d.b} days\n${delta > 0 ? `Delayed by ${delta} day${delta === 1 ? "" : "s"}` : delta < 0 ? `${-delta} day${-delta === 1 ? "" : "s"} early` : "On target"}`;
+          return (
+            <div key={d.label + idx} title={tip} className="flex min-w-[34px] flex-1 cursor-help flex-col items-center gap-1 rounded-md hover:bg-slate-50">
+              <div className="flex h-28 w-full items-end justify-center gap-[3px]">
+                <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.a / max) * 100}%`, minHeight: d.a ? 3 : 0, background: colorA }} />
+                <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.b / max) * 100}%`, minHeight: d.b ? 3 : 0, background: colorB }} />
+              </div>
+              <span className="max-w-[52px] truncate text-[10px] font-semibold text-slate-400">{d.label}</span>
             </div>
-            <span className="max-w-[52px] truncate text-[10px] font-semibold text-slate-400" title={d.label}>{d.label}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -525,7 +525,7 @@ export function DonutBreakdown({ data, centerLabel = "Total" }: { data: { label:
         {items.map((it, i) => {
           const len = (it.value / total) * C;
           const seg = Math.max(0, len - 1.4);
-          const el = <circle key={i} cx="70" cy="70" r={R} fill="none" stroke={DONUT_COLORS[i % DONUT_COLORS.length]} strokeWidth="16" strokeDasharray={`${seg} ${C - seg}`} strokeDashoffset={-acc} transform="rotate(-90 70 70)" style={{ transition: "stroke-dasharray 0.8s ease-out" }} />;
+          const el = <circle key={i} cx="70" cy="70" r={R} fill="none" stroke={DONUT_COLORS[i % DONUT_COLORS.length]} strokeWidth="16" strokeDasharray={`${seg} ${C - seg}`} strokeDashoffset={-acc} transform="rotate(-90 70 70)" style={{ transition: "stroke-dasharray 0.8s ease-out" }}><title>{`${it.label}: ${it.value} (${Math.round((it.value / total) * 100)}% of ${total})`}</title></circle>;
           acc += len;
           return el;
         })}
@@ -534,8 +534,8 @@ export function DonutBreakdown({ data, centerLabel = "Total" }: { data: { label:
       </svg>
       <ul className="min-w-0 flex-1 space-y-1.5">
         {items.map((it, i) => (
-          <li key={i} className="flex items-center justify-between gap-2 text-[12.5px]">
-            <span className="flex min-w-0 items-center gap-2"><span className="size-2.5 shrink-0 rounded-full" style={{ background: DONUT_COLORS[i % DONUT_COLORS.length] }} /><span className="truncate font-semibold text-slate-600" title={it.label}>{it.label}</span></span>
+          <li key={i} className="flex cursor-help items-center justify-between gap-2 rounded text-[12.5px] hover:bg-slate-50" title={`${it.label}: ${it.value} (${Math.round((it.value / total) * 100)}% of ${total})`}>
+            <span className="flex min-w-0 items-center gap-2"><span className="size-2.5 shrink-0 rounded-full" style={{ background: DONUT_COLORS[i % DONUT_COLORS.length] }} /><span className="truncate font-semibold text-slate-600">{it.label}</span></span>
             <span className="shrink-0 tabular-nums font-black text-slate-800">{it.value} <span className="font-semibold text-slate-400">{Math.round((it.value / total) * 100)}%</span></span>
           </li>
         ))}

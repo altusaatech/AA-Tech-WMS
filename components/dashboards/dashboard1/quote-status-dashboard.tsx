@@ -49,15 +49,19 @@ function GroupedBars({ data, labelA, labelB, colorA, colorB }: {
     <div>
       <Legend labelA={labelA} labelB={labelB} colorA={colorA} colorB={colorB} />
       <div className="flex h-36 items-end gap-1.5">
-        {data.map((d) => (
-          <div key={d.label} className="flex flex-1 flex-col items-center gap-1">
-            <div className="flex h-28 w-full items-end justify-center gap-[3px]">
-              <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.a / max) * 100}%`, minHeight: d.a ? 3 : 0, background: colorA }} title={`${labelA}: ${d.a}`} />
-              <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.b / max) * 100}%`, minHeight: d.b ? 3 : 0, background: colorB }} title={`${labelB}: ${d.b}`} />
+        {data.map((d) => {
+          const pct = d.a ? Math.round((d.b / d.a) * 100) : 0;
+          const tip = `${d.label}\n${labelA}: ${d.a}\n${labelB}: ${d.b}${d.a ? `\n${labelB} vs ${labelA}: ${pct}%` : ""}`;
+          return (
+            <div key={d.label} title={tip} className="flex flex-1 cursor-help flex-col items-center gap-1 rounded-md hover:bg-slate-50">
+              <div className="flex h-28 w-full items-end justify-center gap-[3px]">
+                <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.a / max) * 100}%`, minHeight: d.a ? 3 : 0, background: colorA }} />
+                <div className="w-1/2 max-w-[16px] rounded-t transition-[height] duration-700" style={{ height: `${(d.b / max) * 100}%`, minHeight: d.b ? 3 : 0, background: colorB }} />
+              </div>
+              <span className="text-[10px] font-semibold text-slate-400">{d.label}</span>
             </div>
-            <span className="text-[10px] font-semibold text-slate-400">{d.label}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -75,15 +79,19 @@ function StackedBars({ data, labelA, labelB, colorA, colorB }: {
     <div>
       <Legend labelA={labelA} labelB={labelB} colorA={colorA} colorB={colorB} />
       <div className="flex h-36 items-end gap-1.5">
-        {data.map((d) => (
-          <div key={d.label} className="flex flex-1 flex-col items-center gap-1">
-            <div className="mx-auto flex h-28 w-full max-w-[22px] flex-col justify-end" title={`${labelB}: ${d.b} · ${labelA}: ${d.a}`}>
-              <div className="rounded-t transition-[height] duration-700" style={{ height: `${(d.b / max) * 100}%`, minHeight: d.b ? 3 : 0, background: colorB }} />
-              <div className={`transition-[height] duration-700 ${d.b ? "" : "rounded-t"}`} style={{ height: `${(d.a / max) * 100}%`, minHeight: d.a ? 3 : 0, background: colorA }} />
+        {data.map((d) => {
+          const delta = d.b - d.a;
+          const tip = `${d.label}\n${labelB}: ${d.b}\n${labelA}: ${d.a}\nChange: ${delta >= 0 ? "+" : ""}${delta} vs ${labelA}\nTotal: ${d.a + d.b}`;
+          return (
+            <div key={d.label} title={tip} className="flex flex-1 cursor-help flex-col items-center gap-1 rounded-md hover:bg-slate-50">
+              <div className="mx-auto flex h-28 w-full max-w-[22px] flex-col justify-end">
+                <div className="rounded-t transition-[height] duration-700" style={{ height: `${(d.b / max) * 100}%`, minHeight: d.b ? 3 : 0, background: colorB }} />
+                <div className={`transition-[height] duration-700 ${d.b ? "" : "rounded-t"}`} style={{ height: `${(d.a / max) * 100}%`, minHeight: d.a ? 3 : 0, background: colorA }} />
+              </div>
+              <span className="text-[10px] font-semibold text-slate-400">{d.label}</span>
             </div>
-            <span className="text-[10px] font-semibold text-slate-400">{d.label}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
