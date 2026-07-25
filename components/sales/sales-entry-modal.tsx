@@ -177,9 +177,13 @@ function FormBody({
   const router = useRouter();
   const [navPending, startNav] = React.useTransition();
   const editable = React.useMemo(() => columns.filter((c) => !c.readOnly), [columns]);
+  // Fields to render: everything except the grid gutter and hidden read-only
+  // columns (e.g. Sr No). Read-only columns that belong to a section (Customer
+  // KYC) are shown disabled for reference.
+  const shown = React.useMemo(() => columns.filter((c) => c.key !== "__gap__" && (!c.readOnly || !!c.section)), [columns]);
   const [vals, setVals] = React.useState<Record<string, FieldVal>>(() => {
     const o: Record<string, FieldVal> = {};
-    for (const c of editable) {
+    for (const c of shown) {
       const v = row ? row[c.key] : null;
       o[c.key] = c.type === "bool" ? v === true || v === "true" : v == null ? "" : String(v);
     }
@@ -188,7 +192,7 @@ function FormBody({
     if (!row && prefill) {
       for (const [k, val] of Object.entries(prefill)) if (k in o) o[k] = val;
       const kyc = prefill.enquiryNo && kycByEnquiry ? kycByEnquiry[prefill.enquiryNo.trim().toLowerCase()] : undefined;
-      if (kyc) for (const c of editable) { const f = kyc[c.key]; if (c.key !== "enquiryNo" && f != null) o[c.key] = f; }
+      if (kyc) for (const c of shown) { const f = kyc[c.key]; if (c.key !== "enquiryNo" && f != null) o[c.key] = f; }
     }
     return o;
   });
@@ -311,34 +315,46 @@ function FormBody({
       {/* items-end so the inputs in each 2-col row line up even when one field's
           label wraps to two lines and its neighbour's stays on one. */}
       <div className="grid min-h-0 flex-1 grid-cols-1 content-start items-end gap-x-5 gap-y-4 overflow-y-auto bg-gradient-to-b from-[#f7fbff] to-white px-6 py-6 md:grid-cols-2">
-        {editable.map((c) => (
-          <Field
-            key={c.key}
-            col={c}
-            value={vals[c.key] ?? ""}
-            error={errors[c.key]}
-            accent={to}
-            options={c.type === "select" ? optionsFor(c) : undefined}
-            datalist={c.key === "enquiryNo" && kycEnquiryOptions?.length ? kycEnquiryOptions : undefined}
-            onChange={(v) => {
-              setVals((s) => {
-                const next = { ...s, [c.key]: v };
-                // Fetch from Customer KYC: typing/picking an Enquiry No that
-                // exists in KYC fills every column this register shares with it.
-                if (c.key === "enquiryNo" && kycByEnquiry) {
-                  const kyc = kycByEnquiry[String(v).trim().toLowerCase()];
-                  if (kyc)
-                    for (const col of editable) {
-                      const filled = kyc[col.key];
-                      if (col.key !== "enquiryNo" && filled != null) next[col.key] = filled;
+        {(() => {
+          const nodes: React.ReactNode[] = [];
+          let lastSection: string | undefined;
+          for (const c of shown) {
+            if (c.section && c.section !== lastSection) {
+              nodes.push(<SectionHeading key={`sec-${c.section}`} label={c.section} />);
+              lastSection = c.section;
+            }
+            nodes.push(
+              <Field
+                key={c.key}
+                col={c}
+                value={vals[c.key] ?? ""}
+                error={errors[c.key]}
+                accent={to}
+                disabled={!!c.readOnly}
+                options={c.type === "select" ? optionsFor(c) : undefined}
+                datalist={c.key === "enquiryNo" && kycEnquiryOptions?.length ? kycEnquiryOptions : undefined}
+                onChange={(v) => {
+                  setVals((s) => {
+                    const next = { ...s, [c.key]: v };
+                    // Fetch from Customer KYC: typing/picking an Enquiry No that
+                    // exists in KYC fills every column this form shares with it.
+                    if (c.key === "enquiryNo" && kycByEnquiry) {
+                      const kyc = kycByEnquiry[String(v).trim().toLowerCase()];
+                      if (kyc)
+                        for (const col of shown) {
+                          const filled = kyc[col.key];
+                          if (col.key !== "enquiryNo" && filled != null) next[col.key] = filled;
+                        }
                     }
-                }
-                return next;
-              });
-              if (errors[c.key]) setErrors((e) => ({ ...e, [c.key]: "" }));
-            }}
-          />
-        ))}
+                    return next;
+                  });
+                  if (errors[c.key]) setErrors((e) => ({ ...e, [c.key]: "" }));
+                }}
+              />,
+            );
+          }
+          return nodes;
+        })()}
       </div>
 
       {/* ── Next steps (KYC only) — jump into the linked modules, carrying the
@@ -466,6 +482,16 @@ function FormBody({
   );
 }
 
+/** Green→blue heading that groups fields in the entry form (e.g. Customer KYC). */
+function SectionHeading({ label }: { label: string }) {
+  return (
+    <div className="mt-2 flex items-center gap-2.5 first:mt-0 md:col-span-2">
+      <span className="inline-flex h-6 items-center rounded-lg px-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm" style={{ background: "linear-gradient(135deg, #63b81e, #0180cf)" }}>{label}</span>
+      <span className="h-px flex-1" style={{ background: "linear-gradient(90deg, rgba(1,128,207,0.35), transparent)" }} />
+    </div>
+  );
+}
+
 function Field({
   col,
   value,
@@ -473,6 +499,7 @@ function Field({
   accent,
   options,
   datalist,
+  disabled,
   onChange,
 }: {
   col: SalesColDef;
@@ -482,11 +509,27 @@ function Field({
   options?: string[];
   /** Type-ahead suggestions (used for the KYC Enquiry No picker). */
   datalist?: { value: string; label: string }[];
+  /** Read-only display (e.g. Customer KYC fields shown for reference). */
+  disabled?: boolean;
   onChange: (v: FieldVal) => void;
 }) {
   const id = `salesf-${col.key}`;
   const [focused, setFocused] = React.useState(false);
   const FieldIcon = iconForCol(col);
+
+  if (disabled) {
+    return (
+      <label htmlFor={id} className="flex flex-col gap-1.5">
+        <span className="flex items-start gap-1 text-[12px] font-bold leading-tight text-slate-500" title={col.label}>
+          <span className="line-clamp-2">{col.label}</span>
+        </span>
+        <div className="relative">
+          <FieldIcon size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input id={id} value={typeof value === "string" ? value : ""} readOnly disabled placeholder="— from Customer KYC" className="h-11 w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100/70 pl-10 pr-3.5 text-[14px] text-slate-500 shadow-sm outline-none placeholder:text-slate-300" />
+        </div>
+      </label>
+    );
+  }
   const borderColor = error ? "#fca5a5" : focused ? accent : "#e2e8f0";
   const iconColor = error ? "#ef4444" : focused ? accent : "#94a3b8";
 

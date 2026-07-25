@@ -51,6 +51,8 @@ interface FormDef {
   columns: SalesColDef[];
   /** Column checked for duplicate entries when saving via the form. */
   primaryKey: string;
+  /** Hidden from the module hub grid (still used for modal config). */
+  hidden?: boolean;
 }
 
 const FORMS: FormDef[] = [
@@ -64,10 +66,11 @@ const FORMS: FormDef[] = [
     steps: ["Enquiry", "Company", "Contact"],
     columns: KYC_COLUMNS,
     primaryKey: "enquiryNo",
+    hidden: true, // merged into the Quote Status form; edited via the register pen
   },
   {
     key: "quote",
-    label: "Quote Status",
+    label: "Quote Status & Customer KYC",
     desc: "Enquiries to quotations to PO received",
     icon: FileText,
     from: "#63b81e",
@@ -169,6 +172,16 @@ export function SalesWorkspace({
 
   const current = FORMS.find((f) => f.key === active)!;
   const modalCfg = FORMS.find((f) => f.key === modalKind)!;
+  // The Quote entry form shows the Quote Status fields, then the linked
+  // Customer KYC fields (read-only, auto-filled by Enquiry No) under headings.
+  const quoteFormColumns: SalesColDef[] = React.useMemo(
+    () => [
+      ...QUOTE_COLUMNS.map((c) => ({ ...c, section: "Quote Status" })),
+      ...KYC_EXTRA_FOR_QUOTE.map((c) => ({ ...c, section: "Customer KYC" })),
+    ],
+    [],
+  );
+  const modalColumns = modalKind === "quote" ? quoteFormColumns : modalCfg.columns;
   const rows = rowsByKind[active];
   const countOf = (k: Kind) => rowsByKind[k].length;
 
@@ -329,7 +342,8 @@ export function SalesWorkspace({
           />
           {(() => {
             const q = hubQuery.trim().toLowerCase();
-            const forms = q ? FORMS.filter((f) => f.label.toLowerCase().includes(q)) : FORMS;
+            const visible = FORMS.filter((f) => !f.hidden);
+            const forms = q ? visible.filter((f) => f.label.toLowerCase().includes(q)) : visible;
             const showQuote = !q || "quotation".includes(q);
             const showPi = !q || "pi".includes(q) || "proforma invoice".includes(q);
             const empty = forms.length === 0 && !showQuote && !showPi;
@@ -400,7 +414,7 @@ export function SalesWorkspace({
         onOpenChange={setModalOpen}
         kind={modalKind}
         title={modalCfg.label}
-        columns={modalCfg.columns}
+        columns={modalColumns}
         row={modalRow}
         existingRows={rowsByKind[modalKind]}
         primaryKey={modalCfg.primaryKey}

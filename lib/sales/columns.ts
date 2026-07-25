@@ -19,6 +19,8 @@ export interface SalesColDef {
   /** For `type: "select"` — allow typing a value not in the option list
    *  (free-entry searchable combobox). */
   allowCustom?: boolean;
+  /** Groups fields under a heading in the entry form (e.g. "Customer KYC"). */
+  section?: string;
 }
 
 // Customer KYC — captured once per enquiry; the entry point of the sales flow.
