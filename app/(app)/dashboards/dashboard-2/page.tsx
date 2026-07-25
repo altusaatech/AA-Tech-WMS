@@ -51,6 +51,8 @@ export default async function SoStatusDashboardPage() {
       dispatched,
       overdue,
       delayDays: Number(s.noOfDaysDelay) || 0,
+      targetDays: Number(s.daysToProduce) || 0,
+      actualDays: Number(s.actualNoOfDays) || 0,
       amended: Boolean(s.soAmendmentNeeded),
       ageDays: dispatched ? 0 : daysSince(soDate),
     };
