@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, LayoutDashboard, Gauge, BadgeCheck, ClipboardList, Factory, HeartPulse, type LucideIcon } from "lucide-react";
+import { LayoutGrid, LayoutDashboard, Gauge, BadgeCheck, ClipboardList, HeartPulse, type LucideIcon } from "lucide-react";
 
 interface Item {
   href: string;
@@ -17,7 +17,6 @@ const ITEMS: Item[] = [
   { href: "/dashboards/dashboard-2", label: "Sales Order Status", Icon: Gauge },
   { href: "/dashboards/dashboard-3", label: "GA Approval Status", Icon: BadgeCheck },
   { href: "/dashboards/dashboard-4", label: "BOM Status", Icon: ClipboardList },
-  { href: "/dashboards/dashboard-5", label: "Work Order Status", Icon: Factory },
   { href: "/dashboards/hygiene", label: "Hygiene", Icon: HeartPulse },
 ];
 
