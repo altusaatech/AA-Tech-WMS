@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import {
-  ClipboardList, Activity, CheckCircle2, XCircle, Clock3, Target, IndianRupee, RefreshCcw, Search, Filter, X,
+  ClipboardList, Activity, CheckCircle2, XCircle, Clock3, Target, RefreshCcw, Search, Filter, X,
   Hourglass, BadgeCheck, Rocket, CalendarClock, TrendingUp, PieChart, type LucideIcon,
 } from "lucide-react";
-import { Section, compactInr, ExportButtons, DetailModal, Gauge, DonutBreakdown, TrendBars, InsightBanner } from "@/components/dashboards/shared/kit";
+import { Section, ExportButtons, DetailModal, Gauge, DonutBreakdown, TrendBars, InsightBanner } from "@/components/dashboards/shared/kit";
 
 export type StatusKind = "ga" | "bom" | "wo";
 
@@ -21,6 +21,7 @@ export interface DashRow {
   enquiryNo?: string; // enriched from the linked SO (by SO No)
   status: string;
   date: string; // primary date (yyyy-mm-dd)
+  completedDate?: string; // completion/actual date, for the monthly-completion chart
   value: number;
   days: number; // production / approval / bom days
   ageDays: number; // age for open items
@@ -43,12 +44,10 @@ export interface HygieneRow {
 
 interface Tile { label: string; value: string; sub?: string; from: string; to: string; icon: LucideIcon }
 
-const sum = (rows: DashRow[], f: (r: DashRow) => number) => rows.reduce((a, r) => a + f(r), 0);
 const avg = (nums: number[]) => (nums.length ? Math.round(nums.reduce((a, b) => a + b, 0) / nums.length) : 0);
 
 function buildTiles(kind: StatusKind, r: DashRow[]): Tile[] {
   const total = r.length;
-  const value = sum(r, (x) => x.value);
   if (kind === "ga") {
     const approved = r.filter((x) => x.approved).length;
     const rejected = r.filter((x) => x.rejected).length;
@@ -77,8 +76,6 @@ function buildTiles(kind: StatusKind, r: DashRow[]): Tile[] {
       { label: "Active BOM", value: String(active), sub: "Nos", from: "#0180cf", to: "#0069b3", icon: Activity },
       { label: "Overdue BOM", value: String(overdue), sub: "Nos", from: "#ef4444", to: "#b91c1c", icon: Hourglass },
       { label: "Avg Days", value: String(avg(r.filter((x) => x.days > 0).map((x) => x.days))), sub: "days", from: "#b45309", to: "#92400e", icon: CalendarClock },
-      { label: "BOM Value", value: compactInr(value), from: "#0a7d8a", to: "#0069b3", icon: IndianRupee },
-      { label: "Avg BOM", value: compactInr(total ? value / total : 0), from: "#63b81e", to: "#0180cf", icon: IndianRupee },
     ];
   }
   // wo
@@ -114,7 +111,7 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
   const [trendYear, setTrendYear] = React.useState("");
   const [agingBucket, setAgingBucket] = React.useState<number | null>(null);
 
-  const trendYears = React.useMemo(() => Array.from(new Set(rows.map((r) => r.date?.slice(0, 4)).filter(Boolean))).sort((a, b) => b!.localeCompare(a!)), [rows]);
+  const trendYears = React.useMemo(() => Array.from(new Set(rows.map((r) => (kind === "bom" ? r.completedDate : r.date)?.slice(0, 4)).filter(Boolean))).sort((a, b) => b!.localeCompare(a!)), [rows, kind]);
 
   const customers = React.useMemo(() => Array.from(new Set(rows.map((r) => r.company).filter(Boolean))).sort(), [rows]);
   const items = React.useMemo(() => Array.from(new Set(rows.map((r) => r.item).filter(Boolean))).sort(), [rows]);
@@ -156,16 +153,20 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
   }, [f]);
 
   const trend = React.useMemo(() => {
+    // "Monthly BOM Completion" = completed items counted by their completion
+    // month. Other kinds fall back to all records by their primary date.
+    const rowsForTrend = kind === "bom" ? f.filter((r) => r.completed) : f;
+    const dateOf = (r: DashRow) => (kind === "bom" ? (r.completedDate || "") : r.date);
     if (trendYear) {
       const counts = new Array(12).fill(0);
-      for (const r of f) if (r.date && r.date.slice(0, 4) === trendYear) { const mo = Number(r.date.slice(5, 7)) - 1; if (mo >= 0 && mo < 12) counts[mo]++; }
+      for (const r of rowsForTrend) { const d = dateOf(r); if (d && d.slice(0, 4) === trendYear) { const mo = Number(d.slice(5, 7)) - 1; if (mo >= 0 && mo < 12) counts[mo]++; } }
       return MON.map((label, i) => ({ label, value: counts[i] }));
     }
     const m = new Map<string, number>();
-    for (const r of f) if (r.date) m.set(r.date.slice(0, 7), (m.get(r.date.slice(0, 7)) ?? 0) + 1);
+    for (const r of rowsForTrend) { const d = dateOf(r); if (d) m.set(d.slice(0, 7), (m.get(d.slice(0, 7)) ?? 0) + 1); }
     return Array.from(m.entries()).sort(([a], [b]) => a.localeCompare(b)).slice(-8).map(([key, v]) => ({ label: MON[Number(key.slice(5, 7)) - 1] ?? key, value: v }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [f, trendYear]);
+  }, [f, trendYear, kind]);
 
   const openCount = f.filter((x) => x.open).length;
   const overdueCount = f.filter((x) => x.open && x.overdue).length;
@@ -218,19 +219,19 @@ export function RegisterStatusDashboard({ kind, rows }: { kind: StatusKind; rows
         {f.length} record{f.length === 1 ? "" : "s"} in view · <b>{openCount}</b> open{overdueCount > 0 ? <> · <b className="text-[#b45309]">{overdueCount} overdue</b></> : null}
       </InsightBanner>
 
-      {/* KPI grid */}
+      {/* KPI grid — all tiles in one straight line */}
       <Section title="Overview" Icon={Target}>
-        <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-2">
+        <div className="grid grid-cols-6 gap-2.5 max-2xl:grid-cols-3 max-sm:grid-cols-2">
           {tiles.map((t) => (
-            <div key={t.label} className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-[#f6fafd] p-3.5 shadow-[0_10px_26px_-20px_rgba(1,128,207,0.4)]">
+            <div key={t.label} className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-[#f6fafd] p-3 shadow-[0_10px_26px_-20px_rgba(1,128,207,0.4)]">
               <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${t.from}, ${t.to})` }} />
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-[10.5px] font-black uppercase tracking-[0.05em] text-slate-400">{t.label}</div>
-                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-white shadow-sm" style={{ background: `linear-gradient(140deg, ${t.from}, ${t.to})` }}><t.icon size={13} strokeWidth={2.4} /></span>
+              <div className="flex items-center justify-between gap-1.5">
+                <div className="min-w-0 truncate text-[10px] font-black uppercase tracking-[0.04em] text-slate-400" title={t.label}>{t.label}</div>
+                <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-lg text-white shadow-sm" style={{ background: `linear-gradient(140deg, ${t.from}, ${t.to})` }}><t.icon size={12} strokeWidth={2.4} /></span>
               </div>
               <div className="mt-1.5 flex items-baseline gap-1">
-                <span className="tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 22, letterSpacing: "-0.02em", lineHeight: 1 }}>{t.value}</span>
-                {t.sub && <span className="text-[10.5px] font-bold text-slate-400">{t.sub}</span>}
+                <span className="truncate tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: 18, letterSpacing: "-0.02em", lineHeight: 1 }}>{t.value}</span>
+                {t.sub && <span className="text-[10px] font-bold text-slate-400">{t.sub}</span>}
               </div>
             </div>
           ))}

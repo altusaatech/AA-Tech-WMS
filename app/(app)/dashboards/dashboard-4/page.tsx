@@ -45,7 +45,7 @@ export default async function BomStatusDashboardPage() {
     const enquiryNo = enquiryBySo.get(soNo.toLowerCase()) ?? "";
     const scope = enquiryNo ? scopeByEnquiry.get(enquiryNo.toLowerCase()) ?? "" : "";
     return {
-      key: `${no || soNo}-${idx}`, no, soNo, company, item, scope, enquiryNo, status, date, value: Number(b.amountWoGst) || 0,
+      key: `${no || soNo}-${idx}`, no, soNo, company, item, scope, enquiryNo, status, date, completedDate: actual, value: Number(b.amountWoGst) || 0,
       days: Number(b.noOfDays) || 0,
       ageDays: open ? daysSince(date) : 0,
       open, overdue: open && Boolean(target) && target < today,

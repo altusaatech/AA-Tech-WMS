@@ -91,7 +91,8 @@ export function TrendBars({ data, format }: { data: { label: string; value: numb
         {data.map((d, i) => (
           <div key={i} className="group/bar relative z-[1] flex h-full flex-1 flex-col justify-end">
             <div
-              className="relative mx-auto w-full max-w-[46px] rounded-t-[6px] transition-all duration-500 group-hover/bar:brightness-105"
+              title={`${d.label}: ${format ? format(d.value) : d.value}`}
+              className="relative mx-auto w-full max-w-[46px] cursor-help rounded-t-[6px] transition-all duration-500 group-hover/bar:brightness-105"
               style={{
                 height: `${Math.max(2, (d.value / max) * 100)}%`,
                 minHeight: 4,
@@ -505,6 +506,8 @@ export function AreaChart({ data, from = "#63b81e", to = "#0180cf", format }: { 
             <circle cx={p[0]} cy={p[1]} r="3.4" fill="#fff" stroke={to} strokeWidth="2" />
             <text x={p[0]} y={p[1] - 9} textAnchor="middle" fontSize="11" fontWeight="800" fill="#334155">{format ? format(data[i]!.value) : data[i]!.value}</text>
             <text x={p[0]} y={H - 9} textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#94a3b8">{data[i]!.label}</text>
+            {/* wide transparent hover target with a tooltip */}
+            <circle cx={p[0]} cy={p[1]} r="14" fill="transparent" style={{ cursor: "help" }}><title>{`${data[i]!.label}: ${format ? format(data[i]!.value) : data[i]!.value}`}</title></circle>
           </g>
         ))}
       </svg>
