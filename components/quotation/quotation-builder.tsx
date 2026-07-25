@@ -8,6 +8,7 @@ import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
 import { DOOR_ORIENTATIONS, DOOR_CONFIGS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS, HARDWARE_UOMS, HARDWARE_MAKES } from "@/lib/sales/columns";
 import {
+  DEFAULT_SUBJECT,
   newDoor,
   newHardware,
   computeDoor,
@@ -80,8 +81,8 @@ export function QuotationBuilder({
   hardwareOptions: HardwareOption[];
   doorOptions: DoorOption[];
   installationOptions: InstallationOption[];
-  /** Customer KYC records — the Enquiry No box fetches Company Name from here. */
-  kycOptions?: { enquiryNo: string; companyName: string }[];
+  /** Quote Status records — the Enquiry No box fetches Customer & Product from here. */
+  kycOptions?: { enquiryNo: string; companyName: string; product?: string }[];
 }) {
   const router = useRouter();
   const [enquiryNo, setEnquiryNo] = React.useState(initial.enquiryNo);
@@ -96,29 +97,36 @@ export function QuotationBuilder({
   // save doesn't wipe it.
   const [piMeta] = React.useState<PiMeta>(initialPiMeta);
   const [saving, setSaving] = React.useState(false);
-  // Quote Status → Customer lookup, keyed by trimmed/lower-cased Enquiry No.
+  // Quote Status → Customer + Product lookup, keyed by trimmed/lower Enquiry No.
   const kycByEnquiry = React.useMemo(() => {
-    const m = new Map<string, string>();
-    for (const k of kycOptions) if (k.enquiryNo) m.set(k.enquiryNo.trim().toLowerCase(), k.companyName);
+    const m = new Map<string, { companyName: string; product: string }>();
+    for (const k of kycOptions) if (k.enquiryNo) m.set(k.enquiryNo.trim().toLowerCase(), { companyName: k.companyName, product: k.product ?? "" });
     return m;
   }, [kycOptions]);
-  // Offer No mirrors Enquiry No (they're the same in AA Tech's flow) until the
-  // user deliberately types a different Offer No — then mirroring stops.
-  const offerTouched = React.useRef(Boolean(initial.offerNo) && initial.offerNo !== initial.enquiryNo);
-  // Picking an Enquiry No that exists in Quote Status auto-fills the Customer.
+  // Offer No IS the Enquiry No in the working spec — always identical. The Offer
+  // box is a read-only mirror of the Enquiry No.
+  // Subject follows the picked quote's Product ("Supply of <Product>") until the
+  // user deliberately edits the Subject — then it stops auto-following.
+  const subjectTouched = React.useRef(Boolean(initial.subject) && initial.subject !== DEFAULT_SUBJECT);
+  // Picking an Enquiry No that exists in Quote Status auto-fills Customer & Subject.
   function onEnquiryChange(v: string) {
     setEnquiryNo(v);
-    if (!offerTouched.current) setOfferNo(v);
-    const company = kycByEnquiry.get(v.trim().toLowerCase());
-    if (company) setCustomer(company);
+    setOfferNo(v); // Offer No always equals Enquiry No.
+    const hit = kycByEnquiry.get(v.trim().toLowerCase());
+    if (hit?.companyName) setCustomer(hit.companyName);
+    if (hit?.product && !subjectTouched.current) setSubject(`Supply of ${hit.product}`);
   }
-  function onOfferChange(v: string) {
-    offerTouched.current = true;
-    setOfferNo(v);
+  function onSubjectChange(v: string) {
+    subjectTouched.current = true;
+    setSubject(v);
   }
 
-  // New quotations open with today's date pre-filled in the Date box.
   React.useEffect(() => {
+    // Offer No and Enquiry No must match. Seed a blank Enquiry No from a legacy
+    // Offer No; otherwise force the Offer No to equal the Enquiry No.
+    if (!enquiryNo && offerNo) setEnquiryNo(offerNo);
+    else if (enquiryNo !== offerNo) setOfferNo(enquiryNo);
+    // New quotations open with today's date pre-filled in the Date box.
     if (!initial.quoteDate) {
       const t = new Date();
       setQuoteDate(`${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`);
@@ -296,11 +304,11 @@ export function QuotationBuilder({
                 </datalist>
               )}
             </L>
-            <L label="Offer No"><input className={inp} value={offerNo} onChange={(e) => onOfferChange(e.target.value)} placeholder="170051" /></L>
+            <L label="Offer No"><input className={`${inp} bg-slate-50 text-slate-500`} value={offerNo} readOnly title="Same as Enquiry No" placeholder="Same as Enquiry No" /></L>
             <L label="Date"><input type="date" className={inp} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} /></L>
             <L label="Project"><input className={inp} value={project} onChange={(e) => setProject(e.target.value)} placeholder="Project name" /></L>
             <L label="Customer"><input className={inp} value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" /></L>
-            <L label="Subject"><input className={inp} value={subject} onChange={(e) => setSubject(e.target.value)} /></L>
+            <L label="Subject"><input className={inp} value={subject} onChange={(e) => onSubjectChange(e.target.value)} /></L>
           </div>
         </div>
 

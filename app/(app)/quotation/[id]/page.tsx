@@ -21,25 +21,31 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
     db.select().from(masterDoor),
     db.select().from(masterInstallation).orderBy(masterInstallation.srNo),
     db
-      .select({ enquiryNo: salesQuotes.enquiryNo, companyName: salesQuotes.companyName, updatedAt: salesQuotes.updatedAt })
+      .select({ enquiryNo: salesQuotes.enquiryNo, companyName: salesQuotes.companyName, product: salesQuotes.product, updatedAt: salesQuotes.updatedAt })
       .from(salesQuotes),
   ]);
 
-  // Enquiry No picker + Customer auto-fill are sourced from the Quote Status
-  // register — pick an Enquiry No and the Customer fills from that quote. One
-  // entry per Enquiry No (newest row with a Company Name wins). Enquiry No and
-  // Offer No are the same number in AA Tech's flow, so the builder mirrors them.
-  const byEnquiry = new Map<string, { companyName: string; at: number }>();
+  // Enquiry No picker + auto-fill are sourced from the Quote Status register —
+  // pick an Enquiry No and Customer (Company Name) + Subject (from Product) fill
+  // from that quote. One entry per Enquiry No (newest non-blank value wins).
+  // Enquiry No and Offer No are the same number, so the builder mirrors them.
+  const byEnquiry = new Map<string, { companyName: string; product: string; at: number }>();
   for (const r of quoteRows) {
     const enquiryNo = (r.enquiryNo ?? "").trim();
     if (!enquiryNo) continue;
     const companyName = (r.companyName ?? "").trim();
+    const product = (r.product ?? "").trim();
     const at = r.updatedAt ? new Date(r.updatedAt).getTime() : 0;
     const prev = byEnquiry.get(enquiryNo);
-    if (!prev || at >= prev.at) byEnquiry.set(enquiryNo, { companyName: companyName || prev?.companyName || "", at });
+    if (!prev || at >= prev.at)
+      byEnquiry.set(enquiryNo, {
+        companyName: companyName || prev?.companyName || "",
+        product: product || prev?.product || "",
+        at,
+      });
   }
   const kycOptions = Array.from(byEnquiry.entries())
-    .map(([enquiryNo, v]) => ({ enquiryNo, companyName: v.companyName }))
+    .map(([enquiryNo, v]) => ({ enquiryNo, companyName: v.companyName, product: v.product }))
     .sort((a, b) => a.enquiryNo.localeCompare(b.enquiryNo));
 
   const productOptions = products
