@@ -108,18 +108,16 @@ export function QuotationBuilder({
   // Subject follows the picked quote's Product ("Supply of <Product>") until the
   // user deliberately edits the Subject — then it stops auto-following.
   const subjectTouched = React.useRef(Boolean(initial.subject) && initial.subject !== DEFAULT_SUBJECT);
-  // Project follows the Company Name of the picked quote until the user edits it.
+  // Project follows the picked quote's Product until the user edits it.
   const projectTouched = React.useRef(Boolean(initial.project));
   // Picking an Enquiry No that exists in Quote Status auto-fills Customer,
-  // Project (Company Name) & Subject (from Product).
+  // Project (Product) & Subject ("Supply of <Product>").
   function onEnquiryChange(v: string) {
     setEnquiryNo(v);
     setOfferNo(v); // Offer No always equals Enquiry No.
     const hit = kycByEnquiry.get(v.trim().toLowerCase());
-    if (hit?.companyName) {
-      setCustomer(hit.companyName);
-      if (!projectTouched.current) setProject(hit.companyName);
-    }
+    if (hit?.companyName) setCustomer(hit.companyName);
+    if (hit?.product && !projectTouched.current) setProject(hit.product);
     if (hit?.product && !subjectTouched.current) setSubject(`Supply of ${hit.product}`);
   }
   function onSubjectChange(v: string) {
