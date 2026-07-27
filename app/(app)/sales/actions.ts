@@ -93,6 +93,33 @@ export async function saveSalesRow(
 }
 
 /**
+ * Upsert Customer KYC fields for an Enquiry No. Used by the Quote form's
+ * editable "Customer KYC" section: if a KYC row already exists for that
+ * enquiry it's updated (only the provided fields), otherwise a new KYC row is
+ * created. Only real KYC columns are written; blanks become NULL.
+ */
+export async function upsertKycByEnquiry(
+  enquiryNo: string,
+  fields: Record<string, string | null>,
+): Promise<{ ok: boolean }> {
+  await requireUser();
+  const enq = (enquiryNo ?? "").trim();
+  if (!enq) return { ok: false };
+  const patch: Record<string, unknown> = { updatedAt: new Date() };
+  for (const [k, v] of Object.entries(fields)) {
+    if (!KYC_KEYS.includes(k) || k === "srNo" || k === "enquiryNo") continue;
+    patch[k] = typeof v === "string" && v.trim() === "" ? null : v;
+  }
+  const [existing] = await db.select().from(salesKyc).where(eq(salesKyc.enquiryNo, enq)).limit(1);
+  if (existing) {
+    await db.update(salesKyc).set(patch).where(eq(salesKyc.id, existing.id));
+  } else {
+    await db.insert(salesKyc).values({ ...patch, enquiryNo: enq });
+  }
+  return { ok: true };
+}
+
+/**
  * Bulk-insert rows from an imported Excel/CSV file. Each object is filtered
  * through the same column allow-list; the generated `srNo` is never written.
  * Returns the inserted rows (with their new ids / sr_no).

@@ -34,7 +34,7 @@ import {
 import Link from "next/link";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { saveSalesRow, type SaleKind, type SalesRow } from "@/app/(app)/sales/actions";
+import { saveSalesRow, upsertKycByEnquiry, type SaleKind, type SalesRow } from "@/app/(app)/sales/actions";
 import { createQuotation } from "@/app/(app)/quotation/actions";
 import { fireToast } from "@/lib/toast";
 import type { SalesColDef } from "@/lib/sales/columns";
@@ -242,9 +242,21 @@ function FormBody({
     setDup(null);
     setPhase("saving");
     try {
+      // Fields in a secondary section (e.g. "Customer KYC" on the Quote form)
+      // don't belong to this register's table — they're saved separately below.
       const payload: Record<string, string | boolean | null> = {};
-      for (const c of editable) payload[c.key] = vals[c.key] ?? (c.type === "bool" ? false : "");
+      for (const c of editable) if (!c.section || c.section === "Quote Status") payload[c.key] = vals[c.key] ?? (c.type === "bool" ? false : "");
       const saved = await saveSalesRow(kind, row?.id ?? null, payload);
+      // Persist the editable Customer KYC section back to the KYC record.
+      const kycCols = editable.filter((c) => c.section === "Customer KYC");
+      if (kycCols.length) {
+        const enquiryNo = String(vals.enquiryNo ?? "").trim();
+        if (enquiryNo) {
+          const kycFields: Record<string, string | null> = { companyName: String(vals.companyName ?? "").trim() };
+          for (const c of kycCols) kycFields[c.key] = String(vals[c.key] ?? "").trim();
+          try { await upsertKycByEnquiry(enquiryNo, kycFields); } catch { /* non-fatal: quote already saved */ }
+        }
+      }
       setPhase("success");
       await new Promise((r) => setTimeout(r, 850));
       // Confirm the save centrally so every register/master gets feedback —

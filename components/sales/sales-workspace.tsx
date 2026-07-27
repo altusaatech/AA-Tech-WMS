@@ -177,7 +177,8 @@ export function SalesWorkspace({
   const quoteFormColumns: SalesColDef[] = React.useMemo(
     () => [
       ...QUOTE_COLUMNS.map((c) => ({ ...c, section: "Quote Status" })),
-      ...KYC_EXTRA_FOR_QUOTE.map((c) => ({ ...c, section: "Customer KYC" })),
+      // Customer KYC fields are editable here and saved back to the KYC record.
+      ...KYC_EXTRA_FOR_QUOTE.map((c) => ({ ...c, readOnly: false, section: "Customer KYC" })),
     ],
     [],
   );
