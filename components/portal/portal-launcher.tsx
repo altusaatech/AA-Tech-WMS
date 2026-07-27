@@ -33,6 +33,8 @@ interface WorkspaceDef {
   /** Where "Enter workspace" goes (a page, or a workspace hub with options). */
   href: Route;
   adminOnly?: boolean;
+  /** Continuously rotate the logo (merry-go-round). */
+  spin?: boolean;
 }
 
 // Every card is "Enter workspace". WMS/Pre Production go straight to their app
@@ -57,6 +59,7 @@ const WORKSPACES: WorkspaceDef[] = [
     logo: "/portal/masters.png",
     from: "#63b81e",
     to: "#4a9616",
+    spin: true,
   },
   {
     key: "dashboards",
@@ -236,7 +239,7 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
       {/* LEFT — clear logo on a white panel (the PNGs aren't transparent) */}
       {ws.logo ? (
         <span className="relative inline-flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-lg ring-1 ring-white/50 transition-transform group-hover:scale-[1.04] max-sm:size-12">
-          <img src={ws.logo} alt="" className="h-full w-full object-contain" />
+          <img src={ws.logo} alt="" className="h-full w-full object-contain" style={ws.spin ? { animation: "spin 6s linear infinite", transformOrigin: "50% 50%" } : undefined} />
         </span>
       ) : (
         <span className="relative inline-flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm max-sm:size-12">
