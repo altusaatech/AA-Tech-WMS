@@ -45,7 +45,7 @@ export function DashboardCanvas({
       </header>
 
       {/* Header spans full width above; the left panel + body sit below it. */}
-      <div className="mt-2 flex items-start gap-5 max-md:flex-col">
+      <div className="mt-1.5 flex items-start gap-5 max-md:flex-col">
         <DashboardsSidebar />
         <main className="min-w-0 flex-1">
           {children ?? (

@@ -183,24 +183,24 @@ export function QuoteStatusDashboard({ rows }: { rows: QsRow[] }) {
   const reset = () => { setQ(""); setFrom(""); setTo(""); setStatus(""); setSource(""); setCustomer(""); setProduct(""); setScope(""); };
   const anyFilter = q || from || to || status || source || customer || product || scope;
 
-  const selCls = "h-9 rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]";
+  const selCls = "h-8 max-w-[130px] rounded-lg border border-slate-200 bg-white px-1.5 text-[12px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]";
 
   return (
     <div className="space-y-3">
       {/* filter bar */}
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 shadow-sm">
         <div className="relative">
-          <Search size={15} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search quotes…" className="h-9 w-[200px] max-w-[48vw] rounded-lg border border-slate-200 bg-white pl-8 pr-2.5 text-[13px] outline-none focus:border-[#0180cf]" />
+          <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search quotes…" className="h-8 w-[160px] max-w-[44vw] rounded-lg border border-slate-200 bg-white pl-8 pr-2 text-[12.5px] outline-none focus:border-[#0180cf]" />
         </div>
-        <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} title="Start date" className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] outline-none focus:border-[#0180cf]" />
-        <input type="date" value={to} onChange={(e) => setTo(e.target.value)} title="End date" className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-[12.5px] outline-none focus:border-[#0180cf]" />
+        <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} title="Start date" className="h-8 rounded-lg border border-slate-200 bg-white px-1.5 text-[12px] outline-none focus:border-[#0180cf]" />
+        <input type="date" value={to} onChange={(e) => setTo(e.target.value)} title="End date" className="h-8 rounded-lg border border-slate-200 bg-white px-1.5 text-[12px] outline-none focus:border-[#0180cf]" />
         <select value={status} onChange={(e) => setStatus(e.target.value)} className={selCls}><option value="">All statuses</option>{statuses.map((s) => <option key={s} value={s}>{s}</option>)}</select>
-        <select value={product} onChange={(e) => setProduct(e.target.value)} className={`${selCls} max-w-[160px]`}><option value="">All products</option>{products.map((p) => <option key={p} value={p}>{p}</option>)}</select>
-        <select value={scope} onChange={(e) => setScope(e.target.value)} className={`${selCls} max-w-[160px]`}><option value="">All scopes</option>{scopes.map((s) => <option key={s} value={s}>{s}</option>)}</select>
+        <select value={product} onChange={(e) => setProduct(e.target.value)} className={selCls}><option value="">All products</option>{products.map((p) => <option key={p} value={p}>{p}</option>)}</select>
+        <select value={scope} onChange={(e) => setScope(e.target.value)} className={selCls}><option value="">All scopes</option>{scopes.map((s) => <option key={s} value={s}>{s}</option>)}</select>
         <select value={source} onChange={(e) => setSource(e.target.value)} className={selCls}><option value="">All sources</option>{sources.map((s) => <option key={s} value={s}>{s}</option>)}</select>
-        <select value={customer} onChange={(e) => setCustomer(e.target.value)} className={`${selCls} max-w-[170px]`}><option value="">All customers</option>{customers.map((c) => <option key={c} value={c}>{c}</option>)}</select>
-        {anyFilter && <button type="button" onClick={reset} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 text-[12.5px] font-bold text-slate-500 hover:text-[#0069b3]"><X size={13} /> Clear</button>}
+        <select value={customer} onChange={(e) => setCustomer(e.target.value)} className={`${selCls} max-w-[150px]`}><option value="">All customers</option>{customers.map((c) => <option key={c} value={c}>{c}</option>)}</select>
+        {anyFilter && <button type="button" onClick={reset} className="inline-flex h-8 items-center gap-1 rounded-lg px-1.5 text-[12px] font-bold text-slate-500 hover:text-[#0069b3]"><X size={13} /> Clear</button>}
         <span className="ml-auto flex items-center gap-2 text-[12px] font-semibold text-slate-400"><Filter size={13} /> {f.length} of {rows.length}
           <ExportButtons filename="quote-status" headers={["Quote No", "Enquiry No", "Customer", "Product", "Scope", "Value", "Status", "Source", "Salesperson", "Date"]} rows={f.map((r) => [r.quoteNo, r.enquiryNo, r.company, r.product, r.scope, r.value, r.status, r.source, r.salesperson, r.date])} />
         </span>
