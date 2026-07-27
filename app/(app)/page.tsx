@@ -1,5 +1,6 @@
 import { DashboardHeader } from "@/components/layout/header";
 import { DashboardFooter } from "@/components/layout/footer";
+import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
 import { FilterBar } from "@/components/layout/filter-bar";
 import { KpiStrip } from "@/components/dashboard/kpi-strip";
 import { StatusTable } from "@/components/dashboard/status-table";
@@ -180,6 +181,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         )}
       </main>
       <DashboardFooter />
+      <WhatsAppFab />
     </>
   );
 }
