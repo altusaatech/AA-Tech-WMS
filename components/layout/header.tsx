@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { MainNavServer } from "./main-nav-server";
 import { MobileMenuServer } from "./mobile-menu-server";
-import { HeaderStatusBar } from "./header-clock";
 import { UserMenuServer } from "@/components/header/user-menu-server";
 import { AdminPill } from "@/components/header/admin-pill";
 import { GlobalSearch } from "@/components/header/global-search";
@@ -27,7 +26,6 @@ export async function DashboardHeader({
 }: { generatedAt: Date; filters?: ReactNode }) {
   const me = await getCurrentEmployee();
   const isAdmin = me?.isAdmin ?? false;
-  const moduleCount = 6 + (isAdmin ? 1 : 0); // primary nav modules in reach
 
   return (
     <header className="header-light">
@@ -89,12 +87,11 @@ export async function DashboardHeader({
                   >
                     Anant Avinya Technologies
                   </h1>
-                  {/* status pills flanked by the nav: Dashboard/My Day · date·time·online · Tasks/Kanban */}
+                  {/* nav: Dashboard/My Day · Tasks/Kanban */}
                   <div className="mt-3.5 flex items-center justify-center gap-3 2xl:gap-4 max-md:mt-2.5">
                     <div className="shrink-0 max-md:hidden">
                       <MainNavServer side="left" />
                     </div>
-                    <HeaderStatusBar moduleCount={moduleCount} />
                     <div className="shrink-0 max-md:hidden">
                       <MainNavServer side="right" />
                     </div>

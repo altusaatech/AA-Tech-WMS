@@ -8,7 +8,6 @@ import { StatusDistributionChart } from "@/components/dashboard/status-distribut
 import { TopPerformersSection } from "@/components/dashboard/top-performers";
 import { AgingHeatmap } from "@/components/dashboard/aging-heatmap";
 import { WelcomeHero } from "@/components/dashboard/welcome-hero";
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
 import { DashboardLoadError } from "@/components/dashboard/dashboard-load-error";
 import { listEmployees } from "@/lib/queries/employees";
 import { listDistinctSubjects } from "@/lib/queries/tasks";
@@ -153,17 +152,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               </div>
             )}
             <div className={mobileToday ? "max-md:hidden" : undefined}>
-              {me && (
-                <DashboardHero
-                  firstName={me.name.split(" ")[0] ?? me.name}
-                  total={data.kpis.total.current}
-                  pending={data.kpis.pending.current}
-                  done={data.kpis.done.current}
-                  notStarted={data.kpis.notStarted.current}
-                  dueToday={myDay?.dueToday ?? 0}
-                  overdue={myDay?.overdue ?? 0}
-                />
-              )}
               <KpiStrip kpis={data.kpis} summary={data.wmsSummary} />
               <div className="mx-auto max-w-[1600px] px-12 max-md:px-4 mt-8 grid grid-cols-2 max-lg:grid-cols-1 gap-6">
                 <StatusDistributionChart

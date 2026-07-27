@@ -314,7 +314,7 @@ export function QuotationBuilder({
             </L>
             <L label="Offer No"><input className={`${inp} bg-slate-50 text-slate-500`} value={offerNo} readOnly title="Same as Enquiry No" placeholder="Same as Enquiry No" /></L>
             <L label="Date"><input type="date" className={inp} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} /></L>
-            <L label="Project"><input className={inp} value={project} onChange={(e) => onProjectChange(e.target.value)} placeholder="Project name" /></L>
+            <L label="Product"><input className={inp} value={project} onChange={(e) => onProjectChange(e.target.value)} placeholder="Product name" /></L>
             <L label="Customer"><input className={inp} value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" /></L>
             <L label="Subject"><input className={inp} value={subject} onChange={(e) => onSubjectChange(e.target.value)} /></L>
           </div>
@@ -1039,7 +1039,7 @@ function QuotationPrint({
         <span><b style={{ color: "#0069b3" }}>Offer No:</b> {header.offerNo || "—"}</span>
         <span><b style={{ color: "#0069b3" }}>Date:</b> {header.quoteDate || "—"}</span>
         <span><b style={{ color: "#0069b3" }}>Customer:</b> {header.customer || "—"}</span>
-        <span><b style={{ color: "#0069b3" }}>Project:</b> {header.project || "—"}</span>
+        <span><b style={{ color: "#0069b3" }}>Product:</b> {header.project || "—"}</span>
       </div>
 
       {/* door table — a column per used hardware, vertical headers, no empties */}
