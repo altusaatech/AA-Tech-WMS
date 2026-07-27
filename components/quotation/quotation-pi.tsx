@@ -30,19 +30,24 @@ function L({ label, children }: { label: string; children: React.ReactNode }) {
   );
 }
 
+export type PiDetail = Partial<PiMeta> & { customer?: string; project?: string };
+
 export function QuotationPi({
   id,
   initial,
   initialPiMeta,
+  detailsByEnquiry = {},
 }: {
   id: string;
   initial: QuotationData;
   initialPiMeta: PiMeta;
+  /** Enquiry No (lower-cased) → customer details from Quote Status + KYC.
+   *  Changing the Offer Ref (= Enquiry No) re-fills the invoice from here. */
+  detailsByEnquiry?: Record<string, PiDetail>;
 }) {
   const router = useRouter();
-  // Enquiry No isn't edited on the PI, but keep it so saving here doesn't wipe
-  // the value the register links against.
-  const enquiryNo = initial.enquiryNo;
+  // Offer Ref IS the Enquiry No in the working spec — changing it refetches.
+  const [enquiryNo, setEnquiryNo] = React.useState(initial.enquiryNo);
   const [offerNo, setOfferNo] = React.useState(initial.offerNo);
   const [quoteDate, setQuoteDate] = React.useState(initial.quoteDate);
   const [project, setProject] = React.useState(initial.project);
@@ -67,6 +72,28 @@ export function QuotationPi({
 
   function setPi<K extends keyof PiMeta>(key: K, value: PiMeta[K]) {
     setPiMeta((m) => ({ ...m, [key]: value }));
+  }
+  // Offer Ref = Enquiry No: changing it re-fills the Enquiry No, customer and
+  // every KYC/Quote-sourced field from the linked enquiry's details.
+  function onOfferChange(v: string) {
+    setOfferNo(v);
+    setEnquiryNo(v);
+    const d = detailsByEnquiry[v.trim().toLowerCase()];
+    if (!d) return;
+    if (d.customer) setCustomer(d.customer);
+    if (d.project) setProject(d.project);
+    setPiMeta((m) => ({
+      ...m,
+      customerAddress: d.customerAddress ?? m.customerAddress,
+      billingAddress: d.billingAddress ?? m.billingAddress,
+      deliveryAddress: d.deliveryAddress ?? m.deliveryAddress,
+      customerGst: d.customerGst ?? m.customerGst,
+      customerContactPerson: d.customerContactPerson ?? m.customerContactPerson,
+      customerMobile: d.customerMobile ?? m.customerMobile,
+      customerEmail: d.customerEmail ?? m.customerEmail,
+      enquirySource: d.enquirySource ?? m.enquirySource,
+      customerContact: d.customerContact ?? m.customerContact,
+    }));
   }
   function patchDoor(doorId: string, patch: Partial<DoorLine>) {
     setLines((p) => p.map((d) => (d.id === doorId ? { ...d, ...patch } : d)));
@@ -112,7 +139,7 @@ export function QuotationPi({
         {/* details */}
         <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-2 max-md:grid-cols-1">
-            <L label="Offer Ref"><input className={inp} value={offerNo} onChange={(e) => setOfferNo(e.target.value)} placeholder="180015 R1" /></L>
+            <L label="Offer Ref"><input className={inp} value={offerNo} onChange={(e) => onOfferChange(e.target.value)} placeholder="180015 R1" /></L>
             <L label="Date"><input type="date" className={inp} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} /></L>
             <L label="Project"><input className={inp} value={project} onChange={(e) => setProject(e.target.value)} placeholder="Project" /></L>
             <L label="Customer (To)"><input className={inp} value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" /></L>
