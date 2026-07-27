@@ -74,8 +74,8 @@ const WORKSPACES: WorkspaceDef[] = [
     href: "/portal/admin" as Route,
     icon: ShieldCheck,
     logo: "/portal/admin.png",
-    from: "#3b4859",
-    to: "#232d3b",
+    from: "#d97706",
+    to: "#b45309",
     adminOnly: true,
   },
   {
@@ -85,8 +85,8 @@ const WORKSPACES: WorkspaceDef[] = [
     href: "/portal/employees" as Route,
     icon: Users,
     logo: "/portal/employees.png",
-    from: "#0d9488",
-    to: "#0f766e",
+    from: "#4a9616",
+    to: "#3f7a14",
   },
   {
     key: "user-manual",
@@ -94,8 +94,8 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Guides, walkthroughs, photos & videos for the WMS.",
     href: "/user-manual" as Route,
     icon: BookOpen,
-    from: "#7c3aed",
-    to: "#6d28d9",
+    from: "#38a9e5",
+    to: "#0180cf",
   },
 ];
 
