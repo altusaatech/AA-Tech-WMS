@@ -61,6 +61,7 @@ WhatsApp*
 !lib/whatsapp/
 !lib/whatsapp/**
 !lib/validators/whatsapp.ts
+!components/layout/whatsapp-fab.tsx
 !app/api/whatsapp/
 !app/api/whatsapp/**
 !tests/unit/whatsapp-*.test.ts
