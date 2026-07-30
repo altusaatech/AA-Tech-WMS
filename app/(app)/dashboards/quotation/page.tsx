@@ -63,7 +63,7 @@ export default async function QuotationDashboardPage() {
   });
 
   return (
-    <DashboardCanvas eyebrow="Live · Sales" title="Quotation Dashboard" subtitle="Enquiry → quotation → PI → approval lifecycle" Icon={FileText}>
+    <DashboardCanvas eyebrow="Live · Sales" title="Quote Status Dashboard" subtitle="Enquiries · quotes · won/lost · conversion" Icon={FileText}>
       <QuotationDashboard rows={rows} />
     </DashboardCanvas>
   );
