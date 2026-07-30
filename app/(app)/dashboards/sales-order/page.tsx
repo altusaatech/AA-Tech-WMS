@@ -11,6 +11,9 @@ const ENGINEERS = ["N. Deshpande", "K. Menon", "T. Ramesh", "J. Fernandes", "A. 
 const has = (s: string | null, kw: string) => (s ?? "").toLowerCase().includes(kw);
 function hash(s: string): number { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
 function isoAdd(base: string, add: number): string { try { const d = new Date(base + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + add); return d.toISOString().slice(0, 10); } catch { return base; } }
+const str = (v: unknown) => (v == null ? "" : String(v)).trim();
+function daysBetween(a: string, b: string): number { try { return Math.round((new Date(b + "T00:00:00Z").getTime() - new Date(a + "T00:00:00Z").getTime()) / 86400000); } catch { return 0; } }
+function daysSince(d: string): number | null { if (!d) return null; const t = new Date(d + "T00:00:00Z").getTime(); return Number.isNaN(t) ? null : Math.max(0, Math.round((Date.now() - t) / 86400000)); }
 
 export default async function SalesOrderDashboardPage() {
   await requireUser();
@@ -39,7 +42,14 @@ export default async function SalesOrderDashboardPage() {
     const bomCompleted = inBom && has(bomStatus, "complet");
     const soDate = (s.soDate as string | null)?.trim() || "";
     const h = hash(soNo || String(s.srNo));
-    const stage = bomCompleted ? "BOM Complete" : inBom ? "In BOM" : gaCompleted ? "GA Approved" : gaRequired ? "GA Pending" : "Order Confirmed";
+    const dispatched = bomCompleted ? "BOM Complete" : inBom ? "In BOM" : gaCompleted ? "GA Approved" : gaRequired ? "GA Pending" : "Order Confirmed";
+    const targetDispatch = str(s.targetDispatchDate);
+    const actualDispatch = str(s.actualDispatchDate);
+    const isDispatched = !!actualDispatch;
+    const explicitDelay = Number(s.noOfDaysDelay);
+    const delay = Number.isFinite(explicitDelay) && str(s.noOfDaysDelay) !== "" ? explicitDelay : (isDispatched && targetDispatch ? daysBetween(targetDispatch, actualDispatch) : 0);
+    const onTime: boolean | null = isDispatched ? delay <= 0 : null;
+    const agingDays = !isDispatched ? daysSince(soDate) : null;
     return {
       ourSoNo: soNo || "—",
       enquiryNo: (s.enquiryNo ?? "").trim() || "—",
@@ -53,15 +63,21 @@ export default async function SalesOrderDashboardPage() {
       inBom, bomStatus, bomCompleted,
       bomNo: bomRow?.bomNo ?? null,
       woNo: woBySo.get(soNo)?.workOrderNo ?? null,
-      engineer: ENGINEERS[h % ENGINEERS.length]!,
+      salesperson: ENGINEERS[h % ENGINEERS.length]!,
       expectedCompletion: soDate ? isoAdd(soDate, 21 + (h % 14)) : "—",
-      stage,
+      stage: dispatched,
+      targetDispatch: targetDispatch || "—",
+      actualDispatch: actualDispatch || "—",
+      dispatched: isDispatched,
+      onTime,
+      delay: Math.max(0, delay),
+      agingDays,
       date: soDate,
     };
   });
 
   return (
-    <DashboardCanvas eyebrow="Live · Production" title="Sales Order Dashboard" subtitle="Order → GA drawing → BOM → production readiness" Icon={FileCheck2}>
+    <DashboardCanvas eyebrow="Live · Production" title="Sales Order Status" subtitle="Order → GA → BOM → dispatch · target vs actual, aging & customers" Icon={FileCheck2}>
       <SalesOrderDashboard rows={rows} />
     </DashboardCanvas>
   );

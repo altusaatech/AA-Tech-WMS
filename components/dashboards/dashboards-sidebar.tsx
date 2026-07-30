@@ -14,7 +14,7 @@ interface Item {
 // Only the dashboards created for this build remain.
 const ITEMS: Item[] = [
   { href: "/dashboards/quotation", label: "Quote Status", Icon: LayoutDashboard },
-  { href: "/dashboards/dashboard-2", label: "Sales Order Status", Icon: Gauge },
+  { href: "/dashboards/sales-order", label: "Sales Order Status", Icon: Gauge },
   { href: "/dashboards/dashboard-3", label: "GA Approval Status", Icon: BadgeCheck },
   { href: "/dashboards/dashboard-4", label: "BOM Status", Icon: ClipboardList },
   { href: "/dashboards/hygiene", label: "Hygiene", Icon: HeartPulse },
