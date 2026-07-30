@@ -169,19 +169,21 @@ export function AgingChart<T>({ rows, ageOf, onSelect }: { rows: T[]; ageOf: (r:
   );
 }
 
-/* ── ranked list (top customers 1,2,3…) ── */
-export function RankedList({ items, onPick }: { items: { name: string; count: number; value: number; rows?: unknown }[]; onPick?: (name: string) => void }) {
+/* ── ranked list (top customers 1,2,3…). primary = which metric leads. ── */
+export function RankedList({ items, onPick, primary = "value" }: { items: { name: string; count: number; value: number }[]; onPick?: (name: string) => void; primary?: "value" | "count" }) {
   if (items.length === 0) return <p className="py-6 text-center text-[13px] text-slate-400">No data.</p>;
-  const max = Math.max(1, ...items.map((i) => i.value));
+  const metric = (it: { count: number; value: number }) => (primary === "count" ? it.count : it.value);
+  const max = Math.max(1, ...items.map(metric));
   return (
     <div className="space-y-2">
       {items.map((it, i) => (
         <div key={it.name} onClick={() => onPick?.(it.name)} className={`flex items-center gap-2.5 rounded-lg px-1 py-0.5 ${onPick ? "cursor-pointer hover:bg-[#0180cf]/6" : ""}`}>
           <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black text-white" style={{ background: i === 0 ? "#f59e0b" : i === 1 ? "#94a3b8" : i === 2 ? "#b45309" : "#cbd5e1" }}>{i + 1}</span>
           <span className="flex min-w-0 flex-1 items-center gap-1.5"><Building2 size={12} className="shrink-0 text-[#0069b3]" /><span className="truncate text-[12.5px] font-bold text-slate-700" title={it.name}>{it.name}</span></span>
-          <div className="hidden h-2 w-24 shrink-0 overflow-hidden rounded-full bg-slate-100 sm:block"><div className="h-full rounded-full" style={{ width: `${Math.max(6, (it.value / max) * 100)}%`, background: "linear-gradient(90deg,#63b81e,#0180cf)" }} /></div>
-          <span className="w-16 shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{compactInr(it.value)}</span>
-          <span className="w-8 shrink-0 text-right text-[11px] font-semibold tabular-nums text-slate-400">×{it.count}</span>
+          <div className="hidden h-2 w-24 shrink-0 overflow-hidden rounded-full bg-slate-100 sm:block"><div className="h-full rounded-full" style={{ width: `${Math.max(6, (metric(it) / max) * 100)}%`, background: "linear-gradient(90deg,#63b81e,#0180cf)" }} /></div>
+          {primary === "count"
+            ? <><span className="w-8 shrink-0 text-right text-[13px] font-black tabular-nums text-slate-800">{it.count}</span><span className="w-16 shrink-0 text-right text-[11px] font-semibold tabular-nums text-slate-400">{compactInr(it.value)}</span></>
+            : <><span className="w-16 shrink-0 text-right text-[12px] font-black tabular-nums text-slate-700">{compactInr(it.value)}</span><span className="w-8 shrink-0 text-right text-[11px] font-semibold tabular-nums text-slate-400">×{it.count}</span></>}
         </div>
       ))}
     </div>
