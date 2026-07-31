@@ -195,8 +195,11 @@ export function computeDoor(d: DoorLine): DoorCompute {
   // Installation is a flat per-door charge chosen from the Installation master
   // (by building height). Older quotes without a chosen rate fall back to the
   // legacy area × ₹/sq.m figure.
+  // "No installation" explicitly excludes installation from the price (0), so it
+  // never falls back to the legacy area × ₹/sq.m figure.
+  const noInstall = /^no install/i.test((d.installScope ?? "").trim());
   const installRate = n(d.installRate ?? 0);
-  const installPerDoor = installRate > 0 ? installRate : area * n(d.installPerSqm);
+  const installPerDoor = noInstall ? 0 : installRate > 0 ? installRate : area * n(d.installPerSqm);
   const installTotal = installPerDoor * qty;
   return { area, perimeter, basicSupply, hardwareTotal, doorHw, totalSupply, installPerDoor, installTotal, lineTotal: totalSupply + installTotal };
 }

@@ -582,7 +582,8 @@ function DoorCard({
               }}
             >
               <option value="">Select…</option>
-              {door.installScope && !installationOptions.some((o) => o.scope === door.installScope) && (
+              <option value="No installation">No installation</option>
+              {door.installScope && door.installScope !== "No installation" && !installationOptions.some((o) => o.scope === door.installScope) && (
                 <option value={door.installScope}>{door.installScope}</option>
               )}
               {installationOptions.map((o) => (
