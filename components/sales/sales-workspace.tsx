@@ -18,10 +18,13 @@ import {
   ChevronRight,
   Receipt,
   Search,
+  Loader2,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import type { Route } from "next";
+import { useRouter } from "next/navigation";
+import { createQuotation } from "@/app/(app)/quotation/actions";
 import { PageHero } from "@/components/layout/page-hero";
 import { SalesDataGrid } from "./sales-grid";
 import { SalesEntryModal } from "./sales-entry-modal";
@@ -520,12 +523,23 @@ function WindowCard({
   );
 }
 
-/* ── Quotation launcher card (links into the Quotation builder) ── */
+/* ── Quotation launcher card — Form (new spec) + Register (saved list) ── */
 function QuotationLinkCard() {
+  const router = useRouter();
+  const [creating, setCreating] = React.useState(false);
   const grad = "linear-gradient(135deg, #63b81e, #0180cf)";
   const steps = ["Doors", "Hardware", "Print"];
+  async function onNew() {
+    setCreating(true);
+    try {
+      const { id } = await createQuotation();
+      router.push(`/quotation/${id}` as Route);
+    } finally {
+      setCreating(false);
+    }
+  }
   return (
-    <Link href={"/quotation" as Route} className="group relative block h-full">
+    <div className="group relative block h-full">
       <div
         aria-hidden
         className="absolute -inset-0.5 rounded-[24px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-60"
@@ -560,23 +574,34 @@ function QuotationLinkCard() {
 
         <div className="relative mt-2 text-[12px] font-semibold text-white/70">Looks up Product &amp; Hardware</div>
 
-        <div className="relative mt-auto pt-3">
-          <span className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-white text-[13.5px] font-extrabold text-[#0069b3] shadow-md transition-all duration-200 group-hover:-translate-y-0.5">
-            <Receipt size={16} strokeWidth={2.4} /> Open Working Specification
+        <div className="relative mt-auto grid grid-cols-2 gap-2 pt-3">
+          <button
+            type="button"
+            onClick={onNew}
+            disabled={creating}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-white/40 bg-white/15 text-[13.5px] font-extrabold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/25 active:translate-y-0 disabled:opacity-60"
+          >
+            {creating ? <Loader2 size={16} className="animate-spin" /> : <FilePlus2 size={16} strokeWidth={2.4} />} Form
+          </button>
+          <Link
+            href={"/quotation" as Route}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-white text-[13.5px] font-extrabold text-[#0069b3] shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+          >
+            <Table2 size={16} strokeWidth={2.4} /> Register
             <ArrowRight size={14} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-          </span>
+          </Link>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
-/* ── PI launcher card (Proforma Invoice — made from a quotation) ── */
+/* ── PI launcher card — Form (open/make a PI) + Register (saved PIs) ── */
 function PiLinkCard() {
   const grad = "linear-gradient(135deg, #63b81e, #0180cf)";
   const steps = ["Quote", "Fill", "Print"];
   return (
-    <Link href={"/quotation/pi" as Route} className="group relative block h-full">
+    <div className="group relative block h-full">
       <div
         aria-hidden
         className="absolute -inset-0.5 rounded-[24px] opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-60"
@@ -611,14 +636,23 @@ function PiLinkCard() {
 
         <div className="relative mt-2 text-[12px] font-semibold text-white/70">Supply &amp; Installation invoice</div>
 
-        <div className="relative mt-auto pt-3">
-          <span className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-white text-[13.5px] font-extrabold text-[#0069b3] shadow-md transition-all duration-200 group-hover:-translate-y-0.5">
-            <ReceiptText size={16} strokeWidth={2.4} /> Open PI
+        <div className="relative mt-auto grid grid-cols-2 gap-2 pt-3">
+          <Link
+            href={"/quotation/pi" as Route}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-white/40 bg-white/15 text-[13.5px] font-extrabold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/25 active:translate-y-0"
+          >
+            <FilePlus2 size={16} strokeWidth={2.4} /> Form
+          </Link>
+          <Link
+            href={"/quotation/pi/register" as Route}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-white text-[13.5px] font-extrabold text-[#0069b3] shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+          >
+            <Table2 size={16} strokeWidth={2.4} /> Register
             <ArrowRight size={14} strokeWidth={2.6} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-          </span>
+          </Link>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
