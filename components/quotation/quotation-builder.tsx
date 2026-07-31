@@ -9,6 +9,7 @@ import { saveQuotation } from "@/app/(app)/quotation/actions";
 import { DOOR_ORIENTATIONS, DOOR_CONFIGS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS, HARDWARE_UOMS, HARDWARE_MAKES } from "@/lib/sales/columns";
 import {
   DEFAULT_SUBJECT,
+  NO_INSTALL,
   newDoor,
   newHardware,
   computeDoor,
@@ -354,7 +355,9 @@ export function QuotationBuilder({
             <h3 className="mb-3 text-[12px] font-black uppercase tracking-[0.1em] text-slate-400">Grand Total</h3>
             <Row label="Door Total (Qty × Unit Price)" value={inr(totals.doorSupply)} />
             <Row label="Hardware Total" value={inr(totals.hardwareSupply)} />
-            <Row label="Installation Total" value={inr(totals.subtotalInstall)} />
+            {totals.subtotalInstall > 0 && (
+              <Row label="Installation Total" value={inr(totals.subtotalInstall)} />
+            )}
             <div className="my-2.5 h-px bg-slate-100" />
             <Row label="Sub Total" value={inr(totals.subtotal)} />
             <Row label="CGST @ 9%" value={inr2(totals.cgst)} muted />
@@ -582,9 +585,12 @@ function DoorCard({
               }}
             >
               <option value="">Select…</option>
-              {door.installScope && !installationOptions.some((o) => o.scope === door.installScope) && (
-                <option value={door.installScope}>{door.installScope}</option>
-              )}
+              <option value={NO_INSTALL}>No installation</option>
+              {door.installScope &&
+                door.installScope !== NO_INSTALL &&
+                !installationOptions.some((o) => o.scope === door.installScope) && (
+                  <option value={door.installScope}>{door.installScope}</option>
+                )}
               {installationOptions.map((o) => (
                 <option key={o.scope} value={o.scope}>{o.scope} — {inr(o.rate)}</option>
               ))}
@@ -849,8 +855,14 @@ function DoorCard({
           <div className="divide-y divide-slate-100">
             <SummaryRow label="Total Hardware Cost" value={inr(c.hardwareTotal)} />
             <SummaryRow label="Total Doorset Price" value={inr(c.doorHw)} />
-            <SummaryRow label={`Installation${door.installScope ? ` — ${door.installScope}` : ""}`} value={inr(c.installPerDoor)} />
-            <SummaryRow label="Total Door Price with Installation" value={inr(c.doorHw + c.installPerDoor)} strong />
+            {door.installScope !== NO_INSTALL && (
+              <SummaryRow label={`Installation${door.installScope ? ` — ${door.installScope}` : ""}`} value={inr(c.installPerDoor)} />
+            )}
+            <SummaryRow
+              label={door.installScope === NO_INSTALL ? "Total Door Price" : "Total Door Price with Installation"}
+              value={inr(c.doorHw + c.installPerDoor)}
+              strong
+            />
           </div>
         </div>
       </div>
