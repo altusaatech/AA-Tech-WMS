@@ -184,10 +184,6 @@ export function resolveHwModel(name: string, model: string, width: number): stri
   return /kick\s*plate/i.test(name || "") ? kickPlateModel(model, width) : model;
 }
 
-/** Installation scope sentinel: the door explicitly has NO installation, so it
- *  is left out of every total and print (no legacy ₹/sq.m fallback applies). */
-export const NO_INSTALL = "No installation";
-
 export function computeDoor(d: DoorLine): DoorCompute {
   const area = (n(d.width) / 1000) * (n(d.height) / 1000);
   const perimeter = framePerimeter(d);
@@ -198,11 +194,9 @@ export function computeDoor(d: DoorLine): DoorCompute {
   const totalSupply = doorHw * qty;
   // Installation is a flat per-door charge chosen from the Installation master
   // (by building height). Older quotes without a chosen rate fall back to the
-  // legacy area × ₹/sq.m figure. "No installation" removes the charge entirely
-  // — no rate, no legacy fallback — so it drops out of every total and print.
+  // legacy area × ₹/sq.m figure.
   const installRate = n(d.installRate ?? 0);
-  const installPerDoor =
-    d.installScope === NO_INSTALL ? 0 : installRate > 0 ? installRate : area * n(d.installPerSqm);
+  const installPerDoor = installRate > 0 ? installRate : area * n(d.installPerSqm);
   const installTotal = installPerDoor * qty;
   return { area, perimeter, basicSupply, hardwareTotal, doorHw, totalSupply, installPerDoor, installTotal, lineTotal: totalSupply + installTotal };
 }

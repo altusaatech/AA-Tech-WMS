@@ -56,9 +56,10 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Quotations, BOMs, PI & the production floor.",
     href: "/sales" as Route,
     icon: Database,
-    logo: "/portal/pre-production.png",
+    logo: "/portal/masters.png",
     from: "#63b81e",
     to: "#4a9616",
+    spin: true,
   },
   {
     key: "dashboards",
@@ -96,7 +97,6 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Guides, walkthroughs, photos & videos for the WMS.",
     href: "/user-manual" as Route,
     icon: BookOpen,
-    logo: "/portal/user-manual.png",
     from: "#38a9e5",
     to: "#0180cf",
   },
@@ -224,46 +224,41 @@ export function PortalLauncher({
 
 function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
   const Icon = ws.icon;
-  // If a logo PNG is missing/broken, fall back to the Lucide icon instead of a
-  // broken-image glyph.
-  const [logoBroken, setLogoBroken] = React.useState(false);
-  const showLogo = ws.logo && !logoBroken;
 
   const inner = (
     <div
-      className="group relative flex h-full items-center gap-4 overflow-hidden rounded-[20px] border p-4 shadow-sm transition-all duration-200 group-hover:shadow-lg max-sm:flex-col max-sm:items-start max-sm:gap-3"
+      className="group relative flex h-full items-center gap-4 overflow-hidden rounded-[20px] p-4 shadow-lg transition-all duration-200 max-sm:flex-col max-sm:items-start max-sm:gap-3"
       style={{
-        background: `linear-gradient(150deg, #ffffff, color-mix(in srgb, ${ws.from} 7%, #ffffff))`,
-        borderColor: `color-mix(in srgb, ${ws.from} 24%, #e2e8f0)`,
-        boxShadow: `0 12px 26px -20px ${ws.to}66`,
+        background: `linear-gradient(145deg, ${ws.from}, ${ws.to})`,
+        boxShadow: `0 18px 38px -22px ${ws.to}cc`,
       }}
     >
-      {/* colour rail down the left edge — keeps each card's identity */}
-      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1" style={{ background: `linear-gradient(180deg, ${ws.from}, ${ws.to})` }} />
+      {/* subtle sheen */}
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 42%)" }} />
 
-      {/* LEFT — logo on a white panel (PNGs aren't transparent) or a tinted icon badge */}
-      {showLogo ? (
-        <span className="relative inline-flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-sm ring-1 transition-transform group-hover:scale-[1.04] max-sm:size-12" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${ws.from} 20%, transparent)` }}>
-          <img src={ws.logo} alt="" onError={() => setLogoBroken(true)} className="h-full w-full object-contain" style={ws.spin ? { animation: "spin 6s linear infinite", transformOrigin: "50% 50%" } : undefined} />
+      {/* LEFT — clear logo on a white panel (the PNGs aren't transparent) */}
+      {ws.logo ? (
+        <span className="relative inline-flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-lg ring-1 ring-white/50 transition-transform group-hover:scale-[1.04] max-sm:size-12">
+          <img src={ws.logo} alt="" className="h-full w-full object-contain" style={ws.spin ? { animation: "spin 6s linear infinite", transformOrigin: "50% 50%" } : undefined} />
         </span>
       ) : (
-        <span className="relative inline-flex size-14 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-[1.04] max-sm:size-12" style={{ background: `color-mix(in srgb, ${ws.from} 14%, #ffffff)`, color: ws.to, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${ws.from} 26%, transparent)` }}>
+        <span className="relative inline-flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm max-sm:size-12">
           <Icon size={24} strokeWidth={2.2} />
         </span>
       )}
 
       {/* RIGHT — title, description, actions */}
       <div className="relative flex min-w-0 flex-1 flex-col">
-        <h2 className="text-[18px] font-black leading-none tracking-[-0.01em]" style={{ color: ws.to }}>{ws.title}</h2>
-        <p className="mt-1 line-clamp-2 text-[12px] font-medium leading-snug text-slate-600">{ws.desc}</p>
+        <h2 className="text-[18px] font-black leading-none tracking-[-0.01em] text-white">{ws.title}</h2>
+        <p className="mt-1 line-clamp-2 text-[12px] font-medium leading-snug text-white/85">{ws.desc}</p>
 
         <div className="mt-2.5">
           {locked ? (
-            <span className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-slate-100 px-3 text-[12.5px] font-bold text-slate-500 ring-1 ring-slate-200">
+            <span className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-black/20 px-3 text-[12.5px] font-bold text-white/80 ring-1 ring-white/15">
               <Lock size={12} strokeWidth={2.5} /> No access
             </span>
           ) : (
-            <span className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3.5 text-[12.5px] font-extrabold text-white shadow-sm transition-transform group-hover:translate-x-0.5" style={{ background: `linear-gradient(135deg, ${ws.from}, ${ws.to})` }}>
+            <span className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white px-3.5 text-[12.5px] font-extrabold shadow-sm transition-transform group-hover:translate-x-0.5" style={{ color: ws.to }}>
               Enter workspace
               <ArrowRight size={14} strokeWidth={2.7} />
             </span>
