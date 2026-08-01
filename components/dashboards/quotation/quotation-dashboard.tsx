@@ -261,8 +261,8 @@ function GroupedColumns({ data, onSelect }: { data: GBucket[]; onSelect: (b: GBu
       <div className="relative">
         {hi != null && (
           <div className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-center shadow-lg" style={{ left: `${((hi + 0.5) / data.length) * 100}%` }}>
-            <div className="text-[11px] font-black text-slate-700">{data[hi]!.label} {/* year label omitted */}</div>
-            <div className="text-[11px] font-bold tabular-nums"><span className="text-[#0a7d8a]">{data[hi]!.enquiries} enq</span> · <span className="text-[#3f7a14]">{data[hi]!.quotes} quotes</span></div>
+            <div className="text-[11px] font-black text-slate-700">{data[hi]!.label}</div>
+            <div className="text-[11px] font-bold tabular-nums"><span className="text-[#0a7d8a]">{data[hi]!.enquiries} enq</span> · <span className="text-[#3f7a14]">{data[hi]!.quotes} quotes</span> · <span className="text-[#0069b3]">{compactInr(data[hi]!.rows.reduce((s, r) => s + r.value, 0))}</span></div>
           </div>
         )}
         <div className="flex h-52 items-end gap-2 pt-8">
