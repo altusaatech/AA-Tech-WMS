@@ -59,7 +59,8 @@ function PresetTermsField({ value, onChange, options }: { value: string; onChang
   }
   return (
     <select
-      className={inp}
+      className={`${inp} truncate pr-7`}
+      title={value || undefined}
       value={value}
       onChange={(e) => {
         if (e.target.value === "__manual__") { onChange(""); setManual(true); }
