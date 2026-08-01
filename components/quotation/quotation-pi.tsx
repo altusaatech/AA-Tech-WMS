@@ -290,6 +290,10 @@ function PiPrint({
 }) {
   const num = (v: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(v) ? v : 0));
   const c = "border border-slate-500 px-1 py-1 align-top break-words";
+  // Supply-only PIs (no installation on any door) print in the "Supply" format:
+  // no Installation column, "Supply" title/band — matching the paper original.
+  const hasInstall = lines.some((d) => computePiLine(d).install > 0);
+  const cols = hasInstall ? 11 : 10;
   return (
     <div className="q-print hidden bg-white text-slate-900 print:block" style={{ fontSize: 7.5, maxWidth: "100%", margin: "0 auto" }}>
       {/* company header */}
@@ -297,7 +301,7 @@ function PiPrint({
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <img src="/logo-mark.png?v=3" alt="" style={{ height: 50, width: "auto" }} />
           <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.06, color: "#0a0a0a" }}>
-            Anant Avinya<br />Technologies
+            Anant Avinya<br />Technologies LLP
           </div>
         </div>
         <div style={{ textAlign: "right", fontSize: 8, color: "#334155", lineHeight: 1.45 }}>
@@ -311,7 +315,7 @@ function PiPrint({
 
       {/* title */}
       <div style={{ border: "1.5px solid #0069b3", background: "#eef6fc", textAlign: "center", fontWeight: 800, fontSize: 13, padding: 4, color: "#0069b3" }}>
-        PROFORMA INVOICE — Supply &amp; Installation
+        PROFORMA INVOICE — Supply{hasInstall ? " & Installation" : ""}
       </div>
 
       {/* To + reference */}
@@ -334,8 +338,8 @@ function PiPrint({
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <tbody>
                   <tr><td className={c}>Offer Ref:</td><td className={c}><b>{header.offerNo || "—"}</b></td><td className={c}>Date:</td><td className={c}>{header.quoteDate || "—"}</td></tr>
-                  <tr><td className={c}>Enquiry No:</td><td className={c}><b>{header.enquiryNo || "—"}</b></td><td className={c}>Source:</td><td className={c}>{piMeta.enquirySource || "—"}</td></tr>
-                  <tr><td className={c}>Customer Ref Date:</td><td className={c} colSpan={3}>{piMeta.customerRefDate || "—"}</td></tr>
+                  <tr><td className={c}>Customer Reference:</td><td className={c}>{piMeta.enquirySource || "—"}</td><td className={c}>Date:</td><td className={c}>{piMeta.customerRefDate || "—"}</td></tr>
+                  <tr><td className={c}>Other Reference:</td><td className={c} colSpan={3}>—</td></tr>
                 </tbody>
               </table>
             </td>
@@ -359,19 +363,22 @@ function PiPrint({
       {/* line items */}
       <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
         <colgroup>
-          {["4%", "9%", "7%", "7%", "24%", "9%", "6%", "7%", "9%", "9%", "9%"].map((w, i) => (
+          {(hasInstall
+            ? ["4%", "9%", "7%", "7%", "24%", "9%", "6%", "7%", "9%", "9%", "9%"]
+            : ["4%", "9%", "7%", "7%", "33%", "9%", "6%", "7%", "9%", "9%"]
+          ).map((w, i) => (
             <col key={i} style={{ width: w }} />
           ))}
         </colgroup>
         <thead>
           <tr style={{ background: "linear-gradient(180deg,#0180cf,#0069b3)", color: "#fff" }}>
-            {["Sr No", "Door Code", "Width (mm)", "Height (mm)", "Description", "HSN Code", "UOM", "Qty Nos", "Rate ₹", "Installation ₹", "Amount ₹"].map((h) => (
+            {["Sr. No.", "Door Code No.", "Door Width", "Door Height", "Description", "HSN Code", "UOM", "Qty in Nos.", "Rate in Rs.", ...(hasInstall ? ["Installation in Rs."] : []), "Amount in Rs."].map((h) => (
               <th key={h} className={c} style={{ textAlign: "center", fontWeight: 700, wordBreak: "break-word" }}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          <tr><td className={c} colSpan={11} style={{ fontWeight: 700, textAlign: "center", background: "#f1f7fc" }}>SUPPLY &amp; INSTALLATION OF CLEAN ROOM DOORS WITH HARDWARE</td></tr>
+          <tr><td className={c} colSpan={cols} style={{ fontWeight: 700, textAlign: "center", background: "#f1f7fc" }}>SUPPLY {hasInstall ? <>&amp; INSTALLATION </> : ""}OF CLEAN ROOM DOORS WITH HARDWARE</td></tr>
           {lines.map((d, i) => {
             const p = computePiLine(d);
             return (
@@ -385,7 +392,7 @@ function PiPrint({
                 <td className={c} style={{ textAlign: "center" }}>Nos</td>
                 <td className={c} style={{ textAlign: "center" }}>{d.qty || ""}</td>
                 <td className={c} style={{ textAlign: "right" }}>{num(p.rate)}</td>
-                <td className={c} style={{ textAlign: "right" }}>{p.install ? num(p.install) : ""}</td>
+                {hasInstall && <td className={c} style={{ textAlign: "right" }}>{p.install ? num(p.install) : ""}</td>}
                 <td className={c} style={{ textAlign: "right", fontWeight: 700 }}>{num(p.amount)}</td>
               </tr>
             );
@@ -411,6 +418,7 @@ function PiPrint({
                   <tr><td className={c} colSpan={2}><b>Subtotal</b></td><td className={c} style={{ textAlign: "right", fontWeight: 700 }}>{num(totals.subtotal)}</td></tr>
                   <tr><td className={c} colSpan={2}>CGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.cgst)}</td></tr>
                   <tr><td className={c} colSpan={2}>SGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.sgst)}</td></tr>
+                  {piMeta.freightNote && <tr><td className={c} colSpan={2}>Freight</td><td className={c} style={{ textAlign: "right", fontSize: 7 }}>{piMeta.freightNote}</td></tr>}
                   <tr style={{ background: "linear-gradient(90deg,#0069b3,#63b81e)" }}><td className={c} colSpan={2} style={{ color: "#fff", fontWeight: 800 }}>Grand Total</td><td className={c} style={{ textAlign: "right", color: "#fff", fontWeight: 800 }}>{num(totals.grandTotal)}</td></tr>
                 </tbody>
               </table>

@@ -280,10 +280,10 @@ export const DEFAULT_PI_META: PiMeta = {
 
 /** Company / seller details on the Proforma Invoice (edit here if they change). */
 export const COMPANY = {
-  name: "Anant Avinya Technologies",
+  name: "Anant Avinya Technologies LLP",
   address: ["A-299, S Central Road, MIDC Industrial Area,", "Near Antony Motors, Mahape,", "Navi Mumbai 400701, India"],
-  email: "sales@aatech.co.in",
-  web: "www.aatech.co.in",
+  email: "sales@sfpl.co.in",
+  web: "www.sfpl.co.in",
   gstNo: "27ACEFA9263B1ZJ",
   panNo: "ACEFA9263B",
   bank: { name: "HDFC Bank Ltd, Sion (East) Branch, Mumbai", acNo: "99995544554455", ifsc: "HDFC0000163", micr: "400240030" },
