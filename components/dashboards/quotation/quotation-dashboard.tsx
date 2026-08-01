@@ -104,14 +104,22 @@ export function QuotationDashboard({ rows }: { rows: QuoteRow[] }) {
         </span>
       </div>
 
-      {/* ── KPI section: count + value pairs ── */}
+      {/* ── KPI section: counts row, then separate value KPIs below ── */}
       <div className="grid grid-cols-6 gap-3.5 max-xl:grid-cols-3 max-md:grid-cols-2">
-        <KpiCombo label="Enquiries Received" count={k.total} subLabel="Enquiry Value" subValue={compactInr(k.enqValue)} Icon={Inbox} from="#2a78d6" to="#185fa5" onClick={() => setModal({ title: "Enquiries Received", rows: filtered })} />
-        <KpiCombo label="Quotes Sent" count={k.sent} subLabel="Quotes Sent Value" subValue={compactInr(k.sentValue)} Icon={Send} from="#0a7d8a" to="#0069b3" onClick={() => setModal({ title: "Quotes Sent", rows: k.sentRows })} />
-        <KpiCombo label="Quotes Won" count={k.won} subLabel="Quotes Won Value" subValue={compactInr(k.wonValue)} Icon={Trophy} from="#63b81e" to="#4a9616" onClick={() => setModal({ title: "Quotes Won", rows: k.wonRows })} />
-        <KpiCombo label="Quotes Lost" count={k.lost} subLabel="Quotes Lost Value" subValue={compactInr(k.lostValue)} Icon={XCircle} from="#f59e0b" to="#d97706" onClick={() => setModal({ title: "Quotes Lost", rows: k.lostRows })} />
-        <KpiCombo label="Pending Quotes" count={k.pending} subLabel="Avg Quote Value" subValue={compactInr(k.avgValue)} Icon={Clock3} from="#7c3aed" to="#6d28d9" onClick={() => setModal({ title: "Pending Quotes", rows: k.pendingRows })} />
-        <KpiCombo label="Conversion" count={`${k.conv}%`} subLabel={`${k.won} of ${k.total} won`} Icon={Percent} from="#0069b3" to="#0180cf" />
+        <KpiCombo label="Enquiries Received" count={k.total} Icon={Inbox} from="#2a78d6" to="#185fa5" onClick={() => setModal({ title: "Enquiries Received", rows: filtered })} />
+        <KpiCombo label="Quotes Sent" count={k.sent} Icon={Send} from="#0a7d8a" to="#0069b3" onClick={() => setModal({ title: "Quotes Sent", rows: k.sentRows })} />
+        <KpiCombo label="Quotes Won" count={k.won} Icon={Trophy} from="#63b81e" to="#4a9616" onClick={() => setModal({ title: "Quotes Won", rows: k.wonRows })} />
+        <KpiCombo label="Quotes Lost" count={k.lost} Icon={XCircle} from="#f59e0b" to="#d97706" onClick={() => setModal({ title: "Quotes Lost", rows: k.lostRows })} />
+        <KpiCombo label="Pending Quotes" count={k.pending} Icon={Clock3} from="#7c3aed" to="#6d28d9" onClick={() => setModal({ title: "Pending Quotes", rows: k.pendingRows })} />
+        <KpiCombo label="Conversion" count={`${k.conv}%`} Icon={Percent} from="#0069b3" to="#0180cf" />
+      </div>
+      <div className="grid grid-cols-6 gap-3.5 max-xl:grid-cols-3 max-md:grid-cols-2">
+        <KpiCombo label="Enquiry Value" count={compactInr(k.enqValue)} Icon={IndianRupee} from="#2a78d6" to="#185fa5" onClick={() => setModal({ title: "Enquiries Received", rows: filtered })} />
+        <KpiCombo label="Quotes Sent Value" count={compactInr(k.sentValue)} Icon={IndianRupee} from="#0a7d8a" to="#0069b3" onClick={() => setModal({ title: "Quotes Sent", rows: k.sentRows })} />
+        <KpiCombo label="Quotes Won Value" count={compactInr(k.wonValue)} Icon={IndianRupee} from="#63b81e" to="#4a9616" onClick={() => setModal({ title: "Quotes Won", rows: k.wonRows })} />
+        <KpiCombo label="Quotes Lost Value" count={compactInr(k.lostValue)} Icon={IndianRupee} from="#f59e0b" to="#d97706" onClick={() => setModal({ title: "Quotes Lost", rows: k.lostRows })} />
+        <KpiCombo label="Avg Quote Value" count={compactInr(k.avgValue)} Icon={TrendingUp} from="#7c3aed" to="#6d28d9" />
+        <KpiCombo label="Won of Total" count={`${k.won} / ${k.total}`} Icon={Trophy} from="#0069b3" to="#0180cf" onClick={() => setModal({ title: "Quotes Won", rows: k.wonRows })} />
       </div>
 
       {/* ── status pie + monthly trend ── */}
@@ -156,9 +164,9 @@ export function QuotationDashboard({ rows }: { rows: QuoteRow[] }) {
   );
 }
 
-/* ── KPI combo card (count + value) ── */
+/* ── KPI card (big count/value, optional sub-line) ── */
 function KpiCombo({ label, count, subLabel, subValue, Icon, from, to, onClick }: {
-  label: string; count: number | string; subLabel: string; subValue?: string; Icon: typeof Inbox; from: string; to: string; onClick?: () => void;
+  label: string; count: number | string; subLabel?: string; subValue?: string; Icon: typeof Inbox; from: string; to: string; onClick?: () => void;
 }) {
   return (
     <div onClick={onClick} className={`group relative overflow-hidden rounded-[20px] border border-slate-200/80 bg-gradient-to-br from-white to-[#f6fafd] p-4 shadow-[0_14px_34px_-24px_rgba(1,128,207,0.4)] transition-all duration-300 hover:-translate-y-1 ${onClick ? "cursor-pointer" : ""}`}>
@@ -171,10 +179,12 @@ function KpiCombo({ label, count, subLabel, subValue, Icon, from, to, onClick }:
         <span className="min-w-0 truncate text-[11px] font-black uppercase tracking-[0.04em] text-slate-400">{label}</span>
       </div>
       <div className="mt-2 tabular-nums text-slate-900" style={{ fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 900, fontSize: "clamp(24px, 2.6vw, 32px)", lineHeight: 1 }}>{count}</div>
-      <div className="mt-2 flex items-center justify-between gap-1 border-t border-slate-100 pt-2">
-        <span className="truncate text-[10.5px] font-bold uppercase tracking-[0.03em] text-slate-400">{subLabel}</span>
-        {subValue && <span className="shrink-0 text-[13px] font-black tabular-nums text-[#0069b3]">{subValue}</span>}
-      </div>
+      {subLabel && (
+        <div className="mt-2 flex items-center justify-between gap-1 border-t border-slate-100 pt-2">
+          <span className="truncate text-[10.5px] font-bold uppercase tracking-[0.03em] text-slate-400">{subLabel}</span>
+          {subValue && <span className="shrink-0 text-[13px] font-black tabular-nums text-[#0069b3]">{subValue}</span>}
+        </div>
+      )}
     </div>
   );
 }
