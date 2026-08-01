@@ -172,14 +172,24 @@
   /* keep the AA Tech brand colours/gradients when printing */
   .q-print, .q-print * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
+  /* Print on clean white. The screen theme's body wash would otherwise paint
+     on every sheet, and body's min-height:100dvh (taller than the printable
+     area once @page margins are subtracted) forces a blank trailing page. */
+  html, body {
+    min-height: 0 !important;
+    background: #fff !important;
+  }
+
   /* Only the rotated quotation needs overflow containment — its wide layout box
      would otherwise spill onto a blank page. The PI prints normally (and may
-     flow to multiple pages) so it is NOT clipped. */
+     flow to multiple pages) so it is NOT clipped. Height is capped just under
+     one printable page (297 − 2×8mm margins = 281mm) so hidden-but-laid-out
+     screen chrome can never generate a second sheet. */
   html:has(.q-print-landscape),
   body:has(.q-print-landscape) {
     margin: 0 !important;
     padding: 0 !important;
-    height: auto !important;
+    height: 280mm !important;
     overflow: hidden !important;
   }
 
