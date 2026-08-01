@@ -184,6 +184,11 @@ export function resolveHwModel(name: string, model: string, width: number): stri
   return /kick\s*plate/i.test(name || "") ? kickPlateModel(model, width) : model;
 }
 
+/** "No installation" selected — installation is excluded from price & print. */
+export function isNoInstall(scope?: string | null): boolean {
+  return /^no install/i.test((scope ?? "").trim());
+}
+
 export function computeDoor(d: DoorLine): DoorCompute {
   const area = (n(d.width) / 1000) * (n(d.height) / 1000);
   const perimeter = framePerimeter(d);
@@ -197,7 +202,7 @@ export function computeDoor(d: DoorLine): DoorCompute {
   // legacy area × ₹/sq.m figure.
   // "No installation" explicitly excludes installation from the price (0), so it
   // never falls back to the legacy area × ₹/sq.m figure.
-  const noInstall = /^no install/i.test((d.installScope ?? "").trim());
+  const noInstall = isNoInstall(d.installScope);
   const installRate = n(d.installRate ?? 0);
   const installPerDoor = noInstall ? 0 : installRate > 0 ? installRate : area * n(d.installPerSqm);
   const installTotal = installPerDoor * qty;

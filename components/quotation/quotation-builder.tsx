@@ -13,6 +13,7 @@ import {
   newHardware,
   computeDoor,
   computeTotals,
+  isNoInstall,
   hardwareQty,
   resolveHwModel,
   kickPlateModel,
@@ -354,7 +355,9 @@ export function QuotationBuilder({
             <h3 className="mb-3 text-[12px] font-black uppercase tracking-[0.1em] text-slate-400">Grand Total</h3>
             <Row label="Door Total (Qty × Unit Price)" value={inr(totals.doorSupply)} />
             <Row label="Hardware Total" value={inr(totals.hardwareSupply)} />
-            <Row label="Installation Total" value={inr(totals.subtotalInstall)} />
+            {!(lines.length > 0 && lines.every((d) => isNoInstall(d.installScope))) && (
+              <Row label="Installation Total" value={inr(totals.subtotalInstall)} />
+            )}
             <div className="my-2.5 h-px bg-slate-100" />
             <Row label="Sub Total" value={inr(totals.subtotal)} />
             <Row label="CGST @ 9%" value={inr2(totals.cgst)} muted />
@@ -850,8 +853,14 @@ function DoorCard({
           <div className="divide-y divide-slate-100">
             <SummaryRow label="Total Hardware Cost" value={inr(c.hardwareTotal)} />
             <SummaryRow label="Total Doorset Price" value={inr(c.doorHw)} />
-            <SummaryRow label={`Installation${door.installScope ? ` — ${door.installScope}` : ""}`} value={inr(c.installPerDoor)} />
-            <SummaryRow label="Total Door Price with Installation" value={inr(c.doorHw + c.installPerDoor)} strong />
+            {isNoInstall(door.installScope) ? (
+              <SummaryRow label="Total Door Price" value={inr(c.doorHw)} strong />
+            ) : (
+              <>
+                <SummaryRow label={`Installation${door.installScope ? ` — ${door.installScope}` : ""}`} value={inr(c.installPerDoor)} />
+                <SummaryRow label="Total Door Price with Installation" value={inr(c.doorHw + c.installPerDoor)} strong />
+              </>
+            )}
           </div>
         </div>
       </div>
