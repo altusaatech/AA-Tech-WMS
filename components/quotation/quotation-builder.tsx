@@ -355,9 +355,10 @@ export function QuotationBuilder({
             <h3 className="mb-3 text-[12px] font-black uppercase tracking-[0.1em] text-slate-400">Grand Total</h3>
             <Row label="Door Total (Qty × Unit Price)" value={inr(totals.doorSupply)} />
             <Row label="Hardware Total" value={inr(totals.hardwareSupply)} />
-            {!(lines.length > 0 && lines.every((d) => isNoInstall(d.installScope))) && (
-              <Row label="Installation Total" value={inr(totals.subtotalInstall)} />
-            )}
+            <Row
+              label="Installation Total"
+              value={lines.length > 0 && lines.every((d) => isNoInstall(d.installScope)) ? "No" : inr(totals.subtotalInstall)}
+            />
             <div className="my-2.5 h-px bg-slate-100" />
             <Row label="Sub Total" value={inr(totals.subtotal)} />
             <Row label="CGST @ 9%" value={inr2(totals.cgst)} muted />
