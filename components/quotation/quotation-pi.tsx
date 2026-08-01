@@ -31,11 +31,17 @@ function L({ label, children }: { label: string; children: React.ReactNode }) {
 }
 
 const DELIVERY_TERMS = ["1 month", "2 months", "3-4 months", "4-5 months", "5-6 months"];
+const PAYMENT_TERMS = [
+  "100% Advance against Purchase Order.",
+  "60% Advance against Purchase Order, 40% against prior to dispatch.",
+  "50% Advance against Purchase Order, 50% against prior to dispatch.",
+  "30% Advance against Purchase Order, 70% against prior to dispatch.",
+];
 
-/** Terms of Delivery — preset dropdown with a "write manually" free-text mode. */
-function DeliveryTermsField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+/** Preset dropdown with a "write manually" free-text mode (delivery/payment terms). */
+function PresetTermsField({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
   // A saved value outside the presets (older PIs, custom terms) opens in manual mode.
-  const [manual, setManual] = React.useState(() => !!value && !DELIVERY_TERMS.includes(value));
+  const [manual, setManual] = React.useState(() => !!value && !options.includes(value));
   if (manual) {
     return (
       <div className="flex items-center gap-1.5">
@@ -61,7 +67,7 @@ function DeliveryTermsField({ value, onChange }: { value: string; onChange: (v: 
       }}
     >
       <option value="">Select…</option>
-      {DELIVERY_TERMS.map((t) => <option key={t} value={t}>{t}</option>)}
+      {options.map((t) => <option key={t} value={t}>{t}</option>)}
       <option value="__manual__">Write manually…</option>
     </select>
   );
@@ -191,9 +197,9 @@ export function QuotationPi({
             <L label="Email ID"><input className={inp} value={piMeta.customerEmail} onChange={(e) => setPi("customerEmail", e.target.value)} placeholder="name@company.com" /></L>
             <L label="Customer Ref Date"><input type="date" className={inp} value={piMeta.customerRefDate} onChange={(e) => setPi("customerRefDate", e.target.value)} /></L>
             <L label="HSN Code"><input className={inp} value={piMeta.hsnCode} onChange={(e) => setPi("hsnCode", e.target.value)} placeholder="73083000" /></L>
-            <L label="Terms of Delivery"><DeliveryTermsField value={piMeta.termsDelivery} onChange={(v) => setPi("termsDelivery", v)} /></L>
+            <L label="Terms of Delivery"><PresetTermsField options={DELIVERY_TERMS} value={piMeta.termsDelivery} onChange={(v) => setPi("termsDelivery", v)} /></L>
             <L label="Mode of Shipping"><input className={inp} value={piMeta.modeShipping} onChange={(e) => setPi("modeShipping", e.target.value)} /></L>
-            <L label="Terms of Payment"><input className={inp} value={piMeta.termsPayment} onChange={(e) => setPi("termsPayment", e.target.value)} /></L>
+            <L label="Terms of Payment"><PresetTermsField options={PAYMENT_TERMS} value={piMeta.termsPayment} onChange={(v) => setPi("termsPayment", v)} /></L>
           </div>
         </div>
 
