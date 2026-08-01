@@ -855,7 +855,7 @@ function DoorCard({
             <SummaryRow label="Total Hardware Cost" value={inr(c.hardwareTotal)} />
             <SummaryRow label="Total Doorset Price" value={inr(c.doorHw)} />
             {isNoInstall(door.installScope) ? (
-              <SummaryRow label="Total Door Price" value={inr(c.doorHw)} strong />
+              <SummaryRow label="Total Door Price (No Installation)" value={inr(c.doorHw)} strong />
             ) : (
               <>
                 <SummaryRow label={`Installation${door.installScope ? ` — ${door.installScope}` : ""}`} value={inr(c.installPerDoor)} />
