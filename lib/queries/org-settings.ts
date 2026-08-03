@@ -2,6 +2,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { orgSettings, type OrgSettings } from "@/db/schema";
+import { withDbRetry } from "@/lib/db/retry";
 
 /**
  * The single-row `org_settings` table has `id = 1` as the only valid row.
@@ -43,10 +44,15 @@ const DEFAULTS: OrgSettings = {
 };
 
 export async function getOrgSettings(): Promise<OrgSettings> {
-  const [row] = await db
-    .select()
-    .from(orgSettings)
-    .where(eq(orgSettings.id, 1))
-    .limit(1);
-  return row ?? DEFAULTS;
+  // Runs in the (app) layout on every authed page. Retry transient DB blips,
+  // and FAIL OPEN to the seed defaults rather than error the whole page —
+  // these settings are cosmetic/workflow, never a security boundary.
+  try {
+    const [row] = await withDbRetry(() =>
+      db.select().from(orgSettings).where(eq(orgSettings.id, 1)).limit(1),
+    );
+    return row ?? DEFAULTS;
+  } catch {
+    return DEFAULTS;
+  }
 }
