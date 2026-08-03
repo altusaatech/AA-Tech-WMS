@@ -12,14 +12,24 @@ export default async function QuotationListPage() {
   const rows = await db.select().from(quotations).orderBy(desc(quotations.createdAt));
   const quotes: QuoteSummary[] = rows.map((r) => {
     const lines = (r.lines ?? []) as DoorLine[];
+    const t = computeTotals(lines);
     return {
       id: r.id,
+      enquiryNo: r.enquiryNo ?? "",
       offerNo: r.offerNo ?? "",
       project: r.project ?? "",
       customer: r.customer ?? "",
+      subject: r.subject ?? "",
       quoteDate: r.quoteDate ?? "",
       doors: lines.length,
-      grandTotal: computeTotals(lines).grandTotal,
+      qty: lines.reduce((s, d) => s + (Number(d.qty) || 0), 0),
+      doorTotal: t.doorSupply,
+      hardwareTotal: t.hardwareSupply,
+      installTotal: t.subtotalInstall,
+      subtotal: t.subtotal,
+      cgst: t.cgst,
+      sgst: t.sgst,
+      grandTotal: t.grandTotal,
     };
   });
   return <QuotationList quotes={quotes} />;

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
-import { Receipt, Plus, FileText, Trash2, ArrowRight, Loader2, FolderOpen } from "lucide-react";
+import { Receipt, Plus, Trash2, Loader2, FolderOpen } from "lucide-react";
 import { PageHero } from "@/components/layout/page-hero";
 import { fireToast } from "@/lib/toast";
 import { createQuotation, deleteQuotation } from "@/app/(app)/quotation/actions";
@@ -11,13 +11,25 @@ import { inr } from "@/lib/quotation/types";
 
 export interface QuoteSummary {
   id: string;
+  enquiryNo: string;
   offerNo: string;
   project: string;
   customer: string;
+  subject: string;
   quoteDate: string;
   doors: number;
+  qty: number;
+  doorTotal: number;
+  hardwareTotal: number;
+  installTotal: number;
+  subtotal: number;
+  cgst: number;
+  sgst: number;
   grandTotal: number;
 }
+
+const th = "whitespace-nowrap px-3 py-3";
+const td = "whitespace-nowrap border-b border-[#e7eff6] px-3 py-2.5";
 
 export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
   const router = useRouter();
@@ -72,16 +84,25 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
             <p className="mt-1 text-[13.5px] text-slate-500">Click “Working Specification” to build your first one.</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-card premium-card">
-            <table className="w-full text-[13.5px]">
+          <div className="overflow-x-auto rounded-2xl border border-hairline bg-surface-card premium-card">
+            <table className="w-full min-w-[1500px] text-[12.5px]">
               <thead>
-                <tr className="text-left text-[11px] font-extrabold uppercase tracking-[0.05em] text-white" style={{ background: "linear-gradient(180deg, #0069b3, #00598f)" }}>
-                  <th className="px-5 py-3">Offer No</th>
-                  <th className="px-5 py-3">Project</th>
-                  <th className="px-5 py-3">Customer</th>
-                  <th className="px-5 py-3">Date</th>
-                  <th className="px-5 py-3 text-center">Doors</th>
-                  <th className="px-5 py-3 text-right">Grand Total</th>
+                <tr className="text-left text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-white" style={{ background: "linear-gradient(180deg, #0069b3, #00598f)" }}>
+                  <th className={th}>Enquiry No</th>
+                  <th className={th}>Offer No</th>
+                  <th className={th}>Date</th>
+                  <th className={th}>Customer</th>
+                  <th className={th}>Project</th>
+                  <th className={th}>Subject</th>
+                  <th className={`${th} text-center`}>Doors</th>
+                  <th className={`${th} text-center`}>Total Qty</th>
+                  <th className={`${th} text-right`}>Door Total</th>
+                  <th className={`${th} text-right`}>Hardware Total</th>
+                  <th className={`${th} text-right`}>Installation</th>
+                  <th className={`${th} text-right`}>Sub Total</th>
+                  <th className={`${th} text-right`}>CGST 9%</th>
+                  <th className={`${th} text-right`}>SGST 9%</th>
+                  <th className={`${th} text-right`}>Grand Total</th>
                   <th className="px-3 py-3" />
                 </tr>
               </thead>
@@ -92,13 +113,22 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
                     onClick={() => router.push(`/quotation/${q.id}` as Route)}
                     className={`group cursor-pointer transition-colors hover:bg-[#e4f2fc] ${i % 2 ? "bg-[#f5fafe]" : "bg-white"}`}
                   >
-                    <td className="border-b border-[#e7eff6] px-5 py-3 font-black text-slate-800">{q.offerNo || "—"}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 text-slate-600">{q.project || "—"}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 text-slate-600">{q.customer || "—"}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 tabular-nums text-slate-600">{q.quoteDate || "—"}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 text-center tabular-nums font-bold text-slate-700">{q.doors}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 text-right tabular-nums font-black text-[#0069b3]">{inr(q.grandTotal)}</td>
-                    <td className="border-b border-[#e7eff6] px-3 py-3">
+                    <td className={`${td} font-bold text-slate-700`}>{q.enquiryNo || "—"}</td>
+                    <td className={`${td} font-black text-slate-800`}>{q.offerNo || "—"}</td>
+                    <td className={`${td} tabular-nums text-slate-600`}>{q.quoteDate || "—"}</td>
+                    <td className={`${td} max-w-[180px] truncate text-slate-600`} title={q.customer}>{q.customer || "—"}</td>
+                    <td className={`${td} max-w-[160px] truncate text-slate-600`} title={q.project}>{q.project || "—"}</td>
+                    <td className={`${td} max-w-[200px] truncate text-slate-500`} title={q.subject}>{q.subject || "—"}</td>
+                    <td className={`${td} text-center tabular-nums font-bold text-slate-700`}>{q.doors}</td>
+                    <td className={`${td} text-center tabular-nums font-bold text-slate-700`}>{q.qty}</td>
+                    <td className={`${td} text-right tabular-nums text-slate-600`}>{inr(q.doorTotal)}</td>
+                    <td className={`${td} text-right tabular-nums text-slate-600`}>{inr(q.hardwareTotal)}</td>
+                    <td className={`${td} text-right tabular-nums text-slate-600`}>{q.installTotal ? inr(q.installTotal) : "No"}</td>
+                    <td className={`${td} text-right tabular-nums font-semibold text-slate-700`}>{inr(q.subtotal)}</td>
+                    <td className={`${td} text-right tabular-nums text-slate-500`}>{inr(q.cgst)}</td>
+                    <td className={`${td} text-right tabular-nums text-slate-500`}>{inr(q.sgst)}</td>
+                    <td className={`${td} text-right tabular-nums font-black text-[#0069b3]`}>{inr(q.grandTotal)}</td>
+                    <td className="border-b border-[#e7eff6] px-3 py-2.5">
                       <div className="flex items-center justify-end gap-1">
                         <button type="button" onClick={(e) => onDelete(e, q.id)} className="rounded-lg p-1.5 text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100" title="Delete">
                           <Trash2 size={14} />

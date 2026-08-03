@@ -10,15 +10,35 @@ import { inr } from "@/lib/quotation/types";
 
 export interface PiSummary {
   id: string;
+  enquiryNo: string;
   offerNo: string;
   project: string;
   customer: string;
   quoteDate: string;
+  enquirySource: string;
+  customerAddress: string;
+  billingAddress: string;
+  deliveryAddress: string;
+  customerGst: string;
+  contactPerson: string;
+  mobile: string;
+  email: string;
+  customerRefDate: string;
+  hsnCode: string;
+  termsDelivery: string;
+  modeShipping: string;
+  termsPayment: string;
   qty: number;
+  subtotal: number;
+  cgst: number;
+  sgst: number;
   grandTotal: number;
 }
 
-/** Register of Proforma Invoices — one row per quotation, opening its PI. */
+const th = "whitespace-nowrap px-3 py-3";
+const td = "whitespace-nowrap border-b border-[#e7eff6] px-3 py-2.5";
+
+/** Register of Proforma Invoices — every PI field, one row per quotation. */
 export function PiRegister({ pis }: { pis: PiSummary[] }) {
   const router = useRouter();
 
@@ -52,16 +72,33 @@ export function PiRegister({ pis }: { pis: PiSummary[] }) {
             <p className="mt-1 text-[13.5px] text-slate-500">Build a working specification first, then open its PI.</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-card premium-card">
-            <table className="w-full text-[13.5px]">
+          <div className="overflow-x-auto rounded-2xl border border-hairline bg-surface-card premium-card">
+            <table className="w-full min-w-[2300px] text-[12.5px]">
               <thead>
-                <tr className="text-left text-[11px] font-extrabold uppercase tracking-[0.05em] text-white" style={{ background: "linear-gradient(180deg, #0069b3, #00598f)" }}>
-                  <th className="px-5 py-3">Offer No</th>
-                  <th className="px-5 py-3">Project</th>
-                  <th className="px-5 py-3">Customer</th>
-                  <th className="px-5 py-3">Date</th>
-                  <th className="px-5 py-3 text-center">Qty</th>
-                  <th className="px-5 py-3 text-right">Grand Total</th>
+                <tr className="text-left text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-white" style={{ background: "linear-gradient(180deg, #0069b3, #00598f)" }}>
+                  <th className={th}>Enquiry No</th>
+                  <th className={th}>Offer Ref</th>
+                  <th className={th}>Date</th>
+                  <th className={th}>Customer</th>
+                  <th className={th}>Project</th>
+                  <th className={th}>Enquiry Source</th>
+                  <th className={th}>Company Address</th>
+                  <th className={th}>Billing Address</th>
+                  <th className={th}>Delivery Address</th>
+                  <th className={th}>GST No</th>
+                  <th className={th}>Contact Person</th>
+                  <th className={th}>Mobile</th>
+                  <th className={th}>Email</th>
+                  <th className={th}>Customer Ref Date</th>
+                  <th className={th}>HSN Code</th>
+                  <th className={th}>Terms of Delivery</th>
+                  <th className={th}>Mode of Shipping</th>
+                  <th className={th}>Terms of Payment</th>
+                  <th className={`${th} text-center`}>Qty</th>
+                  <th className={`${th} text-right`}>Subtotal</th>
+                  <th className={`${th} text-right`}>CGST 9%</th>
+                  <th className={`${th} text-right`}>SGST 9%</th>
+                  <th className={`${th} text-right`}>Grand Total</th>
                   <th className="px-3 py-3" />
                 </tr>
               </thead>
@@ -72,13 +109,30 @@ export function PiRegister({ pis }: { pis: PiSummary[] }) {
                     onClick={() => router.push(`/quotation/${p.id}/pi` as Route)}
                     className={`group cursor-pointer transition-colors hover:bg-[#e4f2fc] ${i % 2 ? "bg-[#f5fafe]" : "bg-white"}`}
                   >
-                    <td className="border-b border-[#e7eff6] px-5 py-3 font-black text-slate-800">{p.offerNo || "—"}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 text-slate-600">{p.project || "—"}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 text-slate-600">{p.customer || "—"}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 tabular-nums text-slate-600">{p.quoteDate || "—"}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 text-center tabular-nums font-bold text-slate-700">{p.qty}</td>
-                    <td className="border-b border-[#e7eff6] px-5 py-3 text-right tabular-nums font-black text-[#0069b3]">{inr(p.grandTotal)}</td>
-                    <td className="border-b border-[#e7eff6] px-3 py-3">
+                    <td className={`${td} font-bold text-slate-700`}>{p.enquiryNo || "—"}</td>
+                    <td className={`${td} font-black text-slate-800`}>{p.offerNo || "—"}</td>
+                    <td className={`${td} tabular-nums text-slate-600`}>{p.quoteDate || "—"}</td>
+                    <td className={`${td} max-w-[170px] truncate text-slate-600`} title={p.customer}>{p.customer || "—"}</td>
+                    <td className={`${td} max-w-[150px] truncate text-slate-600`} title={p.project}>{p.project || "—"}</td>
+                    <td className={`${td} max-w-[120px] truncate text-slate-500`} title={p.enquirySource}>{p.enquirySource || "—"}</td>
+                    <td className={`${td} max-w-[200px] truncate text-slate-500`} title={p.customerAddress}>{p.customerAddress || "—"}</td>
+                    <td className={`${td} max-w-[200px] truncate text-slate-500`} title={p.billingAddress}>{p.billingAddress || "—"}</td>
+                    <td className={`${td} max-w-[200px] truncate text-slate-500`} title={p.deliveryAddress}>{p.deliveryAddress || "—"}</td>
+                    <td className={`${td} tabular-nums text-slate-600`}>{p.customerGst || "—"}</td>
+                    <td className={`${td} max-w-[140px] truncate text-slate-600`} title={p.contactPerson}>{p.contactPerson || "—"}</td>
+                    <td className={`${td} tabular-nums text-slate-600`}>{p.mobile || "—"}</td>
+                    <td className={`${td} max-w-[180px] truncate text-slate-500`} title={p.email}>{p.email || "—"}</td>
+                    <td className={`${td} tabular-nums text-slate-600`}>{p.customerRefDate || "—"}</td>
+                    <td className={`${td} tabular-nums text-slate-600`}>{p.hsnCode || "—"}</td>
+                    <td className={`${td} max-w-[170px] truncate text-slate-500`} title={p.termsDelivery}>{p.termsDelivery || "—"}</td>
+                    <td className={`${td} max-w-[120px] truncate text-slate-500`} title={p.modeShipping}>{p.modeShipping || "—"}</td>
+                    <td className={`${td} max-w-[200px] truncate text-slate-500`} title={p.termsPayment}>{p.termsPayment || "—"}</td>
+                    <td className={`${td} text-center tabular-nums font-bold text-slate-700`}>{p.qty}</td>
+                    <td className={`${td} text-right tabular-nums font-semibold text-slate-700`}>{inr(p.subtotal)}</td>
+                    <td className={`${td} text-right tabular-nums text-slate-500`}>{inr(p.cgst)}</td>
+                    <td className={`${td} text-right tabular-nums text-slate-500`}>{inr(p.sgst)}</td>
+                    <td className={`${td} text-right tabular-nums font-black text-[#0069b3]`}>{inr(p.grandTotal)}</td>
+                    <td className="border-b border-[#e7eff6] px-3 py-2.5">
                       <div className="flex items-center justify-end gap-1">
                         <ArrowRight size={14} className="text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-[#0180cf]" />
                         <FolderOpen size={16} className="text-slate-300 transition-colors group-hover:text-[#0180cf]" />
