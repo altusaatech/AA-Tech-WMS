@@ -167,10 +167,11 @@
    (26% of the card), so 460% carries it fully off the right edge. */
 @keyframes cardSheenSweep {
   0% { transform: translateX(-130%) rotate(20deg); }
-  55%, 100% { transform: translateX(460%) rotate(20deg); }
+  38%, 100% { transform: translateX(460%) rotate(20deg); }
 }
 .card-sheen {
-  animation: cardSheenSweep 4.2s ease-in-out infinite;
+  animation: cardSheenSweep 9s ease-in-out infinite;
+  filter: blur(6px);
 }
 @media (prefers-reduced-motion: reduce) {
   .card-sheen { animation: none !important; }
