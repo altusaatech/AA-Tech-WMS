@@ -67,6 +67,7 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Sales & quotation pipeline — win rate, order book & trends.",
     href: "/dashboards" as Route,
     icon: TrendingUp,
+    logo: "/portal/dashboards.svg",
     from: "#fbbf24",
     to: "#ea580c",
   },
