@@ -330,8 +330,22 @@ function PiPrint({
               <div style={{ fontSize: 8, color: "#64748b" }}>To,</div>
               <div style={{ fontWeight: 700 }}>{header.customer || "—"}</div>
               {piMeta.customerAddress && <div style={{ whiteSpace: "pre-line" }}>{piMeta.customerAddress}</div>}
-              {piMeta.billingAddress && <div><b>Billing:</b> {piMeta.billingAddress}</div>}
-              {piMeta.deliveryAddress && <div><b>Delivery:</b> {piMeta.deliveryAddress}</div>}
+              {(() => {
+                // Print each distinct address once — a billing/delivery line that
+                // repeats the company (or each other's) address is dropped.
+                const norm = (s: string) => (s || "").replace(/\s+/g, " ").trim().toLowerCase();
+                const company = norm(piMeta.customerAddress);
+                const billing = norm(piMeta.billingAddress);
+                const delivery = norm(piMeta.deliveryAddress);
+                const showBilling = !!piMeta.billingAddress && billing !== company;
+                const showDelivery = !!piMeta.deliveryAddress && delivery !== company && (!showBilling || delivery !== billing);
+                return (
+                  <>
+                    {showBilling && <div><b>Billing:</b> {piMeta.billingAddress}</div>}
+                    {showDelivery && <div><b>Delivery:</b> {piMeta.deliveryAddress}</div>}
+                  </>
+                );
+              })()}
               {piMeta.customerGst && <div><b>GST:</b> {piMeta.customerGst}</div>}
               {(piMeta.customerContactPerson || piMeta.customerMobile) && (
                 <div><b>Contact:</b> {[piMeta.customerContactPerson, piMeta.customerMobile].filter((v) => v && v.trim()).join(" - ")}</div>
