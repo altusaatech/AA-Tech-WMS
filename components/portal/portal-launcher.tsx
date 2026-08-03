@@ -212,8 +212,8 @@ export function PortalLauncher({
           {/* auto-rows-fr → every row is the same height, so all six cards are
               identical rectangles regardless of description length. */}
           <div className="grid auto-rows-fr grid-cols-2 gap-3 max-sm:grid-cols-1 md:grid-cols-3">
-            {WORKSPACES.map((w) => (
-              <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} />
+            {WORKSPACES.map((w, i) => (
+              <WorkspaceCard key={w.key} ws={w} locked={!!w.adminOnly && !isAdmin} delay={i * 0.4} />
             ))}
           </div>
         </div>
@@ -222,7 +222,7 @@ export function PortalLauncher({
   );
 }
 
-function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
+function WorkspaceCard({ ws, locked, delay = 0 }: { ws: WorkspaceDef; locked: boolean; delay?: number }) {
   const Icon = ws.icon;
 
   const inner = (
@@ -237,10 +237,11 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
     >
       {/* glass sheen across the top */}
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.24), rgba(255,255,255,0) 48%)" }} />
-      {/* white slanted light — always visible, sweeps across on hover */}
+      {/* soft white slanted light — continuously sweeps left → right */}
       <span
         aria-hidden
-        className="pointer-events-none absolute bottom-[-40%] top-[-40%] left-[8%] w-[26%] rotate-[20deg] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[320%]"
+        className="card-sheen pointer-events-none absolute bottom-[-40%] top-[-40%] left-0 w-[26%] bg-gradient-to-r from-transparent via-white/25 to-transparent"
+        style={{ animationDelay: `${delay}s` }}
       />
 
       {/* LEFT — clear logo on a white panel (the PNGs aren't transparent) */}
