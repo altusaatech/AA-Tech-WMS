@@ -1028,6 +1028,8 @@ function QuotationPrint({
     { label: "Door price + Hardware price", get: (_d, c) => inr(c.doorHw) },
     { label: "Total amount of supply", get: (_d, c) => inr(c.totalSupply) },
   ];
+  // Client quotation: no money anywhere — drop every rate/amount column too.
+  const rightCols = hideTotals ? [] : RIGHT_ALL;
   return (
     <div className={`${active ? "q-print q-print-landscape print:block" : ""} hidden bg-white text-slate-900`} style={{ fontSize: 8 }}>
       {/* ── AA Tech branded header ── */}
@@ -1063,18 +1065,20 @@ function QuotationPrint({
             {hwCols.map((h, i) => (
               <th key={i} className={`${th} th-vert`} style={{ minWidth: 14 }}>{h.make ? `${h.name} (${h.make})` : h.name}</th>
             ))}
-            {RIGHT_ALL.map((r) => (
+            {rightCols.map((r) => (
               <th key={r.label} className={`${th} th-vert`}>{r.label}</th>
             ))}
           </tr>
-          {/* per-hardware rate row */}
-          <tr style={{ background: "#eef6fc" }}>
-            <td className={td} colSpan={specCols.length} style={{ textAlign: "right", fontWeight: 700 }}>Rate ₹ (Each) →</td>
-            {hwCols.map((h, i) => (
-              <td key={i} className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{h.rate ? inr(h.rate) : ""}</td>
-            ))}
-            <td className={td} colSpan={RIGHT_ALL.length} />
-          </tr>
+          {/* per-hardware rate row (internal print only) */}
+          {!hideTotals && (
+            <tr style={{ background: "#eef6fc" }}>
+              <td className={td} colSpan={specCols.length} style={{ textAlign: "right", fontWeight: 700 }}>Rate ₹ (Each) →</td>
+              {hwCols.map((h, i) => (
+                <td key={i} className={td} style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{h.rate ? inr(h.rate) : ""}</td>
+              ))}
+              <td className={td} colSpan={RIGHT_ALL.length} />
+            </tr>
+          )}
         </thead>
         <tbody>
           {lines.map((d, i) => {
@@ -1088,7 +1092,7 @@ function QuotationPrint({
                   const q = hwQty(d, h.name, h.make);
                   return <td key={hi} className={td}>{q || ""}</td>;
                 })}
-                {RIGHT_ALL.map((r) => (
+                {rightCols.map((r) => (
                   <td key={r.label} className={td} style={{ whiteSpace: "nowrap" }}>{r.get(d, c)}</td>
                 ))}
               </tr>
@@ -1099,8 +1103,12 @@ function QuotationPrint({
             <td className={td} colSpan={specCols.length - 1} style={{ textAlign: "right" }}>TOTAL</td>
             <td className={td}>{totalQty}</td>
             {hwCols.map((_, i) => <td key={i} className={td} />)}
-            <td className={td} colSpan={RIGHT_ALL.length - 1} />
-            <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(totals.subtotalSupply)}</td>
+            {rightCols.length > 0 && (
+              <>
+                <td className={td} colSpan={rightCols.length - 1} />
+                <td className={td} style={{ whiteSpace: "nowrap" }}>{inr(totals.subtotalSupply)}</td>
+              </>
+            )}
           </tr>
         </tbody>
       </table>
