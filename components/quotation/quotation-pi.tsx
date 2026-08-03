@@ -122,7 +122,10 @@ export function QuotationPi({
   function onOfferChange(v: string) {
     setOfferNo(v);
     setEnquiryNo(v);
-    const d = detailsByEnquiry[v.trim().toLowerCase()];
+    // Exact enquiry match first; else the bare number inside the ref, so
+    // "180015 R1" still fetches enquiry 180015's details.
+    const key = v.trim().toLowerCase();
+    const d = detailsByEnquiry[key] ?? detailsByEnquiry[key.match(/\d{4,}/)?.[0] ?? ""];
     if (!d) return;
     if (d.customer) setCustomer(d.customer);
     if (d.project) setProject(d.project);

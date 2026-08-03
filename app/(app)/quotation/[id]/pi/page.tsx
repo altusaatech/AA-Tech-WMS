@@ -50,8 +50,15 @@ export default async function QuotationPiPage({ params }: { params: Promise<{ id
   for (const e of Object.values(detailsByEnquiry)) {
     e.customerContact = [e.customerContactPerson, e.customerMobile].filter(Boolean).join(" - ");
   }
+  // Alias each entry under its bare enquiry number too, so an Offer Ref with a
+  // suffix ("180015 R1") still fetches the "180015" enquiry's details.
+  for (const [k, e] of Object.entries(detailsByEnquiry)) {
+    const nk = k.match(/\d{4,}/)?.[0];
+    if (nk && !detailsByEnquiry[nk]) detailsByEnquiry[nk] = e;
+  }
 
-  const current = detailsByEnquiry[(q.enquiryNo ?? "").trim().toLowerCase()] ?? {};
+  const curKey = (q.enquiryNo ?? "").trim().toLowerCase() || (q.offerNo ?? "").trim().toLowerCase();
+  const current = detailsByEnquiry[curKey] ?? detailsByEnquiry[curKey.match(/\d{4,}/)?.[0] ?? ""] ?? {};
   const { customer: curCompany, project: _curProject, ...curMeta } = current;
 
   // Drop empty keys so a blank field never wipes a saved PI value.
