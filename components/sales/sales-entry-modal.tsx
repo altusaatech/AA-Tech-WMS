@@ -577,7 +577,9 @@ function Field({
             id={id}
             value={typeof value === "string" ? value : ""}
             options={options ?? []}
-            allowCustom={!!col.allowCustom}
+            // Every register dropdown accepts new values: type in the search
+            // box and pick "Use …" to add something not in the list.
+            allowCustom
             accent={accent}
             ringStyle={ringStyle}
             onChange={(v) => onChange(v)}
