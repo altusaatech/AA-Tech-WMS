@@ -229,12 +229,19 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
     <div
       className="group relative flex h-full items-center gap-4 overflow-hidden rounded-[20px] p-4 shadow-lg transition-all duration-200 max-sm:flex-col max-sm:items-start max-sm:gap-3"
       style={{
-        background: `linear-gradient(145deg, ${ws.from}, ${ws.to})`,
-        boxShadow: `0 18px 38px -22px ${ws.to}cc`,
+        // Luminous top-left → rich brand color → deep shade: reads far more
+        // vivid than a flat two-stop gradient.
+        background: `linear-gradient(135deg, color-mix(in srgb, ${ws.from} 70%, #ffffff) 0%, ${ws.from} 36%, ${ws.to} 100%)`,
+        boxShadow: `0 24px 48px -18px ${ws.to}, inset 0 1px 0 rgba(255,255,255,0.4)`,
       }}
     >
-      {/* subtle sheen */}
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 42%)" }} />
+      {/* glass sheen across the top */}
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.24), rgba(255,255,255,0) 48%)" }} />
+      {/* white slanted light — always visible, sweeps across on hover */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-[-40%] top-[-40%] left-[8%] w-[26%] rotate-[20deg] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[320%]"
+      />
 
       {/* LEFT — clear logo on a white panel (the PNGs aren't transparent) */}
       {ws.logo ? (
