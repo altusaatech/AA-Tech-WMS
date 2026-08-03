@@ -298,16 +298,16 @@ function PiPrint({
   // no Installation column, "Supply" title/band — matching the paper original.
   const hasInstall = lines.some((d) => computePiLine(d).install > 0);
   return (
-    <div className="q-print hidden bg-white text-slate-900 print:block" style={{ fontSize: 7.5, maxWidth: "100%", margin: "0 auto" }}>
+    <div className="q-print hidden bg-white text-slate-900 print:block" style={{ fontSize: 10, maxWidth: "100%", margin: "0 auto" }}>
       {/* company header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <img src="/logo-mark.png?v=3" alt="" style={{ height: 50, width: "auto" }} />
-          <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.06, color: "#0a0a0a" }}>
+          <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.06, color: "#0a0a0a" }}>
             Anant Avinya<br />Technologies LLP
           </div>
         </div>
-        <div style={{ textAlign: "right", fontSize: 8, color: "#334155", lineHeight: 1.45 }}>
+        <div style={{ textAlign: "right", fontSize: 10, color: "#334155", lineHeight: 1.45 }}>
           <b>Address:</b>
           {COMPANY.address.map((a, i) => (
             <div key={i}>{a}</div>
@@ -317,7 +317,7 @@ function PiPrint({
       </div>
 
       {/* title */}
-      <div style={{ border: "1.5px solid #0069b3", background: "#eef6fc", textAlign: "center", fontWeight: 800, fontSize: 13, padding: 4, color: "#0069b3" }}>
+      <div style={{ border: "1.5px solid #0069b3", background: "#eef6fc", textAlign: "center", fontWeight: 800, fontSize: 16, padding: 5, color: "#0069b3" }}>
         PROFORMA INVOICE — Supply{hasInstall ? " & Installation" : ""}
       </div>
 
@@ -326,7 +326,7 @@ function PiPrint({
         <tbody>
           <tr>
             <td className={c} style={{ width: "52%" }}>
-              <div style={{ fontSize: 8, color: "#64748b" }}>To,</div>
+              <div style={{ fontSize: 10, color: "#64748b" }}>To,</div>
               <div style={{ fontWeight: 700 }}>{header.customer || "—"}</div>
               {piMeta.customerAddress && <div style={{ whiteSpace: "pre-line" }}>{piMeta.customerAddress}</div>}
               {(() => {
@@ -424,8 +424,8 @@ function PiPrint({
               <div><b>GST No.</b> {COMPANY.gstNo}</div>
               <div><b>PAN No:</b> {COMPANY.panNo}</div>
               <div style={{ marginTop: 4 }}><b>Amount in words:</b> {inrWords(totals.grandTotal)}</div>
-              <div style={{ marginTop: 4, fontSize: 8 }}><b>RTGS Details:</b> {COMPANY.bank.name}; A/c No. {COMPANY.bank.acNo}; IFSC {COMPANY.bank.ifsc}; MICR {COMPANY.bank.micr}</div>
-              <div style={{ marginTop: 4, fontSize: 7.5, color: "#475569" }}>Declaration: We declare that this Invoice shows the actual price of the goods described and that all particulars are true and correct.</div>
+              <div style={{ marginTop: 4, fontSize: 9.5 }}><b>RTGS Details:</b> {COMPANY.bank.name}; A/c No. {COMPANY.bank.acNo}; IFSC {COMPANY.bank.ifsc}; MICR {COMPANY.bank.micr}</div>
+              <div style={{ marginTop: 4, fontSize: 9, color: "#475569" }}>Declaration: We declare that this Invoice shows the actual price of the goods described and that all particulars are true and correct.</div>
             </td>
             <td className={c} style={{ padding: 0 }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -434,11 +434,11 @@ function PiPrint({
                   <tr><td className={c} colSpan={2}><b>Subtotal</b></td><td className={c} style={{ textAlign: "right", fontWeight: 700 }}>{num(totals.subtotal)}</td></tr>
                   <tr><td className={c} colSpan={2}>CGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.cgst)}</td></tr>
                   <tr><td className={c} colSpan={2}>SGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.sgst)}</td></tr>
-                  {piMeta.freightNote && <tr><td className={c} colSpan={2}>Freight</td><td className={c} style={{ textAlign: "right", fontSize: 7 }}>{piMeta.freightNote}</td></tr>}
+                  {piMeta.freightNote && <tr><td className={c} colSpan={2}>Freight</td><td className={c} style={{ textAlign: "right", fontSize: 9 }}>{piMeta.freightNote}</td></tr>}
                   <tr style={{ background: "linear-gradient(90deg,#0069b3,#63b81e)" }}><td className={c} colSpan={2} style={{ color: "#fff", fontWeight: 800 }}>Grand Total</td><td className={c} style={{ textAlign: "right", color: "#fff", fontWeight: 800 }}>{num(totals.grandTotal)}</td></tr>
                 </tbody>
               </table>
-              <div style={{ padding: "26px 8px 8px", textAlign: "right", fontSize: 8.5 }}>
+              <div style={{ padding: "26px 8px 8px", textAlign: "right", fontSize: 10.5 }}>
                 <div>For {COMPANY.name}</div>
                 <div style={{ marginTop: 20 }}>Signature &amp; Date</div>
               </div>
