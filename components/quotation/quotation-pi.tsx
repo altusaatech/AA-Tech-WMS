@@ -297,7 +297,6 @@ function PiPrint({
   // Supply-only PIs (no installation on any door) print in the "Supply" format:
   // no Installation column, "Supply" title/band — matching the paper original.
   const hasInstall = lines.some((d) => computePiLine(d).install > 0);
-  const cols = hasInstall ? 11 : 10;
   return (
     <div className="q-print hidden bg-white text-slate-900 print:block" style={{ fontSize: 7.5, maxWidth: "100%", margin: "0 auto" }}>
       {/* company header */}
@@ -396,7 +395,6 @@ function PiPrint({
           </tr>
         </thead>
         <tbody>
-          <tr><td className={c} colSpan={cols} style={{ fontWeight: 700, textAlign: "center", background: "#f1f7fc" }}>SUPPLY {hasInstall ? <>&amp; INSTALLATION </> : ""}OF CLEAN ROOM DOORS WITH HARDWARE</td></tr>
           {lines.map((d, i) => {
             const p = computePiLine(d);
             return (
