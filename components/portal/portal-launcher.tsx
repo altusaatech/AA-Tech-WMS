@@ -97,8 +97,8 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Guides, walkthroughs, photos & videos for the WMS.",
     href: "/user-manual" as Route,
     icon: BookOpen,
-    from: "#ec4899",
-    to: "#9d174d",
+    from: "#6366f1",
+    to: "#3730a3",
   },
 ];
 
