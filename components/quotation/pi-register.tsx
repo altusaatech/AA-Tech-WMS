@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { ReceiptText, FilePlus2, ArrowRight, FolderOpen } from "lucide-react";
 import { PageHero } from "@/components/layout/page-hero";
+import { RegisterExcelButtons } from "@/components/quotation/register-excel";
 import { inr } from "@/lib/quotation/types";
 
 export interface PiSummary {
@@ -63,6 +64,44 @@ export function PiRegister({ pis }: { pis: PiSummary[] }) {
       />
 
       <div className="mt-6">
+        <RegisterExcelButtons
+          exportName="PI-Register"
+          withPiFields
+          templateHeaders={[
+            "Enquiry No", "Offer No", "Date", "Customer", "Project",
+            "Enquiry Source", "Company Address", "Billing Address", "Delivery Address",
+            "GST No", "Contact Person", "Mobile", "Email", "Customer Ref Date",
+            "HSN Code", "Terms of Delivery", "Mode of Shipping", "Terms of Payment",
+          ]}
+          exportData={pis.map((p) => ({
+            "Enquiry No": p.enquiryNo,
+            "Offer No": p.offerNo,
+            "Date": p.quoteDate,
+            "Customer": p.customer,
+            "Project": p.project,
+            "Enquiry Source": p.enquirySource,
+            "Company Address": p.customerAddress,
+            "Billing Address": p.billingAddress,
+            "Delivery Address": p.deliveryAddress,
+            "GST No": p.customerGst,
+            "Contact Person": p.contactPerson,
+            "Mobile": p.mobile,
+            "Email": p.email,
+            "Customer Ref Date": p.customerRefDate,
+            "HSN Code": p.hsnCode,
+            "Terms of Delivery": p.termsDelivery,
+            "Mode of Shipping": p.modeShipping,
+            "Terms of Payment": p.termsPayment,
+            "Qty": p.qty,
+            "Subtotal": Math.round(p.subtotal),
+            "CGST 9%": Math.round(p.cgst),
+            "SGST 9%": Math.round(p.sgst),
+            "Grand Total": Math.round(p.grandTotal),
+          }))}
+        />
+      </div>
+
+      <div className="mt-3">
         {pis.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-[24px] border border-dashed border-slate-300 bg-white/60 px-6 py-20 text-center backdrop-blur">
             <span className="inline-flex size-14 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)" }}>

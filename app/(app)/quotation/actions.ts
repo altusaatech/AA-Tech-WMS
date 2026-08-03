@@ -62,3 +62,86 @@ export async function deleteQuotation(id: string): Promise<{ ok: boolean }> {
   await db.delete(quotations).where(eq(quotations.id, id));
   return { ok: true };
 }
+
+/* ── Excel bulk import for the Working Spec / PI registers ─────── */
+
+export interface QuotationImportRow {
+  enquiryNo?: string;
+  offerNo?: string;
+  quoteDate?: string;
+  project?: string;
+  customer?: string;
+  subject?: string;
+  /** PI-register imports also carry PiMeta string fields (terms, addresses…). */
+  pi?: Record<string, string>;
+}
+
+/** "2026-08-03" passes through; "03-08-2026" / "03/08/2026" read as D-M-Y. */
+function normDate(v: string): string | undefined {
+  const s = v.trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  const m = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (m) return `${m[3]}-${m[2]!.padStart(2, "0")}-${m[1]!.padStart(2, "0")}`;
+  return undefined;
+}
+
+/**
+ * Rows are keyed by Offer No: a match UPDATES that quotation's header/PI fields
+ * (non-empty values only — blanks never wipe saved data); no match INSERTS a
+ * new quotation with empty doors (filled later in the builder).
+ */
+export async function importQuotationRows(
+  rows: QuotationImportRow[],
+): Promise<{ inserted: number; updated: number; skipped: number }> {
+  await requireUser();
+  const existing = await db
+    .select({ id: quotations.id, offerNo: quotations.offerNo, piMeta: quotations.piMeta })
+    .from(quotations);
+  const byOffer = new Map(
+    existing
+      .filter((e) => (e.offerNo ?? "").trim())
+      .map((e) => [(e.offerNo as string).trim().toLowerCase(), e]),
+  );
+
+  const clean = (v?: string) => {
+    const s = (v ?? "").trim();
+    return s ? s : undefined;
+  };
+
+  let inserted = 0;
+  let updated = 0;
+  let skipped = 0;
+  for (const r of rows.slice(0, 500)) {
+    const offer = clean(r.offerNo);
+    const piPatch = Object.fromEntries(
+      Object.entries(r.pi ?? {}).filter(([, v]) => String(v ?? "").trim() !== ""),
+    );
+    const match = offer ? byOffer.get(offer.toLowerCase()) : undefined;
+    if (match) {
+      const set: Partial<typeof quotations.$inferInsert> = { updatedAt: new Date() };
+      if (clean(r.enquiryNo)) set.enquiryNo = clean(r.enquiryNo);
+      if (clean(r.quoteDate) && normDate(r.quoteDate!)) set.quoteDate = normDate(r.quoteDate!);
+      if (clean(r.project)) set.project = clean(r.project);
+      if (clean(r.customer)) set.customer = clean(r.customer);
+      if (clean(r.subject)) set.subject = clean(r.subject);
+      if (Object.keys(piPatch).length) set.piMeta = { ...(match.piMeta ?? {}), ...piPatch };
+      await db.update(quotations).set(set).where(eq(quotations.id, match.id));
+      updated++;
+    } else if (offer || clean(r.enquiryNo) || clean(r.customer)) {
+      await db.insert(quotations).values({
+        offerNo: offer ?? null,
+        enquiryNo: clean(r.enquiryNo) ?? null,
+        quoteDate: (clean(r.quoteDate) && normDate(r.quoteDate!)) || null,
+        project: clean(r.project) ?? null,
+        customer: clean(r.customer) ?? null,
+        subject: clean(r.subject) ?? null,
+        piMeta: piPatch,
+        updatedAt: new Date(),
+      });
+      inserted++;
+    } else {
+      skipped++;
+    }
+  }
+  return { inserted, updated, skipped };
+}

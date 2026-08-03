@@ -7,6 +7,7 @@ import { Receipt, Plus, Trash2, Loader2, FolderOpen } from "lucide-react";
 import { PageHero } from "@/components/layout/page-hero";
 import { fireToast } from "@/lib/toast";
 import { createQuotation, deleteQuotation } from "@/app/(app)/quotation/actions";
+import { RegisterExcelButtons } from "@/components/quotation/register-excel";
 import { inr } from "@/lib/quotation/types";
 
 export interface QuoteSummary {
@@ -75,6 +76,30 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
       />
 
       <div className="mt-6">
+        <RegisterExcelButtons
+          exportName="Working-Specifications"
+          templateHeaders={["Enquiry No", "Offer No", "Date", "Customer", "Project", "Subject"]}
+          exportData={quotes.map((q) => ({
+            "Enquiry No": q.enquiryNo,
+            "Offer No": q.offerNo,
+            "Date": q.quoteDate,
+            "Customer": q.customer,
+            "Project": q.project,
+            "Subject": q.subject,
+            "Doors": q.doors,
+            "Total Qty": q.qty,
+            "Door Total": Math.round(q.doorTotal),
+            "Hardware Total": Math.round(q.hardwareTotal),
+            "Installation": Math.round(q.installTotal),
+            "Sub Total": Math.round(q.subtotal),
+            "CGST 9%": Math.round(q.cgst),
+            "SGST 9%": Math.round(q.sgst),
+            "Grand Total": Math.round(q.grandTotal),
+          }))}
+        />
+      </div>
+
+      <div className="mt-3">
         {quotes.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-[24px] border border-dashed border-slate-300 bg-white/60 px-6 py-20 text-center backdrop-blur">
             <span className="inline-flex size-14 items-center justify-center rounded-2xl text-white shadow-lg" style={{ background: "linear-gradient(135deg, #0180cf, #63b81e)" }}>
