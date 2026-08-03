@@ -1113,6 +1113,15 @@ function QuotationPrint({
         </tbody>
       </table>
 
+      {/* Quantity basis for dimension-driven hardware (per the works formula sheet) */}
+      {hwCols.some((h) => /gasket|intumescent|drop\s*seal|kick\s*plate/i.test(h.name)) && (
+        <div style={{ marginTop: 6, fontSize: 8, color: "#475569", lineHeight: 1.5 }}>
+          <b style={{ color: "#0069b3" }}>Quantity basis (RMT):</b>{" "}
+          Gasket / Intumescent Tape — Single door: (Height/1000 × 2) + (Width/1000) · Double door: (Height/1000 × 3) + (Width/1000){" "}
+          · Drop Seal / Kick Plate — (Width/1000)
+        </div>
+      )}
+
       {/* totals block (right) */}
       {!hideTotals && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
