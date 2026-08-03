@@ -47,8 +47,8 @@ const WORKSPACES: WorkspaceDef[] = [
     href: "/" as Route,
     icon: LayoutDashboard,
     logo: "/portal/wms.png",
-    from: "#0180cf",
-    to: "#0069b3",
+    from: "#0ea5e9",
+    to: "#1e40af",
   },
   {
     key: "pre-production",
@@ -57,8 +57,8 @@ const WORKSPACES: WorkspaceDef[] = [
     href: "/sales" as Route,
     icon: Database,
     logo: "/portal/masters.png",
-    from: "#63b81e",
-    to: "#4a9616",
+    from: "#84cc16",
+    to: "#15803d",
     spin: true,
   },
   {
@@ -67,8 +67,8 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Sales & quotation pipeline — win rate, order book & trends.",
     href: "/dashboards" as Route,
     icon: TrendingUp,
-    from: "#f59e0b",
-    to: "#d97706",
+    from: "#fbbf24",
+    to: "#c2410c",
   },
   {
     key: "admin",
@@ -77,8 +77,8 @@ const WORKSPACES: WorkspaceDef[] = [
     href: "/portal/admin" as Route,
     icon: ShieldCheck,
     logo: "/portal/admin.png",
-    from: "#d97706",
-    to: "#b45309",
+    from: "#f97316",
+    to: "#9a3412",
     adminOnly: true,
   },
   {
@@ -88,8 +88,8 @@ const WORKSPACES: WorkspaceDef[] = [
     href: "/portal/employees" as Route,
     icon: Users,
     logo: "/portal/employees.png",
-    from: "#4a9616",
-    to: "#3f7a14",
+    from: "#22c55e",
+    to: "#14532d",
   },
   {
     key: "user-manual",
@@ -97,8 +97,8 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Guides, walkthroughs, photos & videos for the WMS.",
     href: "/user-manual" as Route,
     icon: BookOpen,
-    from: "#38a9e5",
-    to: "#0180cf",
+    from: "#22d3ee",
+    to: "#0369a1",
   },
 ];
 
@@ -231,7 +231,7 @@ function WorkspaceCard({ ws, locked }: { ws: WorkspaceDef; locked: boolean }) {
       style={{
         // Luminous top-left → rich brand color → deep shade: reads far more
         // vivid than a flat two-stop gradient.
-        background: `linear-gradient(135deg, color-mix(in srgb, ${ws.from} 70%, #ffffff) 0%, ${ws.from} 36%, ${ws.to} 100%)`,
+        background: `linear-gradient(135deg, color-mix(in srgb, ${ws.from} 84%, #ffffff) 0%, ${ws.from} 34%, ${ws.to} 100%)`,
         boxShadow: `0 24px 48px -18px ${ws.to}, inset 0 1px 0 rgba(255,255,255,0.4)`,
       }}
     >
