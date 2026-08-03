@@ -240,7 +240,7 @@ function WorkspaceCard({ ws, locked, delay = 0 }: { ws: WorkspaceDef; locked: bo
       {/* soft white slanted light — continuously sweeps left → right */}
       <span
         aria-hidden
-        className="card-sheen pointer-events-none absolute bottom-[-40%] top-[-40%] left-0 w-[30%] bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        className="card-sheen pointer-events-none absolute bottom-[-40%] top-[-40%] left-0 w-[30%] bg-gradient-to-r from-transparent via-white/20 to-transparent"
         style={{ animationDelay: `${delay}s` }}
       />
 
