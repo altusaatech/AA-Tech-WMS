@@ -76,7 +76,7 @@ const WORKSPACES: WorkspaceDef[] = [
     desc: "Control room, master data & departments.",
     href: "/portal/admin" as Route,
     icon: ShieldCheck,
-    logo: "/portal/admin.png",
+    logo: "/portal/tech.png",
     from: "#a855f7",
     to: "#6b21a8",
     adminOnly: true,
