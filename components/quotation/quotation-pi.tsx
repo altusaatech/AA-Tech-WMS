@@ -113,13 +113,15 @@ export function QuotationPi({
   const [saving, setSaving] = React.useState(false);
 
   // Print settings — text size + bold, remembered on this computer.
-  const [printCfg, setPrintCfg] = React.useState<{ size: number; bold: boolean }>({ size: 10, bold: true });
+  const [printCfg, setPrintCfg] = React.useState<{ size: number; bold: boolean }>({ size: 13, bold: true });
   React.useEffect(() => {
     try {
       const s = localStorage.getItem("pi-print-settings");
       if (s) {
         const p = JSON.parse(s) as { size?: number; bold?: boolean };
-        setPrintCfg({ size: Number(p.size) || 10, bold: p.bold !== false });
+        // Coerce sizes saved before the scale was raised (≤10) up to the new default.
+        const size = Number(p.size) || 13;
+        setPrintCfg({ size: size >= 11.5 ? size : 13, bold: p.bold !== false });
       }
     } catch { /* defaults stay */ }
   }, []);
@@ -193,9 +195,9 @@ export function QuotationPi({
                 onChange={(e) => patchPrintCfg({ size: Number(e.target.value) })}
                 className="h-7 rounded-lg border border-slate-200 bg-white px-1.5 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"
               >
-                <option value={10}>Normal</option>
-                <option value={11.5}>Large</option>
-                <option value={13}>Extra large</option>
+                <option value={11.5}>Normal</option>
+                <option value={13}>Large</option>
+                <option value={15}>Extra large</option>
               </select>
               <label className="flex cursor-pointer items-center gap-1.5 text-[12.5px] font-bold text-slate-600">
                 <input type="checkbox" checked={printCfg.bold} onChange={(e) => patchPrintCfg({ bold: e.target.checked })} className="size-3.5 accent-[#0069b3]" /> Bold
@@ -331,6 +333,8 @@ function PiPrint({
 }) {
   const num = (v: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(v) ? v : 0));
   const c = "border border-slate-500 px-1 py-1 align-top break-words";
+  // Fixed-size blocks scale with the chosen print size (tuned at base 10pt).
+  const fs = (v: number) => Math.round(v * (printCfg.size / 10) * 10) / 10;
   // Supply-only PIs (no installation on any door) print in the "Supply" format:
   // no Installation column, "Supply" title/band — matching the paper original.
   const hasInstall = lines.some((d) => computePiLine(d).install > 0);
@@ -340,19 +344,19 @@ function PiPrint({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <img src="/logo-mark.png?v=3" alt="" style={{ height: 50, width: "auto" }} />
-          <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.06, color: "#0a0a0a" }}>
+          <div style={{ fontSize: fs(20), fontWeight: 800, lineHeight: 1.06, color: "#0a0a0a" }}>
             Anant Avinya<br />Technologies LLP
           </div>
         </div>
         {/* Company address intentionally not printed on the PI. */}
-        <div style={{ textAlign: "right", fontSize: 10, color: "#334155", lineHeight: 1.45 }}>
+        <div style={{ textAlign: "right", fontSize: fs(10), color: "#334155", lineHeight: 1.45 }}>
           <div>E-mail: {COMPANY.email}</div>
           <div>Web: {COMPANY.web}</div>
         </div>
       </div>
 
       {/* title */}
-      <div style={{ border: "1.5px solid #0069b3", background: "#eef6fc", textAlign: "center", fontWeight: 800, fontSize: 16, padding: 5, color: "#0069b3" }}>
+      <div style={{ border: "1.5px solid #0069b3", background: "#eef6fc", textAlign: "center", fontWeight: 800, fontSize: fs(16), padding: 5, color: "#0069b3" }}>
         PROFORMA INVOICE — Supply{hasInstall ? " & Installation" : ""}
       </div>
 
@@ -361,7 +365,7 @@ function PiPrint({
         <tbody>
           <tr>
             <td className={c} style={{ width: "52%" }}>
-              <div style={{ fontSize: 10, color: "#64748b" }}>To,</div>
+              <div style={{ fontSize: fs(10), color: "#64748b" }}>To,</div>
               <div style={{ fontWeight: 700 }}>{header.customer || "—"}</div>
               {piMeta.customerAddress && <div style={{ whiteSpace: "pre-line" }}>{piMeta.customerAddress}</div>}
               {(() => {
@@ -459,8 +463,8 @@ function PiPrint({
               <div><b>GST No.</b> {COMPANY.gstNo}</div>
               <div><b>PAN No:</b> {COMPANY.panNo}</div>
               <div style={{ marginTop: 4 }}><b>Amount in words:</b> {inrWords(totals.grandTotal)}</div>
-              <div style={{ marginTop: 4, fontSize: 9.5 }}><b>RTGS Details:</b> {COMPANY.bank.name}; A/c No. {COMPANY.bank.acNo}; IFSC {COMPANY.bank.ifsc}; MICR {COMPANY.bank.micr}</div>
-              <div style={{ marginTop: 4, fontSize: 9, color: "#475569" }}>Declaration: We declare that this Invoice shows the actual price of the goods described and that all particulars are true and correct.</div>
+              <div style={{ marginTop: 4, fontSize: fs(9.5) }}><b>RTGS Details:</b> {COMPANY.bank.name}; A/c No. {COMPANY.bank.acNo}; IFSC {COMPANY.bank.ifsc}; MICR {COMPANY.bank.micr}</div>
+              <div style={{ marginTop: 4, fontSize: fs(9), color: "#475569" }}>Declaration: We declare that this Invoice shows the actual price of the goods described and that all particulars are true and correct.</div>
             </td>
             <td className={c} style={{ padding: 0 }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -469,11 +473,11 @@ function PiPrint({
                   <tr><td className={c} colSpan={2}><b>Subtotal</b></td><td className={c} style={{ textAlign: "right", fontWeight: 700 }}>{num(totals.subtotal)}</td></tr>
                   <tr><td className={c} colSpan={2}>CGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.cgst)}</td></tr>
                   <tr><td className={c} colSpan={2}>SGST @ 9.00%</td><td className={c} style={{ textAlign: "right" }}>{num(totals.sgst)}</td></tr>
-                  {piMeta.freightNote && <tr><td className={c} colSpan={2}>Freight</td><td className={c} style={{ textAlign: "right", fontSize: 9 }}>{piMeta.freightNote}</td></tr>}
+                  {piMeta.freightNote && <tr><td className={c} colSpan={2}>Freight</td><td className={c} style={{ textAlign: "right", fontSize: fs(9) }}>{piMeta.freightNote}</td></tr>}
                   <tr style={{ background: "linear-gradient(90deg,#0069b3,#63b81e)" }}><td className={c} colSpan={2} style={{ color: "#fff", fontWeight: 800 }}>Grand Total</td><td className={c} style={{ textAlign: "right", color: "#fff", fontWeight: 800 }}>{num(totals.grandTotal)}</td></tr>
                 </tbody>
               </table>
-              <div style={{ padding: "26px 8px 8px", textAlign: "right", fontSize: 10.5 }}>
+              <div style={{ padding: "26px 8px 8px", textAlign: "right", fontSize: fs(10.5) }}>
                 <div>For {COMPANY.name}</div>
                 <div style={{ marginTop: 20 }}>Signature &amp; Date</div>
               </div>
