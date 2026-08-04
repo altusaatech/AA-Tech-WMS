@@ -61,7 +61,7 @@ interface FormDef {
 const FORMS: FormDef[] = [
   {
     key: "kyc",
-    label: "Customer KYC",
+    label: "Customer KYC & Enquiry",
     desc: "Company, contact & enquiry details — the sales entry point",
     icon: IdCard,
     from: "#63b81e",
@@ -69,7 +69,8 @@ const FORMS: FormDef[] = [
     steps: ["Enquiry", "Company", "Contact"],
     columns: KYC_COLUMNS,
     primaryKey: "enquiryNo",
-    hidden: true, // merged into the Quote Status form; edited via the register pen
+    // First module of the flow. Its fields also stay merged into the Quote
+    // Status form/register, so both entry paths write the same KYC record.
   },
   {
     key: "quote",
