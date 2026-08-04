@@ -79,7 +79,8 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
         <RegisterExcelButtons
           exportName="Working-Specifications"
           templateHeaders={["Enquiry No", "Offer No", "Date", "Customer", "Project", "Subject"]}
-          exportData={quotes.map((q) => ({
+          exportData={quotes.map((q, i) => ({
+            "Sr No": i + 1,
             "Enquiry No": q.enquiryNo,
             "Offer No": q.offerNo,
             "Date": q.quoteDate,
@@ -113,6 +114,7 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
             <table className="w-full min-w-[1500px] text-[12.5px]">
               <thead>
                 <tr className="text-left text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-white" style={{ background: "linear-gradient(180deg, #0069b3, #00598f)" }}>
+                  <th className={th}>Sr No</th>
                   <th className={th}>Enquiry No</th>
                   <th className={th}>Offer No</th>
                   <th className={th}>Date</th>
@@ -138,6 +140,7 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
                     onClick={() => router.push(`/quotation/${q.id}` as Route)}
                     className={`group cursor-pointer transition-colors hover:bg-[#e4f2fc] ${i % 2 ? "bg-[#f5fafe]" : "bg-white"}`}
                   >
+                    <td className={`${td} tabular-nums font-semibold text-slate-500`}>{i + 1}</td>
                     <td className={`${td} font-bold text-slate-700`}>{q.enquiryNo || "—"}</td>
                     <td className={`${td} font-black text-slate-800`}>{q.offerNo || "—"}</td>
                     <td className={`${td} tabular-nums text-slate-600`}>{q.quoteDate || "—"}</td>

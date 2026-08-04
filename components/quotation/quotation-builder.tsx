@@ -836,17 +836,15 @@ function DoorCard({
             </div>
           )}
 
-          {/* Formula legend — surfaced so the client can see how the auto
-              quantities (highlighted Units/Door) are derived. */}
-          {door.hardware.some((h) => /gasket|intumescent|drop\s*seal|kick\s*plate/i.test(h.name)) && (
-            <div className="mt-2 rounded-lg border border-[#0180cf]/20 bg-[#0180cf]/[0.04] px-3 py-2 text-[11.5px] leading-relaxed text-slate-500">
-              <span className="font-black uppercase tracking-[0.06em] text-[#0069b3]">Quantity basis (RMT)</span>
-              <div className="mt-1 flex flex-wrap gap-x-6 gap-y-0.5">
-                <span><b className="text-slate-600">Gasket / Intumescent Tape</b> — Single: (Height/1000 × 2) + (Width/1000) · Double: (Height/1000 × 3) + (Width/1000)</span>
-                <span><b className="text-slate-600">Drop Seal / Kick Plate</b> — (Width/1000)</span>
-              </div>
+          {/* Formula legend — always shown in the hardware section so the
+              dimension-driven quantities (highlighted Units/Door) are explained. */}
+          <div className="mt-2 rounded-lg border border-[#0180cf]/20 bg-[#0180cf]/[0.04] px-3 py-2 text-[11.5px] leading-relaxed text-slate-500">
+            <span className="font-black uppercase tracking-[0.06em] text-[#0069b3]">Quantity basis (RMT)</span>
+            <div className="mt-1 flex flex-wrap gap-x-6 gap-y-0.5">
+              <span><b className="text-slate-600">Gasket / Intumescent Tape</b> — Single: (Height/1000 × 2) + (Width/1000) · Double: (Height/1000 × 3) + (Width/1000) · Triple: (Height/1000 × 4) + (Width/1000)</span>
+              <span><b className="text-slate-600">Drop Seal / Kick Plate</b> — (Width/1000)</span>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Per-door price summary (working specification) */}

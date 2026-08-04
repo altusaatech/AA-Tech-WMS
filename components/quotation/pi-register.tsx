@@ -73,7 +73,8 @@ export function PiRegister({ pis }: { pis: PiSummary[] }) {
             "GST No", "Contact Person", "Mobile", "Email", "Customer Ref Date",
             "HSN Code", "Terms of Delivery", "Mode of Shipping", "Terms of Payment",
           ]}
-          exportData={pis.map((p) => ({
+          exportData={pis.map((p, i) => ({
+            "Sr No": i + 1,
             "Enquiry No": p.enquiryNo,
             "Offer No": p.offerNo,
             "Date": p.quoteDate,
@@ -115,6 +116,7 @@ export function PiRegister({ pis }: { pis: PiSummary[] }) {
             <table className="w-full min-w-[2300px] text-[12.5px]">
               <thead>
                 <tr className="text-left text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-white" style={{ background: "linear-gradient(180deg, #0069b3, #00598f)" }}>
+                  <th className={th}>Sr No</th>
                   <th className={th}>Enquiry No</th>
                   <th className={th}>Offer Ref</th>
                   <th className={th}>Date</th>
@@ -148,6 +150,7 @@ export function PiRegister({ pis }: { pis: PiSummary[] }) {
                     onClick={() => router.push(`/quotation/${p.id}/pi` as Route)}
                     className={`group cursor-pointer transition-colors hover:bg-[#e4f2fc] ${i % 2 ? "bg-[#f5fafe]" : "bg-white"}`}
                   >
+                    <td className={`${td} tabular-nums font-semibold text-slate-500`}>{i + 1}</td>
                     <td className={`${td} font-bold text-slate-700`}>{p.enquiryNo || "—"}</td>
                     <td className={`${td} font-black text-slate-800`}>{p.offerNo || "—"}</td>
                     <td className={`${td} tabular-nums text-slate-600`}>{p.quoteDate || "—"}</td>

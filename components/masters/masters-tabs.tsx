@@ -224,6 +224,17 @@ export function MastersTabs({
             </div>
           </div>
 
+          {active === "hardware" && (
+            <div className="mb-4 rounded-xl border border-[#0180cf]/20 bg-[#0180cf]/[0.04] px-4 py-2.5 text-[12.5px] leading-relaxed text-slate-600">
+              <span className="font-black uppercase tracking-[0.06em] text-[#0069b3]">Quantity basis (RMT)</span>
+              <div className="mt-1 flex flex-wrap gap-x-8 gap-y-0.5">
+                <span><b className="text-slate-700">Gasket / Intumescent Tape</b> — Single: (Height/1000 × 2) + (Width/1000) · Double: (Height/1000 × 3) + (Width/1000) · Triple: (Height/1000 × 4) + (Width/1000)</span>
+                <span><b className="text-slate-700">Drop Seal / Kick Plate</b> — (Width/1000)</span>
+                <span className="text-slate-400">e.g. 1000×2100 single → 5.2 · 1600×2100 double → 7.9 · 2700×2100 triple → 11.1 RMT</span>
+              </div>
+            </div>
+          )}
+
           <SalesDataGrid
             kind={active as SaleKind}
             title={leaf.label}

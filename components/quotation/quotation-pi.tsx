@@ -112,6 +112,25 @@ export function QuotationPi({
   const [piMeta, setPiMeta] = React.useState<PiMeta>(initialPiMeta);
   const [saving, setSaving] = React.useState(false);
 
+  // Print settings — text size + bold, remembered on this computer.
+  const [printCfg, setPrintCfg] = React.useState<{ size: number; bold: boolean }>({ size: 10, bold: true });
+  React.useEffect(() => {
+    try {
+      const s = localStorage.getItem("pi-print-settings");
+      if (s) {
+        const p = JSON.parse(s) as { size?: number; bold?: boolean };
+        setPrintCfg({ size: Number(p.size) || 10, bold: p.bold !== false });
+      }
+    } catch { /* defaults stay */ }
+  }, []);
+  function patchPrintCfg(patch: Partial<{ size: number; bold: boolean }>) {
+    setPrintCfg((c) => {
+      const next = { ...c, ...patch };
+      try { localStorage.setItem("pi-print-settings", JSON.stringify(next)); } catch { /* non-fatal */ }
+      return next;
+    });
+  }
+
   const totals = computePiTotals(lines);
 
   function setPi<K extends keyof PiMeta>(key: K, value: PiMeta[K]) {
@@ -166,6 +185,22 @@ export function QuotationPi({
             <ArrowLeft size={15} strokeWidth={2.6} /> Back to Quotation
           </button>
           <div className="flex items-center gap-2.5">
+            {/* print settings — text size + bold for readable hard copies */}
+            <div className="flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 shadow-sm" title="Print settings">
+              <span className="text-[11px] font-black uppercase tracking-[0.05em] text-slate-400">Print text</span>
+              <select
+                value={printCfg.size}
+                onChange={(e) => patchPrintCfg({ size: Number(e.target.value) })}
+                className="h-7 rounded-lg border border-slate-200 bg-white px-1.5 text-[12.5px] font-semibold text-slate-600 outline-none focus:border-[#0180cf]"
+              >
+                <option value={10}>Normal</option>
+                <option value={11.5}>Large</option>
+                <option value={13}>Extra large</option>
+              </select>
+              <label className="flex cursor-pointer items-center gap-1.5 text-[12.5px] font-bold text-slate-600">
+                <input type="checkbox" checked={printCfg.bold} onChange={(e) => patchPrintCfg({ bold: e.target.checked })} className="size-3.5 accent-[#0069b3]" /> Bold
+              </label>
+            </div>
             <button type="button" onClick={() => window.print()} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/8 px-4 text-[13.5px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5">
               <Printer size={16} /> Print PI
             </button>
@@ -275,7 +310,7 @@ export function QuotationPi({
       </main>
 
       {/* ── print ── */}
-      <PiPrint header={{ enquiryNo, offerNo, quoteDate, project, customer, subject }} piMeta={piMeta} lines={lines} totals={totals} />
+      <PiPrint header={{ enquiryNo, offerNo, quoteDate, project, customer, subject }} piMeta={piMeta} lines={lines} totals={totals} printCfg={printCfg} />
     </>
   );
 }
@@ -286,11 +321,13 @@ function PiPrint({
   piMeta,
   lines,
   totals,
+  printCfg,
 }: {
   header: { enquiryNo: string; offerNo: string; quoteDate: string; project: string; customer: string; subject: string };
   piMeta: PiMeta;
   lines: DoorLine[];
   totals: ReturnType<typeof computePiTotals>;
+  printCfg: { size: number; bold: boolean };
 }) {
   const num = (v: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(v) ? v : 0));
   const c = "border border-slate-500 px-1 py-1 align-top break-words";
@@ -298,7 +335,7 @@ function PiPrint({
   // no Installation column, "Supply" title/band — matching the paper original.
   const hasInstall = lines.some((d) => computePiLine(d).install > 0);
   return (
-    <div className="q-print hidden bg-white text-slate-900 print:block" style={{ fontSize: 10, maxWidth: "100%", margin: "0 auto" }}>
+    <div className="q-print hidden bg-white text-slate-900 print:block" style={{ fontSize: printCfg.size, fontWeight: printCfg.bold ? 600 : 400, maxWidth: "100%", margin: "0 auto" }}>
       {/* company header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -307,12 +344,10 @@ function PiPrint({
             Anant Avinya<br />Technologies LLP
           </div>
         </div>
+        {/* Company address intentionally not printed on the PI. */}
         <div style={{ textAlign: "right", fontSize: 10, color: "#334155", lineHeight: 1.45 }}>
-          <b>Address:</b>
-          {COMPANY.address.map((a, i) => (
-            <div key={i}>{a}</div>
-          ))}
-          <div>E-mail: {COMPANY.email} · Web: {COMPANY.web}</div>
+          <div>E-mail: {COMPANY.email}</div>
+          <div>Web: {COMPANY.web}</div>
         </div>
       </div>
 

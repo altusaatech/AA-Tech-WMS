@@ -159,9 +159,13 @@ export function SalesDataGrid({
 
   async function exportExcel() {
     const XLSX = await import("xlsx");
-    const data = view.map((row) => {
+    const data = view.map((row, ri) => {
       const o: Record<string, string | number> = {};
       for (const c of columns) {
+        if (c.key === "srNo") {
+          o[c.label] = ri + 1; // positional, matching the on-screen serials
+          continue;
+        }
         const v = row[c.key];
         o[c.label] =
           v == null || v === ""
@@ -531,7 +535,11 @@ export function SalesDataGrid({
                           }`}
                           style={{ minWidth: c.width ?? 130 }}
                         >
-                          {piId ? (
+                          {c.key === "srNo" ? (
+                            // Positional serial — the DB identity keeps gaps after
+                            // deletes/imports, so show the row's place in the list.
+                            <span className="font-semibold tabular-nums text-slate-500">{page * pageSize + i + 1}</span>
+                          ) : piId ? (
                             <Link
                               href={`/quotation/${piId}/pi` as Route}
                               onClick={(e) => e.stopPropagation()}
