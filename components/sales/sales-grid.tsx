@@ -129,7 +129,8 @@ export function SalesDataGrid({
         const cmp =
           col?.type === "number"
             ? (Number(av) || 0) - (Number(bv) || 0)
-            : String(av).localeCompare(String(bv));
+            : // numeric-aware: "9001" sorts before "180001", "180002 R1" after "180002"
+              String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: "base" });
         return sortDir === "asc" ? cmp : -cmp;
       });
     }

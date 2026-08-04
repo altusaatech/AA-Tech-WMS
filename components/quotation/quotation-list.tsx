@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
-import { Receipt, Plus, Trash2, Loader2, FolderOpen } from "lucide-react";
+import { Receipt, Plus, Trash2, Loader2, FolderOpen, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { PageHero } from "@/components/layout/page-hero";
 import { fireToast } from "@/lib/toast";
 import { createQuotation, deleteQuotation } from "@/app/(app)/quotation/actions";
@@ -32,9 +32,40 @@ export interface QuoteSummary {
 const th = "whitespace-nowrap px-3 py-3";
 const td = "whitespace-nowrap border-b border-[#e7eff6] px-3 py-2.5";
 
+type SortState = { key: "enquiryNo" | "offerNo"; dir: "asc" | "desc" } | null;
+
+/** Clickable header for the sortable number columns (asc → desc → toggle). */
+function SortTh({ label, colKey, sort, onSort }: { label: string; colKey: "enquiryNo" | "offerNo"; sort: SortState; onSort: (k: "enquiryNo" | "offerNo") => void }) {
+  const active = sort?.key === colKey;
+  const Icon = !active ? ArrowUpDown : sort!.dir === "asc" ? ArrowUp : ArrowDown;
+  return (
+    <th className={th}>
+      <button type="button" onClick={() => onSort(colKey)} className={`inline-flex items-center gap-1 uppercase tracking-[0.05em] ${active ? "text-white" : "text-white/85 hover:text-white"}`} title={`Sort by ${label}`}>
+        {label} <Icon size={12} strokeWidth={2.6} className={active ? "" : "opacity-60"} />
+      </button>
+    </th>
+  );
+}
+
+/** Numeric-aware compare so "9001" sorts before "180001" and "180002 R1" after "180002". */
+function numCompare(a: string, b: string): number {
+  return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+}
+
 export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
   const router = useRouter();
   const [creating, setCreating] = React.useState(false);
+  const [sort, setSort] = React.useState<SortState>(null);
+
+  const view = React.useMemo(() => {
+    if (!sort) return quotes;
+    const s = [...quotes].sort((a, b) => numCompare(String(a[sort.key] ?? ""), String(b[sort.key] ?? "")));
+    return sort.dir === "asc" ? s : s.reverse();
+  }, [quotes, sort]);
+
+  function toggleSort(key: "enquiryNo" | "offerNo") {
+    setSort((s) => (s?.key === key ? (s.dir === "asc" ? { key, dir: "desc" } : null) : { key, dir: "asc" }));
+  }
 
   async function onNew() {
     setCreating(true);
@@ -79,7 +110,7 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
         <RegisterExcelButtons
           exportName="Working-Specifications"
           templateHeaders={["Enquiry No", "Offer No", "Date", "Customer", "Project", "Subject"]}
-          exportData={quotes.map((q, i) => ({
+          exportData={view.map((q, i) => ({
             "Sr No": i + 1,
             "Enquiry No": q.enquiryNo,
             "Offer No": q.offerNo,
@@ -115,8 +146,8 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
               <thead>
                 <tr className="text-left text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-white" style={{ background: "linear-gradient(180deg, #0069b3, #00598f)" }}>
                   <th className={th}>Sr No</th>
-                  <th className={th}>Enquiry No</th>
-                  <th className={th}>Offer No</th>
+                  <SortTh label="Enquiry No" colKey="enquiryNo" sort={sort} onSort={toggleSort} />
+                  <SortTh label="Offer No" colKey="offerNo" sort={sort} onSort={toggleSort} />
                   <th className={th}>Date</th>
                   <th className={th}>Customer</th>
                   <th className={th}>Project</th>
@@ -134,7 +165,7 @@ export function QuotationList({ quotes }: { quotes: QuoteSummary[] }) {
                 </tr>
               </thead>
               <tbody>
-                {quotes.map((q, i) => (
+                {view.map((q, i) => (
                   <tr
                     key={q.id}
                     onClick={() => router.push(`/quotation/${q.id}` as Route)}
