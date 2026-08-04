@@ -25,7 +25,9 @@ import type { Route } from "next";
 import { deleteSalesRow, importSalesRows, type SaleKind, type SalesRow } from "@/app/(app)/sales/actions";
 import type { SalesColDef } from "@/lib/sales/columns";
 
-const PAGE_SIZES = [10, 25, 50, 100];
+// "All" = one page big enough for any register (sentinel, shown as "All").
+const ALL_ROWS = 100000;
+const PAGE_SIZES = [10, 25, 50, 100, ALL_ROWS];
 
 // Visual range picker — how much of the sheet to render for selection.
 const MAX_PREVIEW_ROWS = 300;
@@ -614,7 +616,7 @@ export function SalesDataGrid({
               >
                 {PAGE_SIZES.map((s) => (
                   <option key={s} value={s}>
-                    {s}
+                    {s === ALL_ROWS ? "All" : s}
                   </option>
                 ))}
               </select>
