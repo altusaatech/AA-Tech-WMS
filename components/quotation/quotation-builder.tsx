@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
-import { ArrowLeft, Save, Printer, Plus, Trash2, Loader2, DoorOpen, FileText, ReceiptText, Download } from "lucide-react";
+import { ArrowLeft, Save, Printer, Plus, Trash2, Loader2, DoorOpen, FileText, ReceiptText, Download, Search } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
 import { DOOR_ORIENTATIONS, DOOR_CONFIGS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS, HARDWARE_UOMS, HARDWARE_MAKES } from "@/lib/sales/columns";
@@ -102,8 +102,14 @@ export function QuotationBuilder({
   const kycByEnquiry = React.useMemo(() => {
     const m = new Map<string, { companyName: string; product: string }>();
     for (const k of kycOptions) if (k.enquiryNo) m.set(k.enquiryNo.trim().toLowerCase(), { companyName: k.companyName, product: k.product ?? "" });
+    // Alias bare numbers so "180002 R1" still fetches enquiry 180002.
+    for (const [key, v] of Array.from(m)) {
+      const nk = key.match(/\d{4,}/)?.[0];
+      if (nk && !m.has(nk)) m.set(nk, v);
+    }
     return m;
   }, [kycOptions]);
+  const lastFetched = React.useRef("");
   // Offer No IS the Enquiry No in the working spec — always identical. The Offer
   // box is a read-only mirror of the Enquiry No.
   // Subject follows the picked quote's Product ("Supply of <Product>") until the
@@ -116,10 +122,18 @@ export function QuotationBuilder({
   function onEnquiryChange(v: string) {
     setEnquiryNo(v);
     setOfferNo(v); // Offer No always equals Enquiry No.
-    const hit = kycByEnquiry.get(v.trim().toLowerCase());
-    if (hit?.companyName) setCustomer(hit.companyName);
-    if (hit?.product && !projectTouched.current) setProject(hit.product);
-    if (hit?.product && !subjectTouched.current) setSubject(`Supply of ${hit.product}`);
+    const key = v.trim().toLowerCase();
+    const hit = kycByEnquiry.get(key) ?? kycByEnquiry.get(key.match(/\d{4,}/)?.[0] ?? "");
+    if (!hit) return;
+    if (hit.companyName) setCustomer(hit.companyName);
+    if (hit.product && !projectTouched.current) setProject(hit.product);
+    if (hit.product && !subjectTouched.current) setSubject(`Supply of ${hit.product}`);
+    // One toast per fetched enquiry — confirms what was pulled in.
+    const fetchedKey = `${hit.companyName}|${hit.product}`;
+    if (lastFetched.current !== fetchedKey) {
+      lastFetched.current = fetchedKey;
+      fireToast({ message: `Fetched ${hit.companyName || "details"} from enquiry ${v.trim()}`, type: "success" });
+    }
   }
   function onSubjectChange(v: string) {
     subjectTouched.current = true;
@@ -342,14 +356,7 @@ export function QuotationBuilder({
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="grid grid-cols-6 gap-3 max-lg:grid-cols-2 max-md:grid-cols-1">
             <L label="Enquiry No">
-              <input className={inp} list="kyc-enquiry-list" value={enquiryNo} onChange={(e) => onEnquiryChange(e.target.value)} placeholder="180034" title="Pick an Enquiry No from Quote Status — Customer & Offer No fill automatically" />
-              {kycOptions.length > 0 && (
-                <datalist id="kyc-enquiry-list">
-                  {kycOptions.map((k) => (
-                    <option key={k.enquiryNo} value={k.enquiryNo}>{k.companyName}</option>
-                  ))}
-                </datalist>
-              )}
+              <EnquiryPicker value={enquiryNo} options={kycOptions} onChange={onEnquiryChange} />
             </L>
             <L label="Offer No"><input className={`${inp} bg-slate-50 text-slate-500`} value={offerNo} readOnly title="Same as Enquiry No" placeholder="Same as Enquiry No" /></L>
             <L label="Date"><input type="date" className={inp} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} /></L>
@@ -424,6 +431,86 @@ export function QuotationBuilder({
 }
 
 /* ── editor sub-components ── */
+
+/** Searchable enquiry picker — type the enquiry no OR the customer name; picking
+ *  an entry fetches Customer, Product & Subject from KYC / Quote Status. */
+function EnquiryPicker({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: { enquiryNo: string; companyName: string; product?: string }[];
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [hi, setHi] = React.useState(0);
+  const wrapRef = React.useRef<HTMLDivElement>(null);
+  const needle = value.trim().toLowerCase();
+  const filtered = React.useMemo(() => {
+    const list = needle
+      ? options.filter((o) => o.enquiryNo.toLowerCase().includes(needle) || (o.companyName || "").toLowerCase().includes(needle))
+      : options;
+    return list.slice(0, 8);
+  }, [options, needle]);
+
+  React.useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  function pick(o: { enquiryNo: string }) {
+    onChange(o.enquiryNo);
+    setOpen(false);
+  }
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+      <input
+        className={`${inp} pl-8`}
+        value={value}
+        onFocus={() => setOpen(true)}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setOpen(true);
+          setHi(0);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); setHi((h) => Math.min(h + 1, filtered.length - 1)); }
+          else if (e.key === "ArrowUp") { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)); }
+          else if (e.key === "Enter" && open && filtered[hi]) { e.preventDefault(); pick(filtered[hi]!); }
+          else if (e.key === "Escape") setOpen(false);
+        }}
+        placeholder="Enquiry no or customer…"
+        title="Search by enquiry number or customer — picking one fetches Customer, Product & Subject"
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute left-0 top-[calc(100%+4px)] z-30 w-[340px] max-w-[86vw] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-[0_18px_44px_-18px_rgba(0,40,80,0.4)]">
+          {filtered.map((o, i) => (
+            <button
+              key={o.enquiryNo}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onMouseEnter={() => setHi(i)}
+              onClick={() => pick(o)}
+              className={`block w-full px-3 py-1.5 text-left transition-colors ${i === hi ? "bg-[#0180cf]/8" : ""}`}
+            >
+              <span className="flex items-baseline gap-2">
+                <b className="shrink-0 tabular-nums text-[13px] text-[#0069b3]">{o.enquiryNo}</b>
+                <span className="truncate text-[12.5px] font-semibold text-slate-700">{o.companyName || "—"}</span>
+              </span>
+              {o.product ? <span className="mt-0.5 block truncate text-[11px] text-slate-400">{o.product}</span> : null}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function L({ label, children }: { label: string; children: React.ReactNode }) {
   return (
