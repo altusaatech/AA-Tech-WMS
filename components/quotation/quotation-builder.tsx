@@ -1246,6 +1246,21 @@ function QuotationPrint({
         </div>
       )}
 
+      {/* Client quotation: rates/amounts are hidden, but the bottom line —
+          TOTAL PROJECT COST — still prints. */}
+      {hideTotals && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+          <table style={{ borderCollapse: "collapse", fontSize: 10.5 }}>
+            <tbody>
+              <tr style={{ background: "linear-gradient(90deg,#0069b3,#63b81e)" }}>
+                <td className={tc} style={{ fontWeight: 800, color: "#fff" }}>TOTAL PROJECT COST (incl. GST)</td>
+                <td className={tc} style={{ textAlign: "right", fontWeight: 800, whiteSpace: "nowrap", color: "#fff", minWidth: 110 }}>{inr(totals.grandTotal)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {/* totals block (right) */}
       {!hideTotals && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
