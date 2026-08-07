@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current";
 import { db } from "@/lib/db";
-import { quotations, masterProduct, masterHardware, masterDoor, masterInstallation, salesQuotes } from "@/db/schema";
+import { quotations, masterProduct, masterHardware, masterDoor, masterInstallation, salesQuotes, salesKyc } from "@/db/schema";
 import { QuotationBuilder } from "@/components/quotation/quotation-builder";
 import { DEFAULT_NOTES, DEFAULT_SUBJECT, DEFAULT_PI_META, type DoorLine, type PiMeta } from "@/lib/quotation/types";
 
@@ -15,7 +15,7 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
   const [q] = await db.select().from(quotations).where(eq(quotations.id, id));
   if (!q) notFound();
 
-  const [products, hardware, doors, installations, quoteRows] = await Promise.all([
+  const [products, hardware, doors, installations, quoteRows, kycRows] = await Promise.all([
     db.select().from(masterProduct),
     db.select().from(masterHardware),
     db.select().from(masterDoor),
@@ -23,14 +23,17 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
     db
       .select({ enquiryNo: salesQuotes.enquiryNo, companyName: salesQuotes.companyName, product: salesQuotes.product, updatedAt: salesQuotes.updatedAt })
       .from(salesQuotes),
+    db
+      .select({ enquiryNo: salesKyc.enquiryNo, companyName: salesKyc.companyName, product: salesKyc.productDetails, updatedAt: salesKyc.updatedAt })
+      .from(salesKyc),
   ]);
 
-  // Enquiry No picker + auto-fill are sourced from the Quote Status register —
-  // pick an Enquiry No and Customer (Company Name) + Subject (from Product) fill
-  // from that quote. One entry per Enquiry No (newest non-blank value wins).
-  // Enquiry No and Offer No are the same number, so the builder mirrors them.
+  // Enquiry No picker + auto-fill — sourced from Customer KYC AND the Quote
+  // Status register, so an enquiry entered in either fetches here. One entry
+  // per Enquiry No (newest non-blank value wins). Enquiry No and Offer No are
+  // the same number, so the builder mirrors them.
   const byEnquiry = new Map<string, { companyName: string; product: string; at: number }>();
-  for (const r of quoteRows) {
+  for (const r of [...kycRows, ...quoteRows]) {
     const enquiryNo = (r.enquiryNo ?? "").trim();
     if (!enquiryNo) continue;
     const companyName = (r.companyName ?? "").trim();
@@ -96,8 +99,8 @@ export default async function QuotationBuilderPage({ params }: { params: Promise
           qty: Number(h.quantity) || 0,
           kit: !!h.kit,
         }))
-        // A hardware whose Make is blank is not offered in the working-spec picker.
-        .filter((o) => o.name && o.make)
+        // Only a name is required — items without a Make still show in the picker.
+        .filter((o) => o.name)
         .map((o) => [`${o.name}|${o.make}|${o.model}`, o] as const),
     ).values(),
   ).sort((a, b) => a.name.localeCompare(b.name) || a.make.localeCompare(b.make) || a.model.localeCompare(b.model));

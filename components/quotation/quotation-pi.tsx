@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
-import { ArrowLeft, Save, Printer, Loader2, ReceiptText, Pencil } from "lucide-react";
+import { ArrowLeft, Save, Printer, Loader2, ReceiptText, Pencil, Download } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
 import {
@@ -133,6 +133,38 @@ export function QuotationPi({
     });
   }
 
+  // Export this Proforma Invoice's line items + totals to Excel.
+  async function exportExcel() {
+    const XLSX = await import("xlsx");
+    const rows = lines.map((d, i) => {
+      const p = computePiLine(d);
+      return {
+        "Sr No": i + 1,
+        "Door Code": d.doorCode || "",
+        "Width (mm)": d.width || "",
+        "Height (mm)": d.height || "",
+        "Description": (d.piDesc ?? "").trim() || d.doorType || "",
+        "HSN Code": piMeta.hsnCode || "",
+        "UOM": "Nos",
+        "Qty": d.qty || 0,
+        "Rate": Math.round(p.rate),
+        "Installation": Math.round(p.install),
+        "Amount": Math.round(p.amount),
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const headers = Object.keys(rows[0] ?? { "Sr No": 1 });
+    ws["!cols"] = headers.map((h) => ({ wch: Math.min(30, Math.max(10, h.length + 4)) }));
+    XLSX.utils.sheet_add_aoa(
+      ws,
+      [[], ["", "Subtotal", Math.round(totals.subtotal)], ["", "CGST 9%", Math.round(totals.cgst)], ["", "SGST 9%", Math.round(totals.sgst)], ["", "Grand Total", Math.round(totals.grandTotal)]],
+      { origin: -1 },
+    );
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Proforma Invoice");
+    XLSX.writeFile(wb, `PI-${(offerNo || "draft").replace(/\s+/g, "-")}.xlsx`);
+  }
+
   const totals = computePiTotals(lines);
 
   function setPi<K extends keyof PiMeta>(key: K, value: PiMeta[K]) {
@@ -203,6 +235,9 @@ export function QuotationPi({
                 <input type="checkbox" checked={printCfg.bold} onChange={(e) => patchPrintCfg({ bold: e.target.checked })} className="size-3.5 accent-[#0069b3]" /> Bold
               </label>
             </div>
+            <button type="button" onClick={exportExcel} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#63b81e]/40 bg-[#63b81e]/10 px-4 text-[13.5px] font-bold text-[#3f7a14] shadow-sm transition-all hover:-translate-y-0.5" title="Export this PI to Excel">
+              <Download size={16} /> Export
+            </button>
             <button type="button" onClick={() => window.print()} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/8 px-4 text-[13.5px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5">
               <Printer size={16} /> Print PI
             </button>

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
-import { ArrowLeft, Save, Printer, Plus, Trash2, Loader2, DoorOpen, FileText, ReceiptText } from "lucide-react";
+import { ArrowLeft, Save, Printer, Plus, Trash2, Loader2, DoorOpen, FileText, ReceiptText, Download } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
 import { DOOR_ORIENTATIONS, DOOR_CONFIGS, DOOR_FINISHES, DOOR_SHADES, DOOR_SHADE_FINISHES, DOOR_WIDTHS, DOOR_HEIGHTS, HARDWARE_UOMS, HARDWARE_MAKES } from "@/lib/sales/columns";
@@ -275,6 +275,41 @@ export function QuotationBuilder({
     setPendingPrint(true);
   }
 
+  // Export this working specification's doors + totals to Excel.
+  async function exportExcel() {
+    const XLSX = await import("xlsx");
+    const rows = lines.map((d, i) => {
+      const c = computeDoor(d);
+      return {
+        "Sr No": i + 1,
+        "Door Code": d.doorCode || "",
+        "Type of Door": d.doorType || "",
+        "Config": d.doorConfig || "",
+        "Width (mm)": d.width || "",
+        "Height (mm)": d.height || "",
+        "Area sq.m": Math.round(c.area * 100) / 100,
+        "Qty": d.qty || 0,
+        "Rate / sq.m": d.ratePerSqm || 0,
+        "Basic Supply": Math.round(c.basicSupply),
+        "Hardware Total": Math.round(c.hardwareTotal),
+        "Door + Hardware": Math.round(c.doorHw),
+        "Installation / door": Math.round(c.installPerDoor),
+        "Line Total": Math.round(c.lineTotal),
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const headers = Object.keys(rows[0] ?? { "Sr No": 1 });
+    ws["!cols"] = headers.map((h) => ({ wch: Math.min(30, Math.max(10, h.length + 4)) }));
+    XLSX.utils.sheet_add_aoa(
+      ws,
+      [[], ["", "Sub Total", Math.round(totals.subtotal)], ["", "CGST 9%", Math.round(totals.cgst)], ["", "SGST 9%", Math.round(totals.sgst)], ["", "Grand Total", Math.round(totals.grandTotal)]],
+      { origin: -1 },
+    );
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Working Spec");
+    XLSX.writeFile(wb, `Working-Spec-${(offerNo || "draft").replace(/\s+/g, "-")}.xlsx`);
+  }
+
   return (
     <>
       {/* ───────────── EDITOR (screen only) ───────────── */}
@@ -290,6 +325,9 @@ export function QuotationBuilder({
             </button>
             <button type="button" onClick={printClient} className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[13.5px] font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5" title="Client quotation (without totals)">
               <FileText size={16} /> Client Quotation
+            </button>
+            <button type="button" onClick={exportExcel} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#63b81e]/40 bg-[#63b81e]/10 px-4 text-[13.5px] font-bold text-[#3f7a14] shadow-sm transition-all hover:-translate-y-0.5" title="Export this working specification to Excel">
+              <Download size={16} /> Export
             </button>
             <button type="button" onClick={goToPi} disabled={saving} className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#0180cf]/40 bg-[#0180cf]/8 px-4 text-[13.5px] font-bold text-[#0069b3] shadow-sm transition-all hover:-translate-y-0.5 disabled:opacity-60" title="Save & go to Proforma Invoice">
               {saving ? <Loader2 size={15} className="animate-spin" /> : <ReceiptText size={16} />} Go to PI
