@@ -38,6 +38,7 @@ export interface DoorLine {
   // ── Proforma-Invoice specific (manual) ──
   location?: string;
   piInstall?: number; // flat ₹ installation per door (PI)
+  piDesc?: string; // manual description override for the PI line (defaults to doorType)
 }
 
 export interface QuotationHeader {

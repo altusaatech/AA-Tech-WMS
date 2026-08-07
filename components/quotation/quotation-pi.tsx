@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
-import { ArrowLeft, Save, Printer, Loader2, ReceiptText } from "lucide-react";
+import { ArrowLeft, Save, Printer, Loader2, ReceiptText, Pencil } from "lucide-react";
 import { fireToast } from "@/lib/toast";
 import { saveQuotation } from "@/app/(app)/quotation/actions";
 import {
@@ -276,7 +276,18 @@ export function QuotationPi({
                       <td className="border-b border-[#e7eff6] px-2 py-1.5"><input className={`${inp} h-8 w-24`} value={d.doorCode} onChange={(e) => patchDoor(d.id, { doorCode: e.target.value })} /></td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right tabular-nums text-slate-700">{d.width || "—"}</td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right tabular-nums text-slate-700">{d.height || "—"}</td>
-                      <td className="border-b border-[#e7eff6] px-3 py-1.5 text-slate-700">{d.doorType || "—"}</td>
+                      <td className="border-b border-[#e7eff6] px-2 py-1.5">
+                        <div className="relative min-w-[220px]">
+                          <Pencil size={12} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            className={`${inp} h-8 pl-7`}
+                            value={d.piDesc ?? d.doorType ?? ""}
+                            onChange={(e) => patchDoor(d.id, { piDesc: e.target.value })}
+                            placeholder="Description"
+                            title="Printed on the PI — edit freely (defaults to the door type)"
+                          />
+                        </div>
+                      </td>
                       <td className="border-b border-[#e7eff6] px-2 py-1.5"><input type="number" className={`${inp} h-8 w-16 text-right`} value={d.qty || ""} onChange={(e) => patchDoor(d.id, { qty: Number(e.target.value) })} /></td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right font-semibold tabular-nums text-slate-700">{inr(p.rate)}</td>
                       <td className="border-b border-[#e7eff6] px-3 py-1.5 text-right">
@@ -442,7 +453,7 @@ function PiPrint({
                 <td className={c}>{d.doorCode}</td>
                 <td className={c} style={{ textAlign: "center" }}>{d.width || ""}</td>
                 <td className={c} style={{ textAlign: "center" }}>{d.height || ""}</td>
-                <td className={c}>{d.doorType}</td>
+                <td className={c}>{(d.piDesc ?? "").trim() || d.doorType}</td>
                 <td className={c} style={{ textAlign: "center" }}>{piMeta.hsnCode}</td>
                 <td className={c} style={{ textAlign: "center" }}>Nos</td>
                 <td className={c} style={{ textAlign: "center" }}>{d.qty || ""}</td>

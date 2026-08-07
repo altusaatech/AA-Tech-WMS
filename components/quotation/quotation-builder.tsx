@@ -968,7 +968,8 @@ function QuotationPrint({
   hideTotals?: boolean;
 }) {
   const th = "border border-[#0a5a93] px-0.5 py-1 text-center font-bold text-white";
-  const td = "border border-slate-300 px-0.5 py-0.5 text-center align-middle break-words";
+  // White grid lines over softly tinted rows — clean separators on paper.
+  const td = "border-2 border-white px-1 py-1 text-center align-middle break-words";
   const tc = "border border-slate-400 px-2 py-1";
   // Hardware columns — one per used (name + make) pair, since the same name can
   // come in several makes. Only items actually used (qty > 0 in some door).
@@ -1029,7 +1030,7 @@ function QuotationPrint({
   // Client quotation: no money anywhere — drop every rate/amount column too.
   const rightCols = hideTotals ? [] : RIGHT_ALL;
   return (
-    <div className={`${active ? "q-print q-print-landscape print:block" : ""} hidden bg-white text-slate-900`} style={{ fontSize: 8 }}>
+    <div className={`${active ? "q-print q-print-landscape print:block" : ""} hidden bg-white text-slate-900`} style={{ fontSize: 10, fontWeight: 600 }}>
       {/* ── AA Tech branded header ── */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "3px solid #0180cf", paddingBottom: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -1054,7 +1055,7 @@ function QuotationPrint({
       </div>
 
       {/* door table — a column per used hardware, vertical headers, no empties */}
-      <table className="mt-2 w-full border-collapse" style={{ fontSize: 6 }}>
+      <table className="mt-2 w-full border-collapse" style={{ fontSize: 7.5 }}>
         <thead>
           <tr style={{ background: "linear-gradient(180deg, #0180cf, #0069b3)" }}>
             {specCols.map((s) => (
@@ -1082,7 +1083,7 @@ function QuotationPrint({
           {lines.map((d, i) => {
             const c = computeDoor(d);
             return (
-              <tr key={d.id}>
+              <tr key={d.id} style={{ background: i % 2 ? "#eaf3fb" : "#f6fafd" }}>
                 {specCols.map((s) => (
                   <td key={s.label} className={td} style={s.left ? { textAlign: "left" } : undefined}>{s.get(d, c, i)}</td>
                 ))}
@@ -1091,7 +1092,7 @@ function QuotationPrint({
                   return <td key={hi} className={td}>{q || ""}</td>;
                 })}
                 {rightCols.map((r) => (
-                  <td key={r.label} className={td} style={{ whiteSpace: "nowrap" }}>{r.get(d, c)}</td>
+                  <td key={r.label} className={td} style={{ whiteSpace: "nowrap", fontWeight: 700 }}>{r.get(d, c)}</td>
                 ))}
               </tr>
             );
@@ -1123,7 +1124,7 @@ function QuotationPrint({
       {/* totals block (right) */}
       {!hideTotals && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-          <table style={{ borderCollapse: "collapse", fontSize: 9 }}>
+          <table style={{ borderCollapse: "collapse", fontSize: 10.5 }}>
             <tbody>
               <tr style={{ background: "#fff2b3" }}>
                 <td className={tc} style={{ fontWeight: 700 }}>Sub Total</td>
@@ -1151,7 +1152,7 @@ function QuotationPrint({
       )}
 
       {/* signatures */}
-      <div className="mt-8 flex justify-between" style={{ fontSize: 9 }}>
+      <div className="mt-8 flex justify-between" style={{ fontSize: 10.5 }}>
         <span>Prepared by: ________________</span>
         <span>Authorised Signatory: ________________</span>
       </div>
