@@ -30,7 +30,6 @@ import { SalesDataGrid } from "./sales-grid";
 import { SalesEntryModal } from "./sales-entry-modal";
 import {
   KYC_COLUMNS,
-  KYC_EXTRA_FOR_QUOTE,
   QUOTE_COLUMNS,
   BOM_COLUMNS,
   SO_COLUMNS,
@@ -74,7 +73,7 @@ const FORMS: FormDef[] = [
   },
   {
     key: "quote",
-    label: "Quote Status & Customer KYC",
+    label: "Quote Status",
     desc: "Enquiries to quotations to PO received",
     icon: FileText,
     from: "#63b81e",
@@ -129,8 +128,6 @@ const FORMS: FormDef[] = [
   },
 ];
 
-// A narrow read-only gutter between the Quote Status and Customer KYC groups.
-const QUOTE_GAP_COL: SalesColDef = { key: "__gap__", label: "", type: "text", width: 28, readOnly: true };
 
 type View = "hub" | "register";
 
@@ -176,17 +173,9 @@ export function SalesWorkspace({
 
   const current = FORMS.find((f) => f.key === active)!;
   const modalCfg = FORMS.find((f) => f.key === modalKind)!;
-  // The Quote entry form shows the Quote Status fields, then the linked
-  // Customer KYC fields (read-only, auto-filled by Enquiry No) under headings.
-  const quoteFormColumns: SalesColDef[] = React.useMemo(
-    () => [
-      ...QUOTE_COLUMNS.map((c) => ({ ...c, section: "Quote Status" })),
-      // Customer KYC fields are editable here and saved back to the KYC record.
-      ...KYC_EXTRA_FOR_QUOTE.map((c) => ({ ...c, readOnly: false, section: "Customer KYC" })),
-    ],
-    [],
-  );
-  const modalColumns = modalKind === "quote" ? quoteFormColumns : modalCfg.columns;
+  // Customer KYC has its own module now — the Quote form/register no longer
+  // embeds the KYC fields; the Enquiry No auto-fetch pulls them when needed.
+  const modalColumns = modalCfg.columns;
   const rows = rowsByKind[active];
   const countOf = (k: Kind) => rowsByKind[k].length;
 
@@ -232,31 +221,36 @@ export function SalesWorkspace({
     [rowsByKind.kyc],
   );
 
-  // Quote Status register joined with Customer KYC by Enquiry No: the extra KYC
-  // columns (no duplicates) are appended read-only after a gutter, grouped under
-  // a frozen "Customer KYC" heading beside "Quote Status".
-  const quoteView = React.useMemo(() => {
-    const kycMap = new Map<string, SalesRow>();
-    for (const k of rowsByKind.kyc) {
-      const key = String(k.enquiryNo ?? "").trim().toLowerCase();
-      if (key) kycMap.set(key, k);
+  // Quote Status → KYC-form auto-fill (the reverse direction): typing an
+  // Enquiry No in the Customer KYC form fetches the matching Quote Status
+  // entry's company/contact/product details.
+  const quoteByEnquiry = React.useMemo(() => {
+    const out: Record<string, Record<string, string>> = {};
+    for (const q of rowsByKind.quote) {
+      const key = String(q.enquiryNo ?? "").trim().toLowerCase();
+      if (!key) continue;
+      const f: Record<string, string> = {};
+      const set = (col: string, v: unknown) => {
+        const s = v == null ? "" : String(v).trim();
+        if (s) f[col] = s;
+      };
+      set("companyName", q.companyName);
+      set("enquirySource", q.enquirySource);
+      set("contactPerson", q.personName);
+      set("mobileNo", q.cellNo);
+      set("email", q.email);
+      set("productDetails", q.product);
+      out[key] = f;
     }
-    const rows = rowsByKind.quote.map((qr) => {
-      const kyc = kycMap.get(String(qr.enquiryNo ?? "").trim().toLowerCase());
-      if (!kyc) return qr;
-      const merged: SalesRow = { ...qr };
-      for (const c of KYC_EXTRA_FOR_QUOTE) merged[c.key] = (kyc[c.key] ?? null) as string | number | boolean | null;
-      merged.__kycId = kyc.id; // link back to the KYC record for its edit pen
-      return merged;
-    });
-    const columns: SalesColDef[] = [...QUOTE_COLUMNS, QUOTE_GAP_COL, ...KYC_EXTRA_FOR_QUOTE];
-    const groups = [
-      { label: "Quote Status", span: QUOTE_COLUMNS.length },
-      { label: "", span: 1, spacer: true },
-      { label: "Customer KYC", span: KYC_EXTRA_FOR_QUOTE.length },
-    ];
-    return { rows, columns, groups };
-  }, [rowsByKind.quote, rowsByKind.kyc]);
+    return out;
+  }, [rowsByKind.quote]);
+  const quoteEnquiryOptions = React.useMemo(
+    () =>
+      rowsByKind.quote
+        .map((q) => ({ value: String(q.enquiryNo ?? "").trim(), label: String(q.companyName ?? "").trim() }))
+        .filter((o) => o.value),
+    [rowsByKind.quote],
+  );
 
   function openForm(k: Kind) {
     setActive(k);
@@ -272,16 +266,6 @@ export function SalesWorkspace({
   function openEdit(row: SalesRow) {
     setModalKind(active);
     setModalRow(row);
-    setPrefill(null);
-    setModalOpen(true);
-  }
-  // Edit the linked Customer KYC record straight from the Quote Status register.
-  function openEditKyc(quoteRow: SalesRow) {
-    const kycId = quoteRow.__kycId;
-    const kyc = kycId ? rowsByKind.kyc.find((k) => k.id === kycId) : undefined;
-    if (!kyc) return;
-    setModalKind("kyc");
-    setModalRow(kyc);
     setPrefill(null);
     setModalOpen(true);
   }
@@ -383,8 +367,8 @@ export function SalesWorkspace({
                 <current.icon size={20} strokeWidth={2.3} />
               </span>
               <div>
-                <h2 className="text-[19px] font-black text-slate-800">{active === "quote" ? "Quote Status & Customer KYC" : current.label} · Register</h2>
-                <p className="text-[12.5px] text-slate-500">{active === "quote" ? "Quote entries joined with their Customer KYC by Enquiry No" : current.desc}</p>
+                <h2 className="text-[19px] font-black text-slate-800">{current.label} · Register</h2>
+                <p className="text-[12.5px] text-slate-500">{current.desc}</p>
               </div>
             </div>
             <button
@@ -399,12 +383,10 @@ export function SalesWorkspace({
 
           <SalesDataGrid
             kind={active}
-            title={active === "quote" ? "Quote Status & Customer KYC" : current.label}
-            columns={active === "quote" ? quoteView.columns : current.columns}
-            rows={active === "quote" ? quoteView.rows : rows}
-            groups={active === "quote" ? quoteView.groups : undefined}
+            title={current.label}
+            columns={current.columns}
+            rows={rows}
             onEdit={openEdit}
-            onEditKyc={active === "quote" ? openEditKyc : undefined}
             onDeleted={onDeleted}
             onImported={onImported}
             from={current.from}
@@ -424,8 +406,8 @@ export function SalesWorkspace({
         existingRows={rowsByKind[modalKind]}
         primaryKey={modalCfg.primaryKey}
         onSaved={onSaved}
-        kycByEnquiry={modalKind === "kyc" ? undefined : kycByEnquiry}
-        kycEnquiryOptions={modalKind === "kyc" ? undefined : kycEnquiryOptions}
+        kycByEnquiry={modalKind === "kyc" ? quoteByEnquiry : kycByEnquiry}
+        kycEnquiryOptions={modalKind === "kyc" ? quoteEnquiryOptions : kycEnquiryOptions}
         prefill={prefill}
         onGoToQuote={goToQuoteFromKyc}
         from={modalCfg.from}
